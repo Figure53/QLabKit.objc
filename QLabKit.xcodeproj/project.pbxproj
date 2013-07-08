@@ -17,6 +17,25 @@
 		92F3EA0C178B1BC600A4C617 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F3E9EC178B1BC500A4C617 /* Cocoa.framework */; };
 		92F3EA14178B1BC600A4C617 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 92F3EA12178B1BC600A4C617 /* InfoPlist.strings */; };
 		92F3EA17178B1BC600A4C617 /* QLabKitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA16178B1BC600A4C617 /* QLabKitTests.m */; };
+		92F3EA43178B1DA300A4C617 /* F53OSCBundle.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA24178B1DA300A4C617 /* F53OSCBundle.m */; };
+		92F3EA44178B1DA300A4C617 /* F53OSCClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA26178B1DA300A4C617 /* F53OSCClient.m */; };
+		92F3EA45178B1DA300A4C617 /* F53OSCMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA29178B1DA300A4C617 /* F53OSCMessage.m */; };
+		92F3EA46178B1DA300A4C617 /* F53OSCPacket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA2B178B1DA300A4C617 /* F53OSCPacket.m */; };
+		92F3EA47178B1DA300A4C617 /* F53OSCParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA2D178B1DA300A4C617 /* F53OSCParser.m */; };
+		92F3EA48178B1DA300A4C617 /* F53OSCServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA30178B1DA300A4C617 /* F53OSCServer.m */; };
+		92F3EA49178B1DA300A4C617 /* F53OSCSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA32178B1DA300A4C617 /* F53OSCSocket.m */; };
+		92F3EA4A178B1DA300A4C617 /* F53OSCTimeTag.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA34178B1DA300A4C617 /* F53OSCTimeTag.m */; };
+		92F3EA4B178B1DA300A4C617 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA36178B1DA300A4C617 /* GCDAsyncSocket.m */; };
+		92F3EA4C178B1DA300A4C617 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA38178B1DA300A4C617 /* GCDAsyncUdpSocket.m */; };
+		92F3EA4D178B1DA300A4C617 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 92F3EA39178B1DA300A4C617 /* LICENSE.txt */; };
+		92F3EA4E178B1DA300A4C617 /* NSData+F53OSCBlob.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3B178B1DA300A4C617 /* NSData+F53OSCBlob.m */; };
+		92F3EA4F178B1DA300A4C617 /* NSDate+F53OSCTimeTag.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3D178B1DA300A4C617 /* NSDate+F53OSCTimeTag.m */; };
+		92F3EA50178B1DA300A4C617 /* NSNumber+F53OSCNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3F178B1DA300A4C617 /* NSNumber+F53OSCNumber.m */; };
+		92F3EA51178B1DA300A4C617 /* NSString+F53OSCString.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA41178B1DA300A4C617 /* NSString+F53OSCString.m */; };
+		92F3EA52178B1DA300A4C617 /* README.markdown in Resources */ = {isa = PBXBuildFile; fileRef = 92F3EA42178B1DA300A4C617 /* README.markdown */; };
+		92F3EA5A178B4DF500A4C617 /* QLKServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA56178B4DF500A4C617 /* QLKServer.m */; };
+		92F3EA5B178B4DF500A4C617 /* QLRWorkspace.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA58178B4DF500A4C617 /* QLRWorkspace.m */; };
+		92F3EA5E178B4E8100A4C617 /* QLKBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +68,45 @@
 		92F3EA13178B1BC600A4C617 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		92F3EA15178B1BC600A4C617 /* QLabKitTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QLabKitTests.h; sourceTree = "<group>"; };
 		92F3EA16178B1BC600A4C617 /* QLabKitTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QLabKitTests.m; sourceTree = "<group>"; };
+		92F3EA22178B1DA300A4C617 /* F53OSC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSC.h; sourceTree = "<group>"; };
+		92F3EA23178B1DA300A4C617 /* F53OSCBundle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSCBundle.h; sourceTree = "<group>"; };
+		92F3EA24178B1DA300A4C617 /* F53OSCBundle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = F53OSCBundle.m; sourceTree = "<group>"; };
+		92F3EA25178B1DA300A4C617 /* F53OSCClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSCClient.h; sourceTree = "<group>"; };
+		92F3EA26178B1DA300A4C617 /* F53OSCClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = F53OSCClient.m; sourceTree = "<group>"; };
+		92F3EA27178B1DA300A4C617 /* F53OSCFoundationAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSCFoundationAdditions.h; sourceTree = "<group>"; };
+		92F3EA28178B1DA300A4C617 /* F53OSCMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSCMessage.h; sourceTree = "<group>"; };
+		92F3EA29178B1DA300A4C617 /* F53OSCMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = F53OSCMessage.m; sourceTree = "<group>"; };
+		92F3EA2A178B1DA300A4C617 /* F53OSCPacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSCPacket.h; sourceTree = "<group>"; };
+		92F3EA2B178B1DA300A4C617 /* F53OSCPacket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = F53OSCPacket.m; sourceTree = "<group>"; };
+		92F3EA2C178B1DA300A4C617 /* F53OSCParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSCParser.h; sourceTree = "<group>"; };
+		92F3EA2D178B1DA300A4C617 /* F53OSCParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = F53OSCParser.m; sourceTree = "<group>"; };
+		92F3EA2E178B1DA300A4C617 /* F53OSCProtocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSCProtocols.h; sourceTree = "<group>"; };
+		92F3EA2F178B1DA300A4C617 /* F53OSCServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSCServer.h; sourceTree = "<group>"; };
+		92F3EA30178B1DA300A4C617 /* F53OSCServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = F53OSCServer.m; sourceTree = "<group>"; };
+		92F3EA31178B1DA300A4C617 /* F53OSCSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSCSocket.h; sourceTree = "<group>"; };
+		92F3EA32178B1DA300A4C617 /* F53OSCSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = F53OSCSocket.m; sourceTree = "<group>"; };
+		92F3EA33178B1DA300A4C617 /* F53OSCTimeTag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSCTimeTag.h; sourceTree = "<group>"; };
+		92F3EA34178B1DA300A4C617 /* F53OSCTimeTag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = F53OSCTimeTag.m; sourceTree = "<group>"; };
+		92F3EA35178B1DA300A4C617 /* GCDAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncSocket.h; sourceTree = "<group>"; };
+		92F3EA36178B1DA300A4C617 /* GCDAsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDAsyncSocket.m; sourceTree = "<group>"; };
+		92F3EA37178B1DA300A4C617 /* GCDAsyncUdpSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDAsyncUdpSocket.h; sourceTree = "<group>"; };
+		92F3EA38178B1DA300A4C617 /* GCDAsyncUdpSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDAsyncUdpSocket.m; sourceTree = "<group>"; };
+		92F3EA39178B1DA300A4C617 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		92F3EA3A178B1DA300A4C617 /* NSData+F53OSCBlob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+F53OSCBlob.h"; sourceTree = "<group>"; };
+		92F3EA3B178B1DA300A4C617 /* NSData+F53OSCBlob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+F53OSCBlob.m"; sourceTree = "<group>"; };
+		92F3EA3C178B1DA300A4C617 /* NSDate+F53OSCTimeTag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+F53OSCTimeTag.h"; sourceTree = "<group>"; };
+		92F3EA3D178B1DA300A4C617 /* NSDate+F53OSCTimeTag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+F53OSCTimeTag.m"; sourceTree = "<group>"; };
+		92F3EA3E178B1DA300A4C617 /* NSNumber+F53OSCNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNumber+F53OSCNumber.h"; sourceTree = "<group>"; };
+		92F3EA3F178B1DA300A4C617 /* NSNumber+F53OSCNumber.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNumber+F53OSCNumber.m"; sourceTree = "<group>"; };
+		92F3EA40178B1DA300A4C617 /* NSString+F53OSCString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+F53OSCString.h"; sourceTree = "<group>"; };
+		92F3EA41178B1DA300A4C617 /* NSString+F53OSCString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+F53OSCString.m"; sourceTree = "<group>"; };
+		92F3EA42178B1DA300A4C617 /* README.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.markdown; sourceTree = "<group>"; };
+		92F3EA55178B4DF500A4C617 /* QLKServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKServer.h; sourceTree = "<group>"; };
+		92F3EA56178B4DF500A4C617 /* QLKServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKServer.m; sourceTree = "<group>"; };
+		92F3EA57178B4DF500A4C617 /* QLRWorkspace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLRWorkspace.h; sourceTree = "<group>"; };
+		92F3EA58178B4DF500A4C617 /* QLRWorkspace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLRWorkspace.m; sourceTree = "<group>"; };
+		92F3EA5C178B4E8100A4C617 /* QLKBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKBrowser.h; sourceTree = "<group>"; };
+		92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKBrowser.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,8 +178,7 @@
 				92F3EA01178B1BC500A4C617 /* MainMenu.xib */,
 				92F3E9F3178B1BC500A4C617 /* Supporting Files */,
 			);
-			name = QLabKitDemo;
-			path = QLabKit;
+			path = QLabKitDemo;
 			sourceTree = "<group>";
 		};
 		92F3E9F3178B1BC500A4C617 /* Supporting Files */ = {
@@ -158,16 +215,64 @@
 		92F3EA20178B1CE400A4C617 /* QLabKit */ = {
 			isa = PBXGroup;
 			children = (
+				92F3EA5C178B4E8100A4C617 /* QLKBrowser.h */,
+				92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */,
+				92F3EA55178B4DF500A4C617 /* QLKServer.h */,
+				92F3EA56178B4DF500A4C617 /* QLKServer.m */,
+				92F3EA57178B4DF500A4C617 /* QLRWorkspace.h */,
+				92F3EA58178B4DF500A4C617 /* QLRWorkspace.m */,
+				92F3EA21178B1DA300A4C617 /* F53OSC */,
 			);
 			name = QLabKit;
+			sourceTree = "<group>";
+		};
+		92F3EA21178B1DA300A4C617 /* F53OSC */ = {
+			isa = PBXGroup;
+			children = (
+				92F3EA22178B1DA300A4C617 /* F53OSC.h */,
+				92F3EA23178B1DA300A4C617 /* F53OSCBundle.h */,
+				92F3EA24178B1DA300A4C617 /* F53OSCBundle.m */,
+				92F3EA25178B1DA300A4C617 /* F53OSCClient.h */,
+				92F3EA26178B1DA300A4C617 /* F53OSCClient.m */,
+				92F3EA27178B1DA300A4C617 /* F53OSCFoundationAdditions.h */,
+				92F3EA28178B1DA300A4C617 /* F53OSCMessage.h */,
+				92F3EA29178B1DA300A4C617 /* F53OSCMessage.m */,
+				92F3EA2A178B1DA300A4C617 /* F53OSCPacket.h */,
+				92F3EA2B178B1DA300A4C617 /* F53OSCPacket.m */,
+				92F3EA2C178B1DA300A4C617 /* F53OSCParser.h */,
+				92F3EA2D178B1DA300A4C617 /* F53OSCParser.m */,
+				92F3EA2E178B1DA300A4C617 /* F53OSCProtocols.h */,
+				92F3EA2F178B1DA300A4C617 /* F53OSCServer.h */,
+				92F3EA30178B1DA300A4C617 /* F53OSCServer.m */,
+				92F3EA31178B1DA300A4C617 /* F53OSCSocket.h */,
+				92F3EA32178B1DA300A4C617 /* F53OSCSocket.m */,
+				92F3EA33178B1DA300A4C617 /* F53OSCTimeTag.h */,
+				92F3EA34178B1DA300A4C617 /* F53OSCTimeTag.m */,
+				92F3EA35178B1DA300A4C617 /* GCDAsyncSocket.h */,
+				92F3EA36178B1DA300A4C617 /* GCDAsyncSocket.m */,
+				92F3EA37178B1DA300A4C617 /* GCDAsyncUdpSocket.h */,
+				92F3EA38178B1DA300A4C617 /* GCDAsyncUdpSocket.m */,
+				92F3EA39178B1DA300A4C617 /* LICENSE.txt */,
+				92F3EA3A178B1DA300A4C617 /* NSData+F53OSCBlob.h */,
+				92F3EA3B178B1DA300A4C617 /* NSData+F53OSCBlob.m */,
+				92F3EA3C178B1DA300A4C617 /* NSDate+F53OSCTimeTag.h */,
+				92F3EA3D178B1DA300A4C617 /* NSDate+F53OSCTimeTag.m */,
+				92F3EA3E178B1DA300A4C617 /* NSNumber+F53OSCNumber.h */,
+				92F3EA3F178B1DA300A4C617 /* NSNumber+F53OSCNumber.m */,
+				92F3EA40178B1DA300A4C617 /* NSString+F53OSCString.h */,
+				92F3EA41178B1DA300A4C617 /* NSString+F53OSCString.m */,
+				92F3EA42178B1DA300A4C617 /* README.markdown */,
+			);
+			name = F53OSC;
+			path = QLabKit/F53OSC;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		92F3E9E8178B1BC500A4C617 /* QLabKit */ = {
+		92F3E9E8178B1BC500A4C617 /* QLabKitDemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 92F3EA1A178B1BC600A4C617 /* Build configuration list for PBXNativeTarget "QLabKit" */;
+			buildConfigurationList = 92F3EA1A178B1BC600A4C617 /* Build configuration list for PBXNativeTarget "QLabKitDemo" */;
 			buildPhases = (
 				92F3E9E5178B1BC500A4C617 /* Sources */,
 				92F3E9E6178B1BC500A4C617 /* Frameworks */,
@@ -177,7 +282,7 @@
 			);
 			dependencies = (
 			);
-			name = QLabKit;
+			name = QLabKitDemo;
 			productName = QLabKit;
 			productReference = 92F3E9E9178B1BC500A4C617 /* QLabKit.app */;
 			productType = "com.apple.product-type.application";
@@ -223,7 +328,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				92F3E9E8178B1BC500A4C617 /* QLabKit */,
+				92F3E9E8178B1BC500A4C617 /* QLabKitDemo */,
 				92F3EA08178B1BC600A4C617 /* QLabKitTests */,
 			);
 		};
@@ -237,6 +342,8 @@
 				92F3E9F7178B1BC500A4C617 /* InfoPlist.strings in Resources */,
 				92F3E9FD178B1BC500A4C617 /* Credits.rtf in Resources */,
 				92F3EA03178B1BC500A4C617 /* MainMenu.xib in Resources */,
+				92F3EA4D178B1DA300A4C617 /* LICENSE.txt in Resources */,
+				92F3EA52178B1DA300A4C617 /* README.markdown in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -273,6 +380,23 @@
 			files = (
 				92F3E9F9178B1BC500A4C617 /* main.m in Sources */,
 				92F3EA00178B1BC500A4C617 /* QLKAppDelegate.m in Sources */,
+				92F3EA43178B1DA300A4C617 /* F53OSCBundle.m in Sources */,
+				92F3EA44178B1DA300A4C617 /* F53OSCClient.m in Sources */,
+				92F3EA45178B1DA300A4C617 /* F53OSCMessage.m in Sources */,
+				92F3EA46178B1DA300A4C617 /* F53OSCPacket.m in Sources */,
+				92F3EA47178B1DA300A4C617 /* F53OSCParser.m in Sources */,
+				92F3EA48178B1DA300A4C617 /* F53OSCServer.m in Sources */,
+				92F3EA49178B1DA300A4C617 /* F53OSCSocket.m in Sources */,
+				92F3EA4A178B1DA300A4C617 /* F53OSCTimeTag.m in Sources */,
+				92F3EA4B178B1DA300A4C617 /* GCDAsyncSocket.m in Sources */,
+				92F3EA4C178B1DA300A4C617 /* GCDAsyncUdpSocket.m in Sources */,
+				92F3EA4E178B1DA300A4C617 /* NSData+F53OSCBlob.m in Sources */,
+				92F3EA4F178B1DA300A4C617 /* NSDate+F53OSCTimeTag.m in Sources */,
+				92F3EA50178B1DA300A4C617 /* NSNumber+F53OSCNumber.m in Sources */,
+				92F3EA51178B1DA300A4C617 /* NSString+F53OSCString.m in Sources */,
+				92F3EA5A178B4DF500A4C617 /* QLKServer.m in Sources */,
+				92F3EA5B178B4DF500A4C617 /* QLRWorkspace.m in Sources */,
+				92F3EA5E178B4E8100A4C617 /* QLKBrowser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,7 +413,7 @@
 /* Begin PBXTargetDependency section */
 		92F3EA0E178B1BC600A4C617 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 92F3E9E8178B1BC500A4C617 /* QLabKit */;
+			target = 92F3E9E8178B1BC500A4C617 /* QLabKitDemo */;
 			targetProxy = 92F3EA0D178B1BC600A4C617 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -394,8 +518,8 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "QLabKit/QLabKit-Prefix.pch";
-				INFOPLIST_FILE = "QLabKit/QLabKit-Info.plist";
+				GCC_PREFIX_HEADER = "QLabKitDemo/QLabKit-Prefix.pch";
+				INFOPLIST_FILE = "QLabKitDemo/QLabKit-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -406,8 +530,8 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "QLabKit/QLabKit-Prefix.pch";
-				INFOPLIST_FILE = "QLabKit/QLabKit-Info.plist";
+				GCC_PREFIX_HEADER = "QLabKitDemo/QLabKit-Prefix.pch";
+				INFOPLIST_FILE = "QLabKitDemo/QLabKit-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -455,7 +579,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		92F3EA1A178B1BC600A4C617 /* Build configuration list for PBXNativeTarget "QLabKit" */ = {
+		92F3EA1A178B1BC600A4C617 /* Build configuration list for PBXNativeTarget "QLabKitDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				92F3EA1B178B1BC600A4C617 /* Debug */,

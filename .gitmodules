@@ -1,0 +1,3 @@
+[submodule "QLabKit/F53OSC"]
+	path = QLabKit/F53OSC
+	url = git@github.com:Figure53/F53OSC.git
