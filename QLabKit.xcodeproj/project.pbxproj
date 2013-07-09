@@ -17,25 +17,29 @@
 		92F3EA0C178B1BC600A4C617 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F3E9EC178B1BC500A4C617 /* Cocoa.framework */; };
 		92F3EA14178B1BC600A4C617 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 92F3EA12178B1BC600A4C617 /* InfoPlist.strings */; };
 		92F3EA17178B1BC600A4C617 /* QLabKitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA16178B1BC600A4C617 /* QLabKitTests.m */; };
-		92F3EA43178B1DA300A4C617 /* F53OSCBundle.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA24178B1DA300A4C617 /* F53OSCBundle.m */; };
-		92F3EA44178B1DA300A4C617 /* F53OSCClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA26178B1DA300A4C617 /* F53OSCClient.m */; };
-		92F3EA45178B1DA300A4C617 /* F53OSCMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA29178B1DA300A4C617 /* F53OSCMessage.m */; };
-		92F3EA46178B1DA300A4C617 /* F53OSCPacket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA2B178B1DA300A4C617 /* F53OSCPacket.m */; };
-		92F3EA47178B1DA300A4C617 /* F53OSCParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA2D178B1DA300A4C617 /* F53OSCParser.m */; };
-		92F3EA48178B1DA300A4C617 /* F53OSCServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA30178B1DA300A4C617 /* F53OSCServer.m */; };
-		92F3EA49178B1DA300A4C617 /* F53OSCSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA32178B1DA300A4C617 /* F53OSCSocket.m */; };
-		92F3EA4A178B1DA300A4C617 /* F53OSCTimeTag.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA34178B1DA300A4C617 /* F53OSCTimeTag.m */; };
+		92F3EA43178B1DA300A4C617 /* F53OSCBundle.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA24178B1DA300A4C617 /* F53OSCBundle.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		92F3EA44178B1DA300A4C617 /* F53OSCClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA26178B1DA300A4C617 /* F53OSCClient.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		92F3EA45178B1DA300A4C617 /* F53OSCMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA29178B1DA300A4C617 /* F53OSCMessage.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		92F3EA46178B1DA300A4C617 /* F53OSCPacket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA2B178B1DA300A4C617 /* F53OSCPacket.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		92F3EA47178B1DA300A4C617 /* F53OSCParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA2D178B1DA300A4C617 /* F53OSCParser.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		92F3EA48178B1DA300A4C617 /* F53OSCServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA30178B1DA300A4C617 /* F53OSCServer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		92F3EA49178B1DA300A4C617 /* F53OSCSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA32178B1DA300A4C617 /* F53OSCSocket.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		92F3EA4A178B1DA300A4C617 /* F53OSCTimeTag.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA34178B1DA300A4C617 /* F53OSCTimeTag.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		92F3EA4B178B1DA300A4C617 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA36178B1DA300A4C617 /* GCDAsyncSocket.m */; };
 		92F3EA4C178B1DA300A4C617 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA38178B1DA300A4C617 /* GCDAsyncUdpSocket.m */; };
 		92F3EA4D178B1DA300A4C617 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 92F3EA39178B1DA300A4C617 /* LICENSE.txt */; };
-		92F3EA4E178B1DA300A4C617 /* NSData+F53OSCBlob.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3B178B1DA300A4C617 /* NSData+F53OSCBlob.m */; };
-		92F3EA4F178B1DA300A4C617 /* NSDate+F53OSCTimeTag.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3D178B1DA300A4C617 /* NSDate+F53OSCTimeTag.m */; };
-		92F3EA50178B1DA300A4C617 /* NSNumber+F53OSCNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3F178B1DA300A4C617 /* NSNumber+F53OSCNumber.m */; };
-		92F3EA51178B1DA300A4C617 /* NSString+F53OSCString.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA41178B1DA300A4C617 /* NSString+F53OSCString.m */; };
+		92F3EA4E178B1DA300A4C617 /* NSData+F53OSCBlob.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3B178B1DA300A4C617 /* NSData+F53OSCBlob.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		92F3EA4F178B1DA300A4C617 /* NSDate+F53OSCTimeTag.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3D178B1DA300A4C617 /* NSDate+F53OSCTimeTag.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		92F3EA50178B1DA300A4C617 /* NSNumber+F53OSCNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3F178B1DA300A4C617 /* NSNumber+F53OSCNumber.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		92F3EA51178B1DA300A4C617 /* NSString+F53OSCString.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA41178B1DA300A4C617 /* NSString+F53OSCString.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		92F3EA52178B1DA300A4C617 /* README.markdown in Resources */ = {isa = PBXBuildFile; fileRef = 92F3EA42178B1DA300A4C617 /* README.markdown */; };
 		92F3EA5A178B4DF500A4C617 /* QLKServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA56178B4DF500A4C617 /* QLKServer.m */; };
 		92F3EA5B178B4DF500A4C617 /* QLRWorkspace.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA58178B4DF500A4C617 /* QLRWorkspace.m */; };
 		92F3EA5E178B4E8100A4C617 /* QLKBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */; };
+		92F3EA61178C597D00A4C617 /* QLKCue.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA60178C597D00A4C617 /* QLKCue.m */; };
+		92F3EA64178C5CF300A4C617 /* QLKDefines.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA63178C5CF300A4C617 /* QLKDefines.m */; };
+		92F3EA67178C5D4100A4C617 /* QLRColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA66178C5D4100A4C617 /* QLRColor.m */; };
+		92F3EA69178C5F6A00A4C617 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F3EA68178C5F6A00A4C617 /* Security.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,7 +53,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		92F3E9E9178B1BC500A4C617 /* QLabKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QLabKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		92F3E9E9178B1BC500A4C617 /* QLabKitDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QLabKitDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92F3E9EC178B1BC500A4C617 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		92F3E9EF178B1BC500A4C617 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		92F3E9F0178B1BC500A4C617 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
@@ -107,6 +111,14 @@
 		92F3EA58178B4DF500A4C617 /* QLRWorkspace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLRWorkspace.m; sourceTree = "<group>"; };
 		92F3EA5C178B4E8100A4C617 /* QLKBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKBrowser.h; sourceTree = "<group>"; };
 		92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKBrowser.m; sourceTree = "<group>"; };
+		92F3EA5F178C597D00A4C617 /* QLKCue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKCue.h; sourceTree = "<group>"; };
+		92F3EA60178C597D00A4C617 /* QLKCue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKCue.m; sourceTree = "<group>"; };
+		92F3EA62178C5CF300A4C617 /* QLKDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKDefines.h; sourceTree = "<group>"; };
+		92F3EA63178C5CF300A4C617 /* QLKDefines.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKDefines.m; sourceTree = "<group>"; };
+		92F3EA65178C5D4100A4C617 /* QLRColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLRColor.h; sourceTree = "<group>"; };
+		92F3EA66178C5D4100A4C617 /* QLRColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLRColor.m; sourceTree = "<group>"; };
+		92F3EA68178C5F6A00A4C617 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		92F3EA6A178C607700A4C617 /* QLabKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLabKit.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +126,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92F3EA69178C5F6A00A4C617 /* Security.framework in Frameworks */,
 				92F3E9ED178B1BC500A4C617 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -144,7 +157,7 @@
 		92F3E9EA178B1BC500A4C617 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				92F3E9E9178B1BC500A4C617 /* QLabKit.app */,
+				92F3E9E9178B1BC500A4C617 /* QLabKitDemo.app */,
 				92F3EA09178B1BC600A4C617 /* QLabKitTests.octest */,
 			);
 			name = Products;
@@ -153,6 +166,7 @@
 		92F3E9EB178B1BC500A4C617 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				92F3EA68178C5F6A00A4C617 /* Security.framework */,
 				92F3E9EC178B1BC500A4C617 /* Cocoa.framework */,
 				92F3EA0A178B1BC600A4C617 /* SenTestingKit.framework */,
 				92F3E9EE178B1BC500A4C617 /* Other Frameworks */,
@@ -215,13 +229,20 @@
 		92F3EA20178B1CE400A4C617 /* QLabKit */ = {
 			isa = PBXGroup;
 			children = (
+				92F3EA21178B1DA300A4C617 /* F53OSC */,
+				92F3EA6A178C607700A4C617 /* QLabKit.h */,
 				92F3EA5C178B4E8100A4C617 /* QLKBrowser.h */,
 				92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */,
 				92F3EA55178B4DF500A4C617 /* QLKServer.h */,
 				92F3EA56178B4DF500A4C617 /* QLKServer.m */,
 				92F3EA57178B4DF500A4C617 /* QLRWorkspace.h */,
 				92F3EA58178B4DF500A4C617 /* QLRWorkspace.m */,
-				92F3EA21178B1DA300A4C617 /* F53OSC */,
+				92F3EA5F178C597D00A4C617 /* QLKCue.h */,
+				92F3EA60178C597D00A4C617 /* QLKCue.m */,
+				92F3EA62178C5CF300A4C617 /* QLKDefines.h */,
+				92F3EA63178C5CF300A4C617 /* QLKDefines.m */,
+				92F3EA65178C5D4100A4C617 /* QLRColor.h */,
+				92F3EA66178C5D4100A4C617 /* QLRColor.m */,
 			);
 			name = QLabKit;
 			sourceTree = "<group>";
@@ -284,7 +305,7 @@
 			);
 			name = QLabKitDemo;
 			productName = QLabKit;
-			productReference = 92F3E9E9178B1BC500A4C617 /* QLabKit.app */;
+			productReference = 92F3E9E9178B1BC500A4C617 /* QLabKitDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
 		92F3EA08178B1BC600A4C617 /* QLabKitTests */ = {
@@ -397,6 +418,9 @@
 				92F3EA5A178B4DF500A4C617 /* QLKServer.m in Sources */,
 				92F3EA5B178B4DF500A4C617 /* QLRWorkspace.m in Sources */,
 				92F3EA5E178B4E8100A4C617 /* QLKBrowser.m in Sources */,
+				92F3EA61178C597D00A4C617 /* QLKCue.m in Sources */,
+				92F3EA64178C5CF300A4C617 /* QLKDefines.m in Sources */,
+				92F3EA67178C5D4100A4C617 /* QLRColor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

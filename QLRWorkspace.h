@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import "F53OSC.h"
+#import "QLKCue.h"
+#import "QLKDefines.h"
 
 extern NSString * const QLRWorkspaceDidUpdateCuesNotification;
 extern NSString * const QLRWorkspaceDidConnectNotification;
@@ -21,7 +23,7 @@ extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 
 @property (copy, nonatomic) NSString *name;
 @property (copy, nonatomic) NSString *uniqueId;
-@property (strong, nonatomic) QLRCue *root;
+@property (strong, nonatomic) QLKCue *root;
 @property (assign, nonatomic, getter=isConnected) BOOL connected;
 @property (strong, readonly) QLKServer *server;
 @property (assign, nonatomic) BOOL hasPasscode;
@@ -36,11 +38,11 @@ extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 - (void)reconnect;
 
 - (NSString *)fullName;
-- (NSString *)fullNameWithCueList:(QLRCue *)cueList;
+- (NSString *)fullNameWithCueList:(QLKCue *)cueList;
 
-- (QLRCue *)firstCue;
-- (QLRCue *)firstCueList;
-- (QLRCue *)cueWithId:(NSString *)uid;
+- (QLKCue *)firstCue;
+- (QLKCue *)firstCueList;
+- (QLKCue *)cueWithId:(NSString *)uid;
 
 - (void)processMessage:(F53OSCMessage *)message;
 
@@ -57,48 +59,48 @@ extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 - (void)save;
 - (void)fetchCueLists;
 - (void)fetchCueListsWithCompletion:(QLRMessageHandlerBlock)block;
-- (void)fetchPlaybackPositionForCue:(QLRCue *)cue completion:(QLRMessageHandlerBlock)block;
-- (void)startCue:(QLRCue *)cue;
-- (void)stopCue:(QLRCue *)cue;
-- (void)pauseCue:(QLRCue *)cue;
-- (void)loadCue:(QLRCue *)cue;
-- (void)resetCue:(QLRCue *)cue;
-- (void)deleteCue:(QLRCue *)cue;
-- (void)cue:(QLRCue *)cue valuesForKeys:(NSArray *)keys;
-- (void)cue:(QLRCue *)cue updateName:(NSString *)name;
-- (void)cue:(QLRCue *)cue updateNumber:(NSString *)number;
-- (void)cue:(QLRCue *)cue updatePreWait:(float)preWait;
-- (void)cue:(QLRCue *)cue updatePostWait:(float)postWait;
-- (void)cue:(QLRCue *)cue updateDuration:(float)duration;
-- (void)cue:(QLRCue *)cue updateArmed:(BOOL)armed;
-- (void)cue:(QLRCue *)cue updateFlagged:(BOOL)flagged;
-- (void)cue:(QLRCue *)cue updateNotes:(NSString *)notes;
-- (void)cue:(QLRCue *)cue updateContinueMode:(QLRCueContinueMode)continueMode;
-- (void)cue:(QLRCue *)cue updateChannel:(NSInteger)channel level:(double)level;
-- (void)cue:(QLRCue *)cue updatePatch:(NSInteger)patch;
-- (void)cue:(QLRCue *)cue updateColor:(NSString *)color;
-- (void)cue:(QLRCue *)cue updateSurfaceID:(NSInteger)surfaceID;
-- (void)cue:(QLRCue *)cue updateFullScreen:(BOOL)fullScreen;
-- (void)cue:(QLRCue *)cue updateTranslationX:(CGFloat)originX;
-- (void)cue:(QLRCue *)cue updateTranslationY:(CGFloat)originY;
-- (void)cue:(QLRCue *)cue updateScaleX:(CGFloat)scaleX;
-- (void)cue:(QLRCue *)cue updateScaleY:(CGFloat)scaleY;
-- (void)cue:(QLRCue *)cue updateRotationX:(CGFloat)rotationX;
-- (void)cue:(QLRCue *)cue updateRotationY:(CGFloat)rotationY;
-- (void)cue:(QLRCue *)cue updateRotationZ:(CGFloat)rotationZ;
-- (void)cue:(QLRCue *)cue updatePreserveAspectRatio:(BOOL)preserve;
-- (void)cue:(QLRCue *)cue updatePlaybackPosition:(QLRCue *)playbackCue;
-- (void)cue:(QLRCue *)cue updateLayer:(NSInteger)layer;
-- (void)cue:(QLRCue *)cue updateOpacity:(CGFloat)opacity;
-- (void)cue:(QLRCue *)cue updateStartNextCueWhenSliceEnds:(BOOL)start;
-- (void)cue:(QLRCue *)cue updateStopTargetWhenSliceEnds:(BOOL)stop;
+- (void)fetchPlaybackPositionForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block;
+- (void)startCue:(QLKCue *)cue;
+- (void)stopCue:(QLKCue *)cue;
+- (void)pauseCue:(QLKCue *)cue;
+- (void)loadCue:(QLKCue *)cue;
+- (void)resetCue:(QLKCue *)cue;
+- (void)deleteCue:(QLKCue *)cue;
+- (void)cue:(QLKCue *)cue valuesForKeys:(NSArray *)keys;
+- (void)cue:(QLKCue *)cue updateName:(NSString *)name;
+- (void)cue:(QLKCue *)cue updateNumber:(NSString *)number;
+- (void)cue:(QLKCue *)cue updatePreWait:(float)preWait;
+- (void)cue:(QLKCue *)cue updatePostWait:(float)postWait;
+- (void)cue:(QLKCue *)cue updateDuration:(float)duration;
+- (void)cue:(QLKCue *)cue updateArmed:(BOOL)armed;
+- (void)cue:(QLKCue *)cue updateFlagged:(BOOL)flagged;
+- (void)cue:(QLKCue *)cue updateNotes:(NSString *)notes;
+- (void)cue:(QLKCue *)cue updateContinueMode:(QLRCueContinueMode)continueMode;
+- (void)cue:(QLKCue *)cue updateChannel:(NSInteger)channel level:(double)level;
+- (void)cue:(QLKCue *)cue updatePatch:(NSInteger)patch;
+- (void)cue:(QLKCue *)cue updateColor:(NSString *)color;
+- (void)cue:(QLKCue *)cue updateSurfaceID:(NSInteger)surfaceID;
+- (void)cue:(QLKCue *)cue updateFullScreen:(BOOL)fullScreen;
+- (void)cue:(QLKCue *)cue updateTranslationX:(CGFloat)originX;
+- (void)cue:(QLKCue *)cue updateTranslationY:(CGFloat)originY;
+- (void)cue:(QLKCue *)cue updateScaleX:(CGFloat)scaleX;
+- (void)cue:(QLKCue *)cue updateScaleY:(CGFloat)scaleY;
+- (void)cue:(QLKCue *)cue updateRotationX:(CGFloat)rotationX;
+- (void)cue:(QLKCue *)cue updateRotationY:(CGFloat)rotationY;
+- (void)cue:(QLKCue *)cue updateRotationZ:(CGFloat)rotationZ;
+- (void)cue:(QLKCue *)cue updatePreserveAspectRatio:(BOOL)preserve;
+- (void)cue:(QLKCue *)cue updatePlaybackPosition:(QLKCue *)playbackCue;
+- (void)cue:(QLKCue *)cue updateLayer:(NSInteger)layer;
+- (void)cue:(QLKCue *)cue updateOpacity:(CGFloat)opacity;
+- (void)cue:(QLKCue *)cue updateStartNextCueWhenSliceEnds:(BOOL)start;
+- (void)cue:(QLKCue *)cue updateStopTargetWhenSliceEnds:(BOOL)stop;
 
-- (void)fetchMainPropertiesForCue:(QLRCue *)cue;
-- (void)fetchBasicPropertiesForCue:(QLRCue *)cue;
-- (void)fetchChildrenForCue:(QLRCue *)cue completion:(QLRMessageHandlerBlock)block;
-- (void)fetchNotesForCue:(QLRCue *)cue;
-- (void)fetchAudioLevelsForCue:(QLRCue *)cue completion:(QLRMessageHandlerBlock)block;
-- (void)fetchDisplayAndGeometryForCue:(QLRCue *)cue;
+- (void)fetchMainPropertiesForCue:(QLKCue *)cue;
+- (void)fetchBasicPropertiesForCue:(QLKCue *)cue;
+- (void)fetchChildrenForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block;
+- (void)fetchNotesForCue:(QLKCue *)cue;
+- (void)fetchAudioLevelsForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block;
+- (void)fetchDisplayAndGeometryForCue:(QLKCue *)cue;
 - (void)runningOrPausedCuesWithBlock:(QLRMessageHandlerBlock)block;
 
 @end

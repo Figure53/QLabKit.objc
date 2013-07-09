@@ -15,4 +15,9 @@
   // Insert code here to initialize your application
 }
 
+- (IBAction)go:(id)sender
+{
+  
+}
+
 @end

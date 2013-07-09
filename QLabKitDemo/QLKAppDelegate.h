@@ -11,5 +11,8 @@
 @interface QLKAppDelegate : NSObject <NSApplicationDelegate>
 
 @property (assign) IBOutlet NSWindow *window;
+@property (weak) IBOutlet NSPopUpButton *qlab;
+
+- (IBAction)go:(id)sender;
 
 @end

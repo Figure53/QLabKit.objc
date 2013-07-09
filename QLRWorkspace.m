@@ -7,9 +7,8 @@
 //
 
 #import "QLRWorkspace.h"
-#import "QLRCue.h"
+#import "QLKCue.h"
 #import "QLKServer.h"
-#import "QLRSlider.h"
 #import "F53OSC.h"
 
 #define HEARTBEAT_INTERVAL 5 // seconds
@@ -34,7 +33,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 - (NSString *)workspacePrefix;
 - (NSString *)addressWithoutWorkspace:(NSString *)address;
-- (NSString *)addressForCue:(QLRCue *)cue action:(NSString *)action;
+- (NSString *)addressForCue:(QLKCue *)cue action:(NSString *)action;
 - (void)sendMessage:(NSObject *)message toAddress:(NSString *)address;
 - (void)sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block;
 - (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address;
@@ -57,7 +56,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
     _attempts = 0;
     
     // Setup root cue - parent of cue lists
-    _root = [[QLRCue alloc] init];
+    _root = [[QLKCue alloc] init];
     _root.uid = QLRRootCueIdentifier;
     _root.name = @"Cue Lists";
     _root.type = QLRCueTypeGroup;
@@ -96,7 +95,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
   return [NSString stringWithFormat:@"%@ (%@)", self.name, self.server.name];
 }
 
-- (NSString *)fullNameWithCueList:(QLRCue *)cueList
+- (NSString *)fullNameWithCueList:(QLKCue *)cueList
 {
   return [NSString stringWithFormat:@"%@ - %@ (%@)", self.name, cueList.name, self.server.name];
 }
@@ -177,17 +176,17 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 #pragma mark - Cues
 
-- (QLRCue *)firstCue
+- (QLKCue *)firstCue
 {
   return [[self firstCueList] firstCue];
 }
 
-- (QLRCue *)firstCueList
+- (QLKCue *)firstCueList
 {
   return [self.root firstCue];
 }
 
-- (QLRCue *)cueWithId:(NSString *)uid
+- (QLKCue *)cueWithId:(NSString *)uid
 {
   return [self.root cueWithId:uid];
   //return [[self.cue.cues filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"uid = %@", uid]] lastObject];
@@ -257,12 +256,12 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
     NSMutableArray *children = [NSMutableArray array];
     
     for (NSDictionary *cueList in cueLists) {
-      QLRCue *cue = [QLRCue cueWithDictionary:cueList];
+      QLKCue *cue = [QLKCue cueWithDictionary:cueList];
       [children addObject:cue];
     }
     
     // Manually add active cues to end of list
-    QLRCue *activeCues = [[QLRCue alloc] init];
+    QLKCue *activeCues = [[QLKCue alloc] init];
     activeCues.uid = QLRActiveCueListIdentifier;
     activeCues.name = @"Active Cues";
     activeCues.type = QLRCueTypeGroup;
@@ -281,7 +280,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
   [self sendMessage:nil toAddress:@"/cueLists" block:block];
 }
 
-- (void)fetchPlaybackPositionForCue:(QLRCue *)cue completion:(QLRMessageHandlerBlock)block
+- (void)fetchPlaybackPositionForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block
 {
   [self sendMessage:nil toAddress:[self addressForCue:cue action:@"playbackPositionId"] block:block];
 }
@@ -354,75 +353,75 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 #pragma mark - Cue Actions
 
-- (void)startCue:(QLRCue *)cue
+- (void)startCue:(QLKCue *)cue
 {
   [self sendMessage:nil toAddress:[self addressForCue:cue action:@"start"]];
 }
 
-- (void)stopCue:(QLRCue *)cue
+- (void)stopCue:(QLKCue *)cue
 {
   [self sendMessage:nil toAddress:[self addressForCue:cue action:@"stop"]];
 }
 
-- (void)pauseCue:(QLRCue *)cue
+- (void)pauseCue:(QLKCue *)cue
 {
   [self sendMessage:nil toAddress:[self addressForCue:cue action:@"pause"]];
 }
 
-- (void)loadCue:(QLRCue *)cue
+- (void)loadCue:(QLKCue *)cue
 {
   [self sendMessage:nil toAddress:[self addressForCue:cue action:@"load"]];
 }
 
-- (void)resetCue:(QLRCue *)cue
+- (void)resetCue:(QLKCue *)cue
 {
   [self sendMessage:nil toAddress:[self addressForCue:cue action:@"reset"]];
 }
 
-- (void)deleteCue:(QLRCue *)cue
+- (void)deleteCue:(QLKCue *)cue
 {
   [self sendMessage:nil toAddress:@"/delete"];
 }
 
 #pragma mark - Cue Getters
 
-- (void)cue:(QLRCue *)cue valuesForKeys:(NSArray *)keys
+- (void)cue:(QLKCue *)cue valuesForKeys:(NSArray *)keys
 {
   NSString *JSONKeys = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:keys options:0 error:nil] encoding:NSUTF8StringEncoding];
   [self sendMessage:JSONKeys toAddress:[self addressForCue:cue action:@"valuesForKeys"] block:nil];
 }
 
-- (void)fetchAudioLevelsForCue:(QLRCue *)cue completion:(QLRMessageHandlerBlock)block
+- (void)fetchAudioLevelsForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block
 {
   NSString *address = [self addressForCue:cue action:@"sliderLevels"];
   [self sendMessage:nil toAddress:address block:block];
 }
 
-- (void)fetchMainPropertiesForCue:(QLRCue *)cue
+- (void)fetchMainPropertiesForCue:(QLKCue *)cue
 {
   NSArray *keys = @[@"name", @"number", @"colorName", @"flagged", @"notes"];
   [self cue:cue valuesForKeys:keys];
 }
 
-- (void)fetchBasicPropertiesForCue:(QLRCue *)cue
+- (void)fetchBasicPropertiesForCue:(QLKCue *)cue
 {
   NSArray *keys = @[@"name", @"number", @"armed", @"colorName", @"continueMode", @"flagged", @"postWait", @"preWait", @"duration"];
   [self cue:cue valuesForKeys:keys];
 }
 
-- (void)fetchNotesForCue:(QLRCue *)cue
+- (void)fetchNotesForCue:(QLKCue *)cue
 {
   NSArray *keys = @[@"notes"];
   [self cue:cue valuesForKeys:keys];
 }
 
-- (void)fetchDisplayAndGeometryForCue:(QLRCue *)cue
+- (void)fetchDisplayAndGeometryForCue:(QLKCue *)cue
 {
   NSArray *keys = @[@"fullScreen", @"translationX", @"translationY", @"scaleX", @"scaleY", @"layer", @"opacity", @"quaternion", @"preserveAspectRatio", @"surfaceSize", @"cueSize", @"surfaceID", @"surfaceList"];
   [self cue:cue valuesForKeys:keys];
 }
 
-- (void)fetchChildrenForCue:(QLRCue *)cue completion:(QLRMessageHandlerBlock)block
+- (void)fetchChildrenForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block
 {
   NSString *address = [self addressForCue:cue action:@"children"];
   [self sendMessage:nil toAddress:address block:block];
@@ -435,147 +434,147 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 #pragma mark - Cue Setters
 
-- (void)cue:(QLRCue *)cue updateName:(NSString *)name
+- (void)cue:(QLKCue *)cue updateName:(NSString *)name
 {
   [self sendMessage:name toAddress:[self addressForCue:cue action:@"name"]];
 }
 
-- (void)cue:(QLRCue *)cue updateNotes:(NSString *)notes
+- (void)cue:(QLKCue *)cue updateNotes:(NSString *)notes
 {
   [self sendMessage:notes toAddress:[self addressForCue:cue action:@"notes"]];
 }
 
-- (void)cue:(QLRCue *)cue updateNumber:(NSString *)number
+- (void)cue:(QLKCue *)cue updateNumber:(NSString *)number
 {
   [self sendMessage:number toAddress:[self addressForCue:cue action:@"number"]];
 }
 
-- (void)cue:(QLRCue *)cue updatePreWait:(float)preWait
+- (void)cue:(QLKCue *)cue updatePreWait:(float)preWait
 {
   [self sendMessage:@(preWait) toAddress:[self addressForCue:cue action:@"preWait"]];
 }
 
-- (void)cue:(QLRCue *)cue updatePostWait:(float)postWait
+- (void)cue:(QLKCue *)cue updatePostWait:(float)postWait
 {
   [self sendMessage:@(postWait) toAddress:[self addressForCue:cue action:@"postWait"]];
 }
 
-- (void)cue:(QLRCue *)cue updateDuration:(float)duration
+- (void)cue:(QLKCue *)cue updateDuration:(float)duration
 {
   [self sendMessage:@(duration) toAddress:[self addressForCue:cue action:@"duration"]];
 }
 
-- (void)cue:(QLRCue *)cue updateArmed:(BOOL)armed
+- (void)cue:(QLKCue *)cue updateArmed:(BOOL)armed
 {
   [self sendMessage:@(armed) toAddress:[self addressForCue:cue action:@"armed"]];
 }
 
-- (void)cue:(QLRCue *)cue updateFlagged:(BOOL)flagged
+- (void)cue:(QLKCue *)cue updateFlagged:(BOOL)flagged
 {
   [self sendMessage:@(flagged) toAddress:[self addressForCue:cue action:@"flagged"]];
 }
 
-- (void)cue:(QLRCue *)cue updateColor:(NSString *)color
+- (void)cue:(QLKCue *)cue updateColor:(NSString *)color
 {
   [self sendMessage:color toAddress:[self addressForCue:cue action:@"colorName"]];
 }
 
-- (void)cue:(QLRCue *)cue updateContinueMode:(QLRCueContinueMode)continueMode
+- (void)cue:(QLKCue *)cue updateContinueMode:(QLRCueContinueMode)continueMode
 {
   [self sendMessage:@(continueMode) toAddress:[self addressForCue:cue action:@"continueMode"]];
 }
 
-- (void)cue:(QLRCue *)cue updateChannel:(NSInteger)channel level:(double)level
+- (void)cue:(QLKCue *)cue updateChannel:(NSInteger)channel level:(double)level
 {
 	NSArray *params = [NSArray arrayWithObjects:[NSNumber numberWithInt:channel], [NSNumber numberWithDouble:level], nil];
   [self sendMessages:params toAddress:[self addressForCue:cue action:@"sliderLevel"]];
 }
 
-- (void)cue:(QLRCue *)cue updatePatch:(NSInteger)patch
+- (void)cue:(QLKCue *)cue updatePatch:(NSInteger)patch
 {
   [self sendMessage:@(patch) toAddress:[self addressForCue:cue action:@"patch"]];
 }
 
-- (void)cue:(QLRCue *)cue updatePlaybackPosition:(QLRCue *)playbackCue
+- (void)cue:(QLKCue *)cue updatePlaybackPosition:(QLKCue *)playbackCue
 {
   [self sendMessage:playbackCue.uid toAddress:[self addressForCue:cue action:@"playbackPositionId"]];
 }
 
-- (void)cue:(QLRCue *)cue updateStartNextCueWhenSliceEnds:(BOOL)start
+- (void)cue:(QLKCue *)cue updateStartNextCueWhenSliceEnds:(BOOL)start
 {
   [self sendMessage:@(start) toAddress:[self addressForCue:cue action:@"startNextCueWhenSliceEnds"]];
 }
 
-- (void)cue:(QLRCue *)cue updateStopTargetWhenSliceEnds:(BOOL)stop
+- (void)cue:(QLKCue *)cue updateStopTargetWhenSliceEnds:(BOOL)stop
 {
   [self sendMessage:@(stop) toAddress:[self addressForCue:cue action:@"stopTargetWhenSliceEnds"]];
 }
 
 #pragma mark - OSC Video methods
 
-- (void)cue:(QLRCue *)cue updateSurfaceID:(NSInteger)surfaceID
+- (void)cue:(QLKCue *)cue updateSurfaceID:(NSInteger)surfaceID
 {
   [self sendMessage:@(surfaceID) toAddress:[self addressForCue:cue action:@"surfaceID"]];
 }
 
-- (void)cue:(QLRCue *)cue updateFullScreen:(BOOL)fullScreen
+- (void)cue:(QLKCue *)cue updateFullScreen:(BOOL)fullScreen
 {
   [self sendMessage:@(fullScreen) toAddress:[self addressForCue:cue action:@"fullScreen"]];
 }
 
-- (void)cue:(QLRCue *)cue updateTranslationX:(CGFloat)translationX
+- (void)cue:(QLKCue *)cue updateTranslationX:(CGFloat)translationX
 {
   [self sendMessage:@(translationX) toAddress:[self addressForCue:cue action:@"translationX"]];
 }
 
-- (void)cue:(QLRCue *)cue updateTranslationY:(CGFloat)translationY
+- (void)cue:(QLKCue *)cue updateTranslationY:(CGFloat)translationY
 {
   [self sendMessage:@(translationY) toAddress:[self addressForCue:cue action:@"translationY"]];
 }
 
-- (void)cue:(QLRCue *)cue updateScaleX:(CGFloat)scaleX
+- (void)cue:(QLKCue *)cue updateScaleX:(CGFloat)scaleX
 {
   [self sendMessage:@(scaleX) toAddress:[self addressForCue:cue action:@"scaleX"]];
 }
 
-- (void)cue:(QLRCue *)cue updateScaleY:(CGFloat)scaleY
+- (void)cue:(QLKCue *)cue updateScaleY:(CGFloat)scaleY
 {
   [self sendMessage:@(scaleY) toAddress:[self addressForCue:cue action:@"scaleY"]];
 }
 
-- (void)cue:(QLRCue *)cue updateRotationX:(CGFloat)rotationX
+- (void)cue:(QLKCue *)cue updateRotationX:(CGFloat)rotationX
 {
   [self sendMessage:@(rotationX) toAddress:[self addressForCue:cue action:@"rotationX"]];
 }
 
-- (void)cue:(QLRCue *)cue updateRotationY:(CGFloat)rotationY
+- (void)cue:(QLKCue *)cue updateRotationY:(CGFloat)rotationY
 {
   [self sendMessage:@(rotationY) toAddress:[self addressForCue:cue action:@"rotationY"]];
 }
 
-- (void)cue:(QLRCue *)cue updateRotationZ:(CGFloat)rotationZ
+- (void)cue:(QLKCue *)cue updateRotationZ:(CGFloat)rotationZ
 {
   [self sendMessage:@(rotationZ) toAddress:[self addressForCue:cue action:@"rotationZ"]];
 }
 
-- (void)cue:(QLRCue *)cue updatePreserveAspectRatio:(BOOL)preserve
+- (void)cue:(QLKCue *)cue updatePreserveAspectRatio:(BOOL)preserve
 {
   [self sendMessage:@(preserve) toAddress:[self addressForCue:cue action:@"preserveAspectRatio"]];
 }
 
-- (void)cue:(QLRCue *)cue updateLayer:(NSInteger)layer
+- (void)cue:(QLKCue *)cue updateLayer:(NSInteger)layer
 {
   [self sendMessage:@(layer) toAddress:[self addressForCue:cue action:@"layer"]];
 }
 
-- (void)cue:(QLRCue *)cue updateOpacity:(CGFloat)opacity
+- (void)cue:(QLKCue *)cue updateOpacity:(CGFloat)opacity
 {
   [self sendMessage:@(opacity) toAddress:[self addressForCue:cue action:@"opacity"]];
 }
 
 #pragma mark - OSC address helpers
 
-- (NSString *)addressForCue:(QLRCue *)cue action:(NSString *)action
+- (NSString *)addressForCue:(QLKCue *)cue action:(NSString *)action
 {
   return [NSString stringWithFormat:@"/cue_id/%@/%@", cue.uid, action];
 }
@@ -678,7 +677,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
          
     if ([address hasPrefix:@"/cue_id"]) {
       NSString *cueId = [address componentsSeparatedByString:@"/"][2];
-      QLRCue *cue = [self cueWithId:cueId];
+      QLKCue *cue = [self cueWithId:cueId];
       
       if ([data isKindOfClass:[NSDictionary class]]) {
         [cue updatePropertiesWithDict:data];
@@ -707,7 +706,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
     } else if (parts.count == 6) {
       // Individual cue updated - /update/workspace/<workspace_id>/cue_id/<cue_id>
       NSString *cueId = parts[5];
-      QLRCue *cue = [self cueWithId:cueId];
+      QLKCue *cue = [self cueWithId:cueId];
     
       //NSLog(@"update cue: %@", cue);
       
@@ -716,7 +715,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
           NSMutableArray *children = [NSMutableArray array];
           
           for (NSDictionary *dict in data) {
-            QLRCue *cue = [QLRCue cueWithDictionary:dict];
+            QLKCue *cue = [QLKCue cueWithDictionary:dict];
             [children addObject:cue];
           }
           
@@ -735,7 +734,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
       }
     } else if (parts.count == 7 && [relativeAddress hasSuffix:@"/playbackPosition"]) {
       // Special update, playback position has changed
-      QLRCue *cue = nil;
+      QLKCue *cue = nil;
       
       if ([data count] > 0) {
         cue = [self cueWithId:data[0]];

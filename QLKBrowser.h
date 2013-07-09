@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "F53OSC.h"
-#import "QLRDefines.h"
+#import "QLKDefines.h"
 
 extern NSString * const QLRServersUpdatedNotification;
 extern NSString * const QLabServiceType;
