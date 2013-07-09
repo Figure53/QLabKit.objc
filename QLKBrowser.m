@@ -22,6 +22,8 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
 @property (strong, nonatomic) F53OSCServer *server;
 @property (assign) BOOL running;
 
+- (QLKServer *)serverForIPAddress:(NSString *)ip port:(NSInteger)port;
+
 @end
 
 @implementation QLKBrowser
@@ -99,6 +101,28 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
   self.browser = nil;  
 }
 
+- (QLKServer *)serverForIPAddress:(NSString *)ip port:(NSInteger)port
+{
+  for (QLKServer *server in self.servers) {
+    if ([server.ip isEqualToString:ip] && server.port == port) {
+      return server;
+    }
+  }
+  
+  return nil;
+}
+
+- (QLKServer *)serverForNetService:(NSNetService *)netService
+{
+  for (QLKServer *server in self.servers) {
+    if ([server.netService isEqual:netService]) {
+      return server;
+    }
+  }
+  
+  return nil;
+}
+
 #pragma mark - OSC server delegate
 
 - (void)takeMessage:(F53OSCMessage *)message
@@ -107,7 +131,7 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
   int port = message.replySocket.port;
 
 #if DEBUG_OSC
-  NSLog(@"[OSC/UDP] message received - address: %@, arguments: %@ (from %@:%d)", message.addressPattern, message.arguments, ip, port);
+  NSLog(@"[OSC/UDP %@:%d] message received - address: %@, arguments: %@", ip, port, message.addressPattern, message.arguments);
 #endif
 
   if ([message.addressPattern hasPrefix:@"/reply"]) {
@@ -129,7 +153,7 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
         self.workspaceBlock(workspaces, ip);
       }
       
-      QLKServer *server = [self serverForIp:ip];
+      QLKServer *server = [self serverForIPAddress:ip port:port];
       [server removeAllWorkspaces];
       
       for (NSDictionary *dict in workspaces) {
@@ -204,26 +228,18 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
 // Resolved address for net service, now get workspaces
 - (void)netServiceDidResolveAddress:(NSNetService *)netService
 {
-  // Taken from Apple sample project - CocoaSoap
-  NSData *address = netService.addresses[0];
-  NSString *ip = @"0.0.0.0";
-  struct sockaddr_in *address_sin = (struct sockaddr_in *)[address bytes];
-  const char *formatted;
-  char buffer[1024];
-  if (AF_INET == address_sin->sin_family) {
-    formatted = inet_ntop(AF_INET, &(address_sin->sin_addr), buffer, sizeof(buffer));
-    ip = [NSString stringWithFormat:@"%s", formatted];
-  }
-  
+  NSString *ip = [self IPAddressFromData:netService.addresses[0]];
+
   F53OSCClient *client = [[F53OSCClient alloc] init];
   client.host = ip;
-  client.port = [netService port];
+  client.port = netService.port;
   
   QLKServer *server = [self serverForNetService:netService];
   server.ip = ip;
+  server.port = netService.port;
   server.client = client;
   
-  NSLog(@"resolved address for server: %@", server);
+  NSLog(@"resolved address for server: %@:%ld", server, netService.port);
   
   [client sendPacket:[F53OSCMessage messageWithAddressPattern:@"/workspaces" arguments:nil]];
 }
@@ -234,28 +250,19 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
   NSLog(@"error resolving service: %@ - %@", netService, error);
 }
 
-#pragma mark - Server helpers
-
-- (QLKServer *)serverForIp:(NSString *)ip
+- (NSString *)IPAddressFromData:(NSData *)data
 {
-  for (QLKServer *server in self.servers) {
-    if ([server.ip isEqualToString:ip]) {
-      return server;
-    }
+  // Taken from Apple sample project - CocoaSoap
+  NSString *ip = @"0.0.0.0";
+  struct sockaddr_in *address_sin = (struct sockaddr_in *)data.bytes;
+  const char *formatted;
+  char buffer[1024];
+  if (AF_INET == address_sin->sin_family) {
+    formatted = inet_ntop(AF_INET, &(address_sin->sin_addr), buffer, sizeof(buffer));
+    ip = [NSString stringWithFormat:@"%s", formatted];
   }
-  
-  return nil;
-}
 
-- (QLKServer *)serverForNetService:(NSNetService *)netService
-{
-  for (QLKServer *server in self.servers) {
-    if ([server.netService isEqual:netService]) {
-      return server;
-    }
-  }
-  
-  return nil;
+  return ip;
 }
 
 @end

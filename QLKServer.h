@@ -14,6 +14,7 @@
 
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) NSString *ip;
+@property (assign, nonatomic) NSInteger port;
 @property (strong, nonatomic) NSNetService *netService;
 @property (strong, nonatomic) F53OSCClient *client;
 @property (strong, nonatomic) NSMutableArray *workspaces;
