@@ -17,9 +17,9 @@ extern NSString * const QLRWorkspaceDidDisconnectNotification;
 extern NSString * const QLRWorkspaceConnectionErrorNotification;
 extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 
-@class QLRSlider, QLKServer;
+@class QLKServer;
 
-@interface QLRWorkspace : NSObject <F53OSCPacketDestination, F53OSCClientDelegate>
+@interface QLKWorkspace : NSObject <F53OSCPacketDestination, F53OSCClientDelegate>
 
 @property (copy, nonatomic) NSString *name;
 @property (copy, nonatomic) NSString *uniqueId;

@@ -13,9 +13,10 @@
 
 - (id)init
 {
-  if ((self = [super init])) {
-    _workspaces = [[NSMutableArray alloc] init];
-  }
+  self = [super init];
+  if (!self) return nil;
+  
+  _workspaces = [[NSMutableArray alloc] init];
   
   return self;
 }
@@ -27,12 +28,12 @@
 
 #pragma mark - 
 
-- (void)addWorkspace:(QLRWorkspace *)workspace
+- (void)addWorkspace:(QLKWorkspace *)workspace
 {
   [self.workspaces addObject:workspace];
 }
 
-- (void)removeWorkspace:(QLRWorkspace *)workspace
+- (void)removeWorkspace:(QLKWorkspace *)workspace
 {
   [self.workspaces removeObject:workspace];
 }

@@ -6,7 +6,7 @@
 //  Copyright 2011 Figure 53. All rights reserved.
 //
 
-#import "QLRWorkspace.h"
+#import "QLKWorkspace.h"
 #import "QLKCue.h"
 #import "QLKServer.h"
 #import "F53OSC.h"
@@ -23,7 +23,7 @@ NSString * const QLRWorkspaceDidDisconnectNotification = @"QLRConnectionDidDisco
 NSString * const QLRWorkspaceConnectionErrorNotification = @"QLRWorkspaceTimeoutNotification";
 NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorkspaceDidChangePlaybackPositionNotification";
 
-@interface QLRWorkspace ()
+@interface QLKWorkspace ()
 
 @property (strong, readonly) F53OSCClient *client;
 @property (strong, nonatomic) NSMutableDictionary *callbacks;
@@ -46,7 +46,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 @end
 
-@implementation QLRWorkspace
+@implementation QLKWorkspace
 
 - (id)init
 {
@@ -486,7 +486,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 - (void)cue:(QLKCue *)cue updateChannel:(NSInteger)channel level:(double)level
 {
-	NSArray *params = [NSArray arrayWithObjects:[NSNumber numberWithInt:channel], [NSNumber numberWithDouble:level], nil];
+	NSArray *params = @[@(channel), @(level)];
   [self sendMessages:params toAddress:[self addressForCue:cue action:@"sliderLevel"]];
 }
 

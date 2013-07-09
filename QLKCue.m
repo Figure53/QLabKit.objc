@@ -7,7 +7,7 @@
 //
 
 #import "QLKCue.h"
-#import "QLRColor.h"
+#import "QLKColor.h"
 
 NSString * const QLRCueUpdatedNotification = @"QLRCueUpdatedNotification";
 NSString * const QLRCueNeedsUpdateNotification = @"QLRCueNeedsUpdateNotification";
@@ -73,7 +73,7 @@ NSString * const QLRRootCueIdentifier = @"__root__";
   _name = @"(Untitled Cue)";
   _listName = @"";
   _flagged = NO;
-  _color = [QLRColor defaultColor];
+  _color = [QLKColor defaultColor];
   _type = QLRCueTypeCue;
   _cues = [NSMutableArray array];
   _depth = 0;
@@ -100,7 +100,7 @@ NSString * const QLRRootCueIdentifier = @"__root__";
   
   NSString *color = dict[@"colorName"];
   if (![color isEqualToString:@"none"]) {
-    _color = [QLRColor colorWithName:color];
+    _color = [QLKColor colorWithName:color];
   }
   
   if ([_type isEqualToString:QLRCueTypeGroup]) {
@@ -172,7 +172,7 @@ NSString * const QLRRootCueIdentifier = @"__root__";
   }
   
   if (dict[QLROSCColorNameKey]) {
-    self.color = [QLRColor colorWithName:dict[QLROSCColorNameKey]];
+    self.color = [QLKColor colorWithName:dict[QLROSCColorNameKey]];
   }
   
   if (dict[QLROSCFlaggedKey]) {

@@ -7,7 +7,7 @@
 //
 
 #import "QLKBrowser.h"
-#import "QLRWorkspace.h"
+#import "QLKWorkspace.h"
 #import "QLKServer.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -16,11 +16,10 @@
 #define SERVER_PORT 53001
 
 NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification";
-NSString * const QLabServiceType = @"_qlab._tcp.";
-NSString * const QLabServiceDomain = @"local.";
 
 @interface QLKBrowser ()
 
+@property (strong, nonatomic) F53OSCServer *server;
 @property (assign) BOOL running;
 
 @end
@@ -31,7 +30,6 @@ NSString * const QLabServiceDomain = @"local.";
 {
   [self.server stopListening];
   [self.browser stop];
-  [self.activeWorkspace disconnect];
 }
 
 + (QLKBrowser *)sharedManager
@@ -84,7 +82,7 @@ NSString * const QLabServiceDomain = @"local.";
   // Bonjour browser to find QLab instances
   self.browser = [[NSNetServiceBrowser alloc] init];
   [self.browser setDelegate:self];
-  [self.browser searchForServicesOfType:QLabServiceType inDomain:QLabServiceDomain];
+  [self.browser searchForServicesOfType:QLKBonjourServiceType inDomain:QLKBonjourServiceDomain];
 }
 
 // Stop bonjour - can't currently stop OSC server
@@ -106,9 +104,10 @@ NSString * const QLabServiceDomain = @"local.";
 - (void)takeMessage:(F53OSCMessage *)message
 {
   NSString *ip = message.replySocket.host;
+  int port = message.replySocket.port;
 
 #if DEBUG_OSC
-  NSLog(@"[OSC/UDP] message received - address: %@, arguments: %@ (from %@)", message.addressPattern, message.arguments, ip);
+  NSLog(@"[OSC/UDP] message received - address: %@, arguments: %@ (from %@:%d)", message.addressPattern, message.arguments, ip, port);
 #endif
 
   if ([message.addressPattern hasPrefix:@"/reply"]) {
@@ -134,22 +133,23 @@ NSString * const QLabServiceDomain = @"local.";
       [server removeAllWorkspaces];
       
       for (NSDictionary *dict in workspaces) {
-        QLRWorkspace *workspace = [[QLRWorkspace alloc] initWithDictionary:dict server:server];
+        QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:server];
         [server addWorkspace:workspace];
       }
 
       // Make sure this is dispatched on main thread
       dispatch_async(dispatch_get_main_queue(), ^{
+        if (self.delegate) {
+          [self.delegate browserDidUpdateServers:self];
+        }
+        
         [[NSNotificationCenter defaultCenter] postNotificationName:QLRServersUpdatedNotification object:self];
       });
-    } else if (self.activeWorkspace) {
-      // Forward to appropriate connection
-      [self.activeWorkspace processMessage:message];
     } else {
-      NSLog(@"[OSC] unhandled reply: %@ from %@", message, ip);
+      NSLog(@"[OSC] unhandled reply: %@ from %@", message, ip); 
     }
-  } else if ([message.addressPattern hasPrefix:@"/update"]) {
-    [self.activeWorkspace processMessage:message];
+  } else {
+    NSLog(@"[OSC] unhandled reply: %@ from %@", message, ip);
   }
 }
 
@@ -191,6 +191,10 @@ NSString * const QLabServiceDomain = @"local.";
   
   // Make sure this is dispatched on main thread
   dispatch_async(dispatch_get_main_queue(), ^{
+    if (self.delegate) {
+      [self.delegate browserDidUpdateServers:self];
+    }
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:QLRServersUpdatedNotification object:self];
   });
 }

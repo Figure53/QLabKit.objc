@@ -7,12 +7,14 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "QLKBrowser.h"
 
-@interface QLKAppDelegate : NSObject <NSApplicationDelegate>
+@interface QLKAppDelegate : NSObject <NSApplicationDelegate, QLKBrowserDelegate>
 
 @property (assign) IBOutlet NSWindow *window;
 @property (weak) IBOutlet NSPopUpButton *qlab;
 
 - (IBAction)go:(id)sender;
+- (IBAction)stop:(id)sender;
 
 @end

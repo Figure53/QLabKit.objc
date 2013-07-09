@@ -8,11 +8,15 @@
 
 #if TARGET_OS_IPHONE
 #define QLKImage UIImage
-#define QLKColor UIColor
+#define QLKColorClass UIColor
 #else
 #define QLKImage NSImage
-#define QLKColor NSColor
+#define QLKColorClass NSColor
 #endif
 
 typedef void (^QLRMessageHandlerBlock)(id data);
 typedef void (^QLRWorkspaceHandlerBlock)(NSArray *workspaces, NSString *ip);
+
+
+extern NSString * const QLKBonjourServiceType;
+extern NSString * const QLKBonjourServiceDomain;

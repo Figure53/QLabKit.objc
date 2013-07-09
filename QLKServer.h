@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class F53OSCClient, QLRWorkspace;
+@class F53OSCClient, QLKWorkspace;
 
 @interface QLKServer : NSObject
 
@@ -18,8 +18,8 @@
 @property (strong, nonatomic) F53OSCClient *client;
 @property (strong, nonatomic) NSMutableArray *workspaces;
 
-- (void)addWorkspace:(QLRWorkspace *)workspace;
-- (void)removeWorkspace:(QLRWorkspace *)workspace;
+- (void)addWorkspace:(QLKWorkspace *)workspace;
+- (void)removeWorkspace:(QLKWorkspace *)workspace;
 - (void)removeAllWorkspaces;
 
 @end

@@ -11,18 +11,21 @@
 #import "QLKDefines.h"
 
 extern NSString * const QLRServersUpdatedNotification;
-extern NSString * const QLabServiceType;
-extern NSString * const QLabServiceDomain;
 
-@class QLRWorkspace;
+@class QLKWorkspace, QLKBrowser;
+
+@protocol QLKBrowserDelegate <NSObject>
+
+- (void)browserDidUpdateServers:(QLKBrowser *)browser;
+
+@end
 
 @interface QLKBrowser : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, F53OSCPacketDestination>
 
 @property (strong, nonatomic) NSNetServiceBrowser *browser;
 @property (strong, nonatomic) NSMutableArray *servers;
-@property (strong, nonatomic) F53OSCServer *server;
-@property (strong, nonatomic) QLRWorkspace *activeWorkspace;
 @property (copy) QLRWorkspaceHandlerBlock workspaceBlock;
+@property (unsafe_unretained) id<QLKBrowserDelegate> delegate;
 
 + (QLKBrowser *)sharedManager;
 - (void)refreshWorkspaces;

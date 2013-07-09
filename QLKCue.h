@@ -54,7 +54,7 @@ typedef enum {
   QLRCueContinueModeAutoFollow
 } QLRCueContinueMode;
 
-@class QLRColor;
+@class QLKColor;
 
 @interface QLKCue : NSObject
 
@@ -66,7 +66,7 @@ typedef enum {
 @property (strong, nonatomic) NSString *type;
 @property (strong, nonatomic) NSString *notes;
 @property (strong, nonatomic) QLKImage *icon;
-@property (strong, nonatomic) QLRColor *color;
+@property (strong, nonatomic) QLKColor *color;
 @property (strong, nonatomic) NSMutableArray *cues;
 @property (assign, nonatomic) BOOL flagged;
 @property (assign, nonatomic) BOOL armed;

@@ -34,12 +34,13 @@
 		92F3EA51178B1DA300A4C617 /* NSString+F53OSCString.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA41178B1DA300A4C617 /* NSString+F53OSCString.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		92F3EA52178B1DA300A4C617 /* README.markdown in Resources */ = {isa = PBXBuildFile; fileRef = 92F3EA42178B1DA300A4C617 /* README.markdown */; };
 		92F3EA5A178B4DF500A4C617 /* QLKServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA56178B4DF500A4C617 /* QLKServer.m */; };
-		92F3EA5B178B4DF500A4C617 /* QLRWorkspace.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA58178B4DF500A4C617 /* QLRWorkspace.m */; };
+		92F3EA5B178B4DF500A4C617 /* QLKWorkspace.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA58178B4DF500A4C617 /* QLKWorkspace.m */; };
 		92F3EA5E178B4E8100A4C617 /* QLKBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */; };
 		92F3EA61178C597D00A4C617 /* QLKCue.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA60178C597D00A4C617 /* QLKCue.m */; };
 		92F3EA64178C5CF300A4C617 /* QLKDefines.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA63178C5CF300A4C617 /* QLKDefines.m */; };
-		92F3EA67178C5D4100A4C617 /* QLRColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA66178C5D4100A4C617 /* QLRColor.m */; };
+		92F3EA67178C5D4100A4C617 /* QLKColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA66178C5D4100A4C617 /* QLKColor.m */; };
 		92F3EA69178C5F6A00A4C617 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F3EA68178C5F6A00A4C617 /* Security.framework */; };
+		92F3EA6F178C6A8200A4C617 /* QLKClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA6E178C6A8200A4C617 /* QLKClient.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -107,18 +108,20 @@
 		92F3EA42178B1DA300A4C617 /* README.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.markdown; sourceTree = "<group>"; };
 		92F3EA55178B4DF500A4C617 /* QLKServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKServer.h; sourceTree = "<group>"; };
 		92F3EA56178B4DF500A4C617 /* QLKServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKServer.m; sourceTree = "<group>"; };
-		92F3EA57178B4DF500A4C617 /* QLRWorkspace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLRWorkspace.h; sourceTree = "<group>"; };
-		92F3EA58178B4DF500A4C617 /* QLRWorkspace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLRWorkspace.m; sourceTree = "<group>"; };
+		92F3EA57178B4DF500A4C617 /* QLKWorkspace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKWorkspace.h; sourceTree = "<group>"; };
+		92F3EA58178B4DF500A4C617 /* QLKWorkspace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKWorkspace.m; sourceTree = "<group>"; };
 		92F3EA5C178B4E8100A4C617 /* QLKBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKBrowser.h; sourceTree = "<group>"; };
 		92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKBrowser.m; sourceTree = "<group>"; };
 		92F3EA5F178C597D00A4C617 /* QLKCue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKCue.h; sourceTree = "<group>"; };
 		92F3EA60178C597D00A4C617 /* QLKCue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKCue.m; sourceTree = "<group>"; };
 		92F3EA62178C5CF300A4C617 /* QLKDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKDefines.h; sourceTree = "<group>"; };
 		92F3EA63178C5CF300A4C617 /* QLKDefines.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKDefines.m; sourceTree = "<group>"; };
-		92F3EA65178C5D4100A4C617 /* QLRColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLRColor.h; sourceTree = "<group>"; };
-		92F3EA66178C5D4100A4C617 /* QLRColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLRColor.m; sourceTree = "<group>"; };
+		92F3EA65178C5D4100A4C617 /* QLKColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKColor.h; sourceTree = "<group>"; };
+		92F3EA66178C5D4100A4C617 /* QLKColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKColor.m; sourceTree = "<group>"; };
 		92F3EA68178C5F6A00A4C617 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		92F3EA6A178C607700A4C617 /* QLabKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLabKit.h; sourceTree = "<group>"; };
+		92F3EA6D178C6A8200A4C617 /* QLKClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKClient.h; sourceTree = "<group>"; };
+		92F3EA6E178C6A8200A4C617 /* QLKClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKClient.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -233,16 +236,18 @@
 				92F3EA6A178C607700A4C617 /* QLabKit.h */,
 				92F3EA5C178B4E8100A4C617 /* QLKBrowser.h */,
 				92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */,
+				92F3EA6D178C6A8200A4C617 /* QLKClient.h */,
+				92F3EA6E178C6A8200A4C617 /* QLKClient.m */,
 				92F3EA55178B4DF500A4C617 /* QLKServer.h */,
 				92F3EA56178B4DF500A4C617 /* QLKServer.m */,
-				92F3EA57178B4DF500A4C617 /* QLRWorkspace.h */,
-				92F3EA58178B4DF500A4C617 /* QLRWorkspace.m */,
+				92F3EA57178B4DF500A4C617 /* QLKWorkspace.h */,
+				92F3EA58178B4DF500A4C617 /* QLKWorkspace.m */,
 				92F3EA5F178C597D00A4C617 /* QLKCue.h */,
 				92F3EA60178C597D00A4C617 /* QLKCue.m */,
 				92F3EA62178C5CF300A4C617 /* QLKDefines.h */,
 				92F3EA63178C5CF300A4C617 /* QLKDefines.m */,
-				92F3EA65178C5D4100A4C617 /* QLRColor.h */,
-				92F3EA66178C5D4100A4C617 /* QLRColor.m */,
+				92F3EA65178C5D4100A4C617 /* QLKColor.h */,
+				92F3EA66178C5D4100A4C617 /* QLKColor.m */,
 			);
 			name = QLabKit;
 			sourceTree = "<group>";
@@ -416,11 +421,12 @@
 				92F3EA50178B1DA300A4C617 /* NSNumber+F53OSCNumber.m in Sources */,
 				92F3EA51178B1DA300A4C617 /* NSString+F53OSCString.m in Sources */,
 				92F3EA5A178B4DF500A4C617 /* QLKServer.m in Sources */,
-				92F3EA5B178B4DF500A4C617 /* QLRWorkspace.m in Sources */,
+				92F3EA5B178B4DF500A4C617 /* QLKWorkspace.m in Sources */,
 				92F3EA5E178B4E8100A4C617 /* QLKBrowser.m in Sources */,
 				92F3EA61178C597D00A4C617 /* QLKCue.m in Sources */,
 				92F3EA64178C5CF300A4C617 /* QLKDefines.m in Sources */,
-				92F3EA67178C5D4100A4C617 /* QLRColor.m in Sources */,
+				92F3EA67178C5D4100A4C617 /* QLKColor.m in Sources */,
+				92F3EA6F178C6A8200A4C617 /* QLKClient.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
