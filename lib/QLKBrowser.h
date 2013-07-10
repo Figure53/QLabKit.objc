@@ -10,8 +10,6 @@
 #import "F53OSC.h"
 #import "QLKDefines.h"
 
-extern NSString * const QLRServersUpdatedNotification;
-
 @class QLKWorkspace, QLKBrowser;
 
 @protocol QLKBrowserDelegate <NSObject>
@@ -22,15 +20,16 @@ extern NSString * const QLRServersUpdatedNotification;
 
 @interface QLKBrowser : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, F53OSCPacketDestination>
 
-@property (strong, nonatomic) NSNetServiceBrowser *browser;
 @property (strong, nonatomic) NSMutableArray *servers;
 @property (copy) QLRWorkspaceHandlerBlock workspaceBlock;
 @property (unsafe_unretained) id<QLKBrowserDelegate> delegate;
-@property (assign, nonatomic) BOOL automaticallyRefresh;
 
-+ (QLKBrowser *)sharedManager;
 - (void)refreshWorkspaces;
-- (void)startServers;
-- (void)stopServers;
+- (void)start;
+- (void)stop;
+
+// Auto refresh workspaces of all servers with given interval (in seconds)
+- (void)enableAutoRefreshWithInterval:(NSTimeInterval)interval;
+- (void)disableAutoRefresh;
 
 @end

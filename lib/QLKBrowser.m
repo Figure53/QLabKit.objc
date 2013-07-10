@@ -13,16 +13,16 @@
 #include <arpa/inet.h>
 
 #define DEBUG_OSC 1
-#define SERVER_PORT 53001
-
-NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification";
+#define UDP_SERVER_PORT 53001
 
 @interface QLKBrowser ()
 
-@property (strong, nonatomic) F53OSCServer *server;
+@property (strong) NSNetServiceBrowser *browser;
+@property (strong) F53OSCServer *server;
+@property (strong) NSTimer *refreshTimer;
 @property (assign) BOOL running;
 
-- (QLKServer *)serverForIPAddress:(NSString *)ip port:(NSInteger)port;
+- (QLKServer *)serverForIPAddress:(NSString *)ip;
 
 @end
 
@@ -30,19 +30,9 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
 
 - (void)dealloc 
 {
+  [self disableAutoRefresh];
   [self.server stopListening];
   [self.browser stop];
-}
-
-+ (QLKBrowser *)sharedManager
-{
-  static QLKBrowser *_sharedManager = nil;
-  static dispatch_once_t oncePredicate;
-  dispatch_once(&oncePredicate, ^{
-    _sharedManager = [[QLKBrowser alloc] init];
-  });
-  
-  return _sharedManager;
 }
 
 - (id)init
@@ -52,28 +42,33 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
   
   _running = NO;
   _servers = [[NSMutableArray alloc] init];
-  _automaticallyRefresh = NO;
   
   return self;
 }
 
 - (void)enableAutoRefreshWithInterval:(NSTimeInterval)interval
 {
-  self.automaticallyRefresh = YES;
+  if (!self.refreshTimer && self.running) {
+    self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(refreshWorkspaces) userInfo:nil repeats:YES];
+  }
+}
+
+- (void)disableAutoRefresh
+{
+  [self.refreshTimer invalidate];
+  self.refreshTimer = nil;
 }
 
 // Manually refresh all workspaces
 - (void)refreshWorkspaces
 {
   for (QLKServer *server in self.servers) {
-    [server.client sendPacket:[F53OSCMessage messageWithAddressPattern:@"/workspaces" arguments:nil]];
+    [server refreshWorkspaces];
   }
 }
 
-// Start OSC server and bonjour browser
-- (void)startServers
+- (void)start
 {
-  NSLog(@"start listening for servers...");
   if (self.running) return;
   
   self.running = YES;
@@ -81,7 +76,7 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
   // OSC server to receive workspaces from QLab instances
   if (!self.server) {
     self.server = [[F53OSCServer alloc] init];
-    self.server.port = SERVER_PORT;
+    self.server.port = UDP_SERVER_PORT;
     self.server.delegate = self;
   }
   
@@ -93,24 +88,25 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
   [self.browser searchForServicesOfType:QLKBonjourServiceType inDomain:QLKBonjourServiceDomain];
 }
 
-// Stop bonjour - can't currently stop OSC server
-- (void)stopServers
+- (void)stop
 {
   NSLog(@"stop listening for servers...");
   self.running = NO;
-  
+
+  // Remove all servers and stop OSC server
   [self.servers removeAllObjects];
   [self.server stopListening];
   self.server = nil;
 
+  // Stop bonjour
   [self.browser stop];
   self.browser = nil;  
 }
 
-- (QLKServer *)serverForIPAddress:(NSString *)ip port:(NSInteger)port
+- (QLKServer *)serverForIPAddress:(NSString *)ip
 {
   for (QLKServer *server in self.servers) {
-    if ([server.ip isEqualToString:ip] && server.port == port) {
+    if ([server.ip isEqualToString:ip]) {
       return server;
     }
   }
@@ -134,12 +130,12 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
 - (void)takeMessage:(F53OSCMessage *)message
 {
   NSString *ip = message.replySocket.host;
-  int port = message.replySocket.port;
 
 #if DEBUG_OSC
-  NSLog(@"[OSC/UDP %@:%d] message received - address: %@, arguments: %@", ip, port, message.addressPattern, message.arguments);
+  NSLog(@"[OSC/UDP %@] message received - address: %@, arguments: %@", ip, message.addressPattern, message.arguments);
 #endif
-
+  
+  // We only care about replies for the /workspaces request
   if ([message.addressPattern hasPrefix:@"/reply"]) {
     NSString *body = message.arguments[0];
     NSError *error = nil;
@@ -159,7 +155,7 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
         self.workspaceBlock(workspaces, ip);
       }
       
-      QLKServer *server = [self serverForIPAddress:ip port:port];
+      QLKServer *server = [self serverForIPAddress:ip];
       [server removeAllWorkspaces];
       
       for (NSDictionary *dict in workspaces) {
@@ -172,15 +168,16 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
         if (self.delegate) {
           [self.delegate browserDidUpdateServers:self];
         }
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:QLRServersUpdatedNotification object:self];
       });
-    } else {
-      NSLog(@"[OSC] unhandled reply: %@ from %@", message, ip); 
+      
+      return;
     }
-  } else {
-    NSLog(@"[OSC] unhandled reply: %@ from %@", message, ip);
   }
+  
+  // Some other message - we don't care about
+#if DEBUG_OSC
+  NSLog(@"[OSC] unhandled reply: %@ from %@", message, ip);
+#endif
 }
 
 - (void)takeBundle:(F53OSCBundle *)bundle
@@ -198,6 +195,7 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
   NSLog(@"netServiceBrowser:didFindService: %@", netService);
 #endif
   
+  // We found a QLab instance, create a server for it
   QLKServer *server = [[QLKServer alloc] init];
   server.netService = netService;
   server.name = netService.name;
@@ -224,8 +222,6 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
     if (self.delegate) {
       [self.delegate browserDidUpdateServers:self];
     }
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:QLRServersUpdatedNotification object:self];
   });
 }
 

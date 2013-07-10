@@ -9,6 +9,8 @@
 #import "QLKAppDelegate.h"
 #import "QLabKit.h"
 
+#define REFRESH_INTERVAL 2 // seconds
+
 @interface QLKAppDelegate ()
 
 @property (strong) QLKBrowser *browser;
@@ -21,7 +23,8 @@
 {
   self.browser = [[QLKBrowser alloc] init];
   self.browser.delegate = self;
-  [self.browser startServers];
+  [self.browser start];
+  [self.browser enableAutoRefreshWithInterval:REFRESH_INTERVAL];
 }
 
 - (IBAction)go:(id)sender

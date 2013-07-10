@@ -14,9 +14,10 @@
 #define QLKColorClass NSColor
 #endif
 
+// Blocks
 typedef void (^QLRMessageHandlerBlock)(id data);
 typedef void (^QLRWorkspaceHandlerBlock)(NSArray *workspaces, NSString *ip);
 
-
+// Bonjour
 extern NSString * const QLKBonjourServiceType;
 extern NSString * const QLKBonjourServiceDomain;

@@ -17,9 +17,9 @@
 
 #define DEBUG_OSC 0
 
-NSString * const QLRWorkspaceDidUpdateCuesNotification = @"QLRDidUpdateCuesNotification";
-NSString * const QLRWorkspaceDidConnectNotification = @"QLRConnectionDidConnectNotification";
-NSString * const QLRWorkspaceDidDisconnectNotification = @"QLRConnectionDidDisconnectNotification";
+NSString * const QLRWorkspaceDidUpdateCuesNotification = @"QLRWorkspaceDidUpdateCuesNotification";
+NSString * const QLRWorkspaceDidConnectNotification = @"QLRWorkspaceConnectionDidConnectNotification";
+NSString * const QLRWorkspaceDidDisconnectNotification = @"QLRWorkspaceConnectionDidDisconnectNotification";
 NSString * const QLRWorkspaceConnectionErrorNotification = @"QLRWorkspaceTimeoutNotification";
 NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorkspaceDidChangePlaybackPositionNotification";
 
@@ -31,6 +31,12 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 @property (assign) NSInteger attempts;
 @property (strong, nonatomic) NSString *passcode;
 
+- (void)startHeartbeat;
+- (void)stopHeartbeat;
+- (void)clearHeartbeatTimeout;
+- (void)sendHeartbeat;
+- (void)heartbeatTimeout:(NSTimer *)timer;
+
 - (NSString *)workspacePrefix;
 - (NSString *)addressWithoutWorkspace:(NSString *)address;
 - (NSString *)addressForCue:(QLKCue *)cue action:(NSString *)action;
@@ -38,11 +44,6 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 - (void)sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block;
 - (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address;
 - (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block;
-- (void)startHeartbeat;
-- (void)stopHeartbeat;
-- (void)clearHeartbeatTimeout;
-- (void)sendHeartbeat;
-- (void)heartbeatTimeout:(NSTimer *)timer;
 
 @end
 

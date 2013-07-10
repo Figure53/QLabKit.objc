@@ -19,6 +19,7 @@
 @property (strong, nonatomic) F53OSCClient *client;
 @property (strong, nonatomic) NSMutableArray *workspaces;
 
+- (void)refreshWorkspaces;
 - (void)addWorkspace:(QLKWorkspace *)workspace;
 - (void)removeWorkspace:(QLKWorkspace *)workspace;
 - (void)removeAllWorkspaces;

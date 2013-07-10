@@ -150,7 +150,7 @@
 			isa = PBXGroup;
 			children = (
 				92F3EA20178B1CE400A4C617 /* QLabKit */,
-				92F3E9F2178B1BC500A4C617 /* QLabKitDemo */,
+				92F3E9F2178B1BC500A4C617 /* Demo */,
 				92F3EA0F178B1BC600A4C617 /* QLabKitTests */,
 				92F3E9EB178B1BC500A4C617 /* Frameworks */,
 				92F3E9EA178B1BC500A4C617 /* Products */,
@@ -187,7 +187,7 @@
 			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
-		92F3E9F2178B1BC500A4C617 /* QLabKitDemo */ = {
+		92F3E9F2178B1BC500A4C617 /* Demo */ = {
 			isa = PBXGroup;
 			children = (
 				92F3E9FE178B1BC500A4C617 /* QLKAppDelegate.h */,
@@ -195,7 +195,8 @@
 				92F3EA01178B1BC500A4C617 /* MainMenu.xib */,
 				92F3E9F3178B1BC500A4C617 /* Supporting Files */,
 			);
-			path = QLabKitDemo;
+			name = Demo;
+			path = demo;
 			sourceTree = "<group>";
 		};
 		92F3E9F3178B1BC500A4C617 /* Supporting Files */ = {
@@ -217,7 +218,8 @@
 				92F3EA16178B1BC600A4C617 /* QLabKitTests.m */,
 				92F3EA10178B1BC600A4C617 /* Supporting Files */,
 			);
-			path = QLabKitTests;
+			name = QLabKitTests;
+			path = tests;
 			sourceTree = "<group>";
 		};
 		92F3EA10178B1BC600A4C617 /* Supporting Files */ = {
@@ -238,10 +240,10 @@
 				92F3EA63178C5CF300A4C617 /* QLKDefines.m */,
 				92F3EA5C178B4E8100A4C617 /* QLKBrowser.h */,
 				92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */,
-				92F3EA6D178C6A8200A4C617 /* QLKClient.h */,
-				92F3EA6E178C6A8200A4C617 /* QLKClient.m */,
 				92F3EA55178B4DF500A4C617 /* QLKServer.h */,
 				92F3EA56178B4DF500A4C617 /* QLKServer.m */,
+				92F3EA6D178C6A8200A4C617 /* QLKClient.h */,
+				92F3EA6E178C6A8200A4C617 /* QLKClient.m */,
 				92F3EA57178B4DF500A4C617 /* QLKWorkspace.h */,
 				92F3EA58178B4DF500A4C617 /* QLKWorkspace.m */,
 				92F3EA5F178C597D00A4C617 /* QLKCue.h */,
@@ -249,7 +251,8 @@
 				92F3EA65178C5D4100A4C617 /* QLKColor.h */,
 				92F3EA66178C5D4100A4C617 /* QLKColor.m */,
 			);
-			path = QLabKit;
+			name = QLabKit;
+			path = lib;
 			sourceTree = "<group>";
 		};
 		92F3EA21178B1DA300A4C617 /* F53OSC */ = {
@@ -547,8 +550,8 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "QLabKitDemo/QLabKit-Prefix.pch";
-				INFOPLIST_FILE = "QLabKitDemo/QLabKit-Info.plist";
+				GCC_PREFIX_HEADER = "demo/QLabKit-Prefix.pch";
+				INFOPLIST_FILE = "demo/QLabKit-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -559,8 +562,8 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "QLabKitDemo/QLabKit-Prefix.pch";
-				INFOPLIST_FILE = "QLabKitDemo/QLabKit-Info.plist";
+				GCC_PREFIX_HEADER = "demo/QLabKit-Prefix.pch";
+				INFOPLIST_FILE = "demo/QLabKit-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -573,8 +576,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = "\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "QLabKit/QLabKit-Prefix.pch";
-				INFOPLIST_FILE = "QLabKitTests/QLabKitTests-Info.plist";
+				GCC_PREFIX_HEADER = "demo/QLabKit-Prefix.pch";
+				INFOPLIST_FILE = "tests/QLabKitTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = octest;
@@ -588,8 +591,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = "\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "QLabKit/QLabKit-Prefix.pch";
-				INFOPLIST_FILE = "QLabKitTests/QLabKitTests-Info.plist";
+				GCC_PREFIX_HEADER = "demo/QLabKit-Prefix.pch";
+				INFOPLIST_FILE = "tests/QLabKitTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = octest;
@@ -615,6 +618,7 @@
 				92F3EA1C178B1BC600A4C617 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		92F3EA1D178B1BC600A4C617 /* Build configuration list for PBXNativeTarget "QLabKitTests" */ = {
 			isa = XCConfigurationList;
@@ -623,6 +627,7 @@
 				92F3EA1F178B1BC600A4C617 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

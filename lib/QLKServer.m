@@ -7,7 +7,7 @@
 //
 
 #import "QLKServer.h"
-#import "F53OSCClient.h"
+#import "F53OSC.h"
 
 @implementation QLKServer
 
@@ -26,7 +26,12 @@
   return [NSString stringWithFormat:@"%@ - %@ - %@", [super description], self.name, self.ip];
 }
 
-#pragma mark - 
+#pragma mark - Workspaces
+
+- (void)refreshWorkspaces
+{
+  [self.client sendPacket:[F53OSCMessage messageWithAddressPattern:@"/workspaces" arguments:nil]];
+}
 
 - (void)addWorkspace:(QLKWorkspace *)workspace
 {
