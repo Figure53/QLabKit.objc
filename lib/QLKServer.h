@@ -13,13 +13,15 @@
 @interface QLKServer : NSObject
 
 @property (strong, nonatomic) NSString *name;
-@property (strong, nonatomic) NSString *ip;
+@property (strong, nonatomic) NSString *host;
 @property (assign, nonatomic) NSInteger port;
 @property (strong, nonatomic) NSNetService *netService;
 @property (strong, nonatomic) F53OSCClient *client;
 @property (strong, nonatomic) NSMutableArray *workspaces;
 
+- (id)initWithHost:(NSString *)host port:(NSInteger)port;
 - (void)refreshWorkspaces;
+- (void)updateWorkspaces:(NSArray *)workspaces;
 - (void)addWorkspace:(QLKWorkspace *)workspace;
 - (void)removeWorkspace:(QLKWorkspace *)workspace;
 - (void)removeAllWorkspaces;

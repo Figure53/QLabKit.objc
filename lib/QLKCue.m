@@ -154,7 +154,8 @@ NSString * const QLRRootCueIdentifier = @"__root__";
   //NSLog(@"updateProperties: %@", dict);
 #endif
   
-  // We check for the existence of every property because we don't want to overwrite an existing value with nil
+  // We don't know what properties are present, so we need to check for the existence of every property because we don't want to overwrite an existing value with nil
+  // Probably a better way to do this
   
   // Default properties
   

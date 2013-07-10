@@ -17,18 +17,19 @@
 
 @interface QLKBrowser ()
 
+@property (strong) NSMutableArray *services;
 @property (strong) NSNetServiceBrowser *browser;
 @property (strong) F53OSCServer *server;
 @property (strong) NSTimer *refreshTimer;
 @property (assign) BOOL running;
 
-- (QLKServer *)serverForIPAddress:(NSString *)ip;
+- (QLKServer *)serverForHost:(NSString *)host;
 
 @end
 
 @implementation QLKBrowser
 
-- (void)dealloc 
+- (void)dealloc
 {
   [self disableAutoRefresh];
   [self.server stopListening];
@@ -42,6 +43,7 @@
   
   _running = NO;
   _servers = [[NSMutableArray alloc] init];
+  _services = [[NSMutableArray alloc] init];
   
   return self;
 }
@@ -103,10 +105,10 @@
   self.browser = nil;  
 }
 
-- (QLKServer *)serverForIPAddress:(NSString *)ip
+- (QLKServer *)serverForHost:(NSString *)host
 {
   for (QLKServer *server in self.servers) {
-    if ([server.ip isEqualToString:ip]) {
+    if ([server.host isEqualToString:host]) {
       return server;
     }
   }
@@ -129,10 +131,10 @@
 
 - (void)takeMessage:(F53OSCMessage *)message
 {
-  NSString *ip = message.replySocket.host;
+  NSString *host = message.replySocket.host;
 
 #if DEBUG_OSC
-  NSLog(@"[OSC/UDP %@] message received - address: %@, arguments: %@", ip, message.addressPattern, message.arguments);
+  NSLog(@"[OSC/UDP %@] message received - address: %@, arguments: %@", host, message.addressPattern, message.arguments);
 #endif
   
   // We only care about replies for the /workspaces request
@@ -152,17 +154,12 @@
       NSArray *workspaces = (NSArray *)data;
       
       if (self.workspaceBlock) {
-        self.workspaceBlock(workspaces, ip);
+        self.workspaceBlock(workspaces, host);
       }
       
-      QLKServer *server = [self serverForIPAddress:ip];
-      [server removeAllWorkspaces];
+      QLKServer *server = [self serverForHost:host];
+      [server updateWorkspaces:workspaces];
       
-      for (NSDictionary *dict in workspaces) {
-        QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:server];
-        [server addWorkspace:workspace];
-      }
-
       // Make sure this is dispatched on main thread
       dispatch_async(dispatch_get_main_queue(), ^{
         if (self.delegate) {
@@ -176,7 +173,7 @@
   
   // Some other message - we don't care about
 #if DEBUG_OSC
-  NSLog(@"[OSC] unhandled reply: %@ from %@", message, ip);
+  NSLog(@"[OSC] unhandled reply: %@ from %@", message, host);
 #endif
 }
 
@@ -195,17 +192,7 @@
   NSLog(@"netServiceBrowser:didFindService: %@", netService);
 #endif
   
-  // We found a QLab instance, create a server for it
-  QLKServer *server = [[QLKServer alloc] init];
-  server.netService = netService;
-  server.name = netService.name;
-  
-  NSLog(@"added server: %@", server);
-  
-  [self.servers addObject:server];
-  
-  NSLog(@"servers: %@", self.servers);
-
+  [self.services addObject:netService];
   [netService setDelegate:self];
   [netService resolveWithTimeout:5.0f];
 }
@@ -214,6 +201,7 @@
 // Remove the server and all workspaces
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)netService moreComing:(BOOL)moreComing
 {
+  NSLog(@"didRemoveService: %@", netService);
   QLKServer *server = [self serverForNetService:netService];
   [self.servers removeObject:server];
   
@@ -230,20 +218,22 @@
 // Resolved address for net service, now get workspaces
 - (void)netServiceDidResolveAddress:(NSNetService *)netService
 {
+  NSLog(@"netServiceDidResolveAddress: %@", netService);
   NSString *ip = [self IPAddressFromData:netService.addresses[0]];
-
-  F53OSCClient *client = [[F53OSCClient alloc] init];
-  client.host = ip;
-  client.port = netService.port;
+  NSInteger port = netService.port;
   
-  QLKServer *server = [self serverForNetService:netService];
-  server.ip = ip;
-  server.port = netService.port;
-  server.client = client;
+  // We resolved a QLab instance, create a server for it
+  QLKServer *server = [[QLKServer alloc] initWithHost:ip port:port];
+  server.netService = netService;
+  server.name = netService.name;
   
-  NSLog(@"resolved address for server: %@:%ld", server, netService.port);
+  NSLog(@"added server: %@", server);
   
-  [client sendPacket:[F53OSCMessage messageWithAddressPattern:@"/workspaces" arguments:nil]];
+  [self.servers addObject:server];  
+  [server refreshWorkspaces];
+  
+  // Once resolved, we can remove it
+  [self.services removeObject:netService];
 }
 
 // Sent if resolution fails

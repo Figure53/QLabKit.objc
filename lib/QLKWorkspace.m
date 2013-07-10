@@ -53,7 +53,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 {
   self = [super init];
   if (!self) return nil;
-  
+
   _uniqueId = @"";
   _connected = NO;
   _attempts = 0;
@@ -66,7 +66,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
   
   _callbacks = [[NSMutableDictionary alloc] init];
   _hasPasscode = NO;
-  
+
   return self;
 }
 
@@ -74,7 +74,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 {
   self = [self init];
   if (!self) return nil;
-  
+
   _name = dict[@"displayName"];
   _server = server;
   _client = [[F53OSCClient alloc] init];
@@ -84,7 +84,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
   _client.delegate = self;
   _uniqueId = dict[@"uniqueID"];
   _hasPasscode = [dict[@"hasPasscode"] boolValue];
-  
+
   return self;
 }
 
@@ -696,7 +696,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
         // Clear handler for address
         [self.callbacks removeObjectForKey:address];
 			});
-    }    
+    }
   } else if ([message.addressPattern hasPrefix:@"/update"]) {
     // QLab has informed us we need to update
     NSString *relativeAddress = message.addressPattern;
