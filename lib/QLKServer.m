@@ -20,6 +20,7 @@
   _host = host;
   _port = port;
   _workspaces = [[NSMutableArray alloc] init];
+  
   _client = [[F53OSCClient alloc] init];
   _client.host = host;
   _client.port = port;

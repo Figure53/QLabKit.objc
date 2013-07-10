@@ -21,8 +21,8 @@
 @interface QLKBrowser : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, F53OSCPacketDestination>
 
 @property (strong, nonatomic) NSMutableArray *servers;
-@property (copy) QLRWorkspaceHandlerBlock workspaceBlock;
-@property (unsafe_unretained) id<QLKBrowserDelegate> delegate;
+@property (copy, nonatomic) QLRWorkspaceHandlerBlock workspaceBlock;
+@property (unsafe_unretained, nonatomic) id<QLKBrowserDelegate> delegate;
 
 - (void)refreshWorkspaces;
 - (void)start;

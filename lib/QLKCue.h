@@ -102,7 +102,7 @@ typedef enum {
 - (BOOL)isAudio;
 - (BOOL)isVideo;
 - (BOOL)isGroup;
-- (void)updatePropertiesWithDict:(NSDictionary *)dict;
+- (void)updatePropertiesWithDictionary:(NSDictionary *)dict;
 - (QLKCue *)firstCue;
 - (QLKCue *)lastCue;
 - (QLKCue *)cueAtIndex:(NSInteger)index;

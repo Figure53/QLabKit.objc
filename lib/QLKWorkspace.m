@@ -616,8 +616,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 - (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block
 {
-  NSAssert(self.server != nil, @"Workspace has no server");
-  NSAssert(self.client != nil, @"Server has no client");
+  NSAssert(self.client != nil, @"Workspace has no client!");
   
   if (block) {
     self.callbacks[address] = block;
@@ -683,7 +682,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
       QLKCue *cue = [self cueWithId:cueId];
       
       if ([data isKindOfClass:[NSDictionary class]]) {
-        [cue updatePropertiesWithDict:data];
+        [cue updatePropertiesWithDictionary:data];
       }
     }
     

@@ -47,9 +47,6 @@
 
 - (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block
 {
-//  NSAssert(self.server != nil, @"Workspace has no server");
-//  NSAssert(self.client != nil, @"Server has no client");
-  
   if (block) {
     self.callbacks[address] = block;
   }
@@ -58,7 +55,7 @@
   NSString *fullAddress = address; //[NSString stringWithFormat:@"%@%@", [self workspacePrefix], address];
   
 #if DEBUG_OSC
-  NSLog(@"[OSC] to: %@, data: %@", fullAddress, messages);
+  NSLog(@"[OSC ->] to: %@, data: %@", fullAddress, messages);
 #endif
   
   F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:fullAddress arguments:messages];

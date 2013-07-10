@@ -148,7 +148,7 @@ NSString * const QLRRootCueIdentifier = @"__root__";
 }
 
 // Basic properties
-- (void)updatePropertiesWithDict:(NSDictionary *)dict
+- (void)updatePropertiesWithDictionary:(NSDictionary *)dict
 {
 #if DEBUG
   //NSLog(@"updateProperties: %@", dict);

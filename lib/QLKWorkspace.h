@@ -25,7 +25,7 @@ extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 @property (copy, nonatomic) NSString *uniqueId;
 @property (strong, nonatomic) QLKCue *root;
 @property (assign, nonatomic, getter=isConnected) BOOL connected;
-@property (strong, readonly) QLKServer *server;
+@property (strong, nonatomic, readonly) QLKServer *server;
 @property (assign, nonatomic) BOOL hasPasscode;
 
 - (id)initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
