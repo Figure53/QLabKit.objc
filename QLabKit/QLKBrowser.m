@@ -52,8 +52,14 @@ NSString * const QLRServersUpdatedNotification = @"QLRServersUpdatedNotification
   
   _running = NO;
   _servers = [[NSMutableArray alloc] init];
+  _automaticallyRefresh = NO;
   
   return self;
+}
+
+- (void)enableAutoRefreshWithInterval:(NSTimeInterval)interval
+{
+  self.automaticallyRefresh = YES;
 }
 
 // Manually refresh all workspaces

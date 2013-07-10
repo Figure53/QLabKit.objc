@@ -50,37 +50,39 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 - (id)init
 {
-  if ((self = [super init])) {
-    _uniqueId = @"";
-    _connected = NO;
-    _attempts = 0;
-    
-    // Setup root cue - parent of cue lists
-    _root = [[QLKCue alloc] init];
-    _root.uid = QLRRootCueIdentifier;
-    _root.name = @"Cue Lists";
-    _root.type = QLRCueTypeGroup;
-    
-    _callbacks = [[NSMutableDictionary alloc] init];
-    _hasPasscode = NO;
-  }
+  self = [super init];
+  if (!self) return nil;
+  
+  _uniqueId = @"";
+  _connected = NO;
+  _attempts = 0;
+  
+  // Setup root cue - parent of cue lists
+  _root = [[QLKCue alloc] init];
+  _root.uid = QLRRootCueIdentifier;
+  _root.name = @"Cue Lists";
+  _root.type = QLRCueTypeGroup;
+  
+  _callbacks = [[NSMutableDictionary alloc] init];
+  _hasPasscode = NO;
   
   return self;
 }
 
 - (id)initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server
 {
-  if ((self = [self init])) {
-    _name = dict[@"displayName"];
-    _server = server;
-    _client = [[F53OSCClient alloc] init];
-    _client.host = server.client.host;
-    _client.port = server.client.port;
-    _client.useTcp = YES;
-    _client.delegate = self;
-    _uniqueId = dict[@"uniqueID"];
-    _hasPasscode = [dict[@"hasPasscode"] boolValue];
-  }
+  self = [self init];
+  if (!self) return nil;
+  
+  _name = dict[@"displayName"];
+  _server = server;
+  _client = [[F53OSCClient alloc] init];
+  _client.host = server.client.host;
+  _client.port = server.client.port;
+  _client.useTcp = YES;
+  _client.delegate = self;
+  _uniqueId = dict[@"uniqueID"];
+  _hasPasscode = [dict[@"hasPasscode"] boolValue];
   
   return self;
 }

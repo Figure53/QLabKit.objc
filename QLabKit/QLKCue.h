@@ -47,7 +47,7 @@ extern NSString * const QLRCueTypeStagetracker;
 extern NSString * const QLRActiveCueListIdentifier;
 extern NSString * const QLRRootCueIdentifier;
 
-// Continue mode enum
+// Continue mode type
 typedef enum {
   QLRCueContinueModeNoContinue,
   QLRCueContinueModeAutoContinue,

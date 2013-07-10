@@ -234,6 +234,8 @@
 			children = (
 				92F3EA21178B1DA300A4C617 /* F53OSC */,
 				92F3EA6A178C607700A4C617 /* QLabKit.h */,
+				92F3EA62178C5CF300A4C617 /* QLKDefines.h */,
+				92F3EA63178C5CF300A4C617 /* QLKDefines.m */,
 				92F3EA5C178B4E8100A4C617 /* QLKBrowser.h */,
 				92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */,
 				92F3EA6D178C6A8200A4C617 /* QLKClient.h */,
@@ -244,12 +246,10 @@
 				92F3EA58178B4DF500A4C617 /* QLKWorkspace.m */,
 				92F3EA5F178C597D00A4C617 /* QLKCue.h */,
 				92F3EA60178C597D00A4C617 /* QLKCue.m */,
-				92F3EA62178C5CF300A4C617 /* QLKDefines.h */,
-				92F3EA63178C5CF300A4C617 /* QLKDefines.m */,
 				92F3EA65178C5D4100A4C617 /* QLKColor.h */,
 				92F3EA66178C5D4100A4C617 /* QLKColor.m */,
 			);
-			name = QLabKit;
+			path = QLabKit;
 			sourceTree = "<group>";
 		};
 		92F3EA21178B1DA300A4C617 /* F53OSC */ = {
@@ -289,8 +289,7 @@
 				92F3EA41178B1DA300A4C617 /* NSString+F53OSCString.m */,
 				92F3EA42178B1DA300A4C617 /* README.markdown */,
 			);
-			name = F53OSC;
-			path = QLabKit/F53OSC;
+			path = F53OSC;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

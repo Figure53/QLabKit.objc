@@ -13,6 +13,7 @@ NSString * const QLRCueUpdatedNotification = @"QLRCueUpdatedNotification";
 NSString * const QLRCueNeedsUpdateNotification = @"QLRCueNeedsUpdateNotification";
 NSString * const QLRCueEditCueNotification = @"QLRCueEditCueNotification";
 
+// Cue Types
 NSString * const QLRCueTypeCue = @"Cue";
 NSString * const QLRCueTypeGroup = @"Group";
 NSString * const QLRCueTypeAudio = @"Audio";
@@ -43,6 +44,7 @@ NSString * const QLRCueTypeArm = @"Arm";
 NSString * const QLRCueTypeDisarm = @"Disarm";
 NSString * const QLRCueTypeStagetracker = @"Stagetracker";
 
+// OSC key constants
 NSString * const QLROSCNameKey = @"name";
 NSString * const QLROSCNumberKey = @"number";
 NSString * const QLROSCNotesKey = @"notes";
@@ -50,6 +52,7 @@ NSString * const QLROSCColorNameKey = @"colorName";
 NSString * const QLROSCFlaggedKey = @"flagged";
 NSString * const QLROSCArmedKey = @"armed";
 
+// Identifiers for "fake" cues
 NSString * const QLRActiveCueListIdentifier = @"__active__";
 NSString * const QLRRootCueIdentifier = @"__root__";
 
@@ -78,9 +81,7 @@ NSString * const QLRRootCueIdentifier = @"__root__";
   _cues = [NSMutableArray array];
   _depth = 0;
   _expanded = NO;
-  
-  // Hardcode these for beta since testers might not have latest QLab build
-  _patches = @[ @{ @"patchName": @"1 -", @"patchNumber": @1 }, @{ @"patchName": @"2 -", @"patchNumber": @2 }, @{ @"patchName": @"3 -", @"patchNumber": @3 }, @{ @"patchName": @"4 -", @"patchNumber": @4 }, @{ @"patchName": @"5 -", @"patchNumber": @5 }, @{ @"patchName": @"6 -", @"patchNumber": @6 }, @{ @"patchName": @"7 -", @"patchNumber": @7 }, @{ @"patchName": @"8 -", @"patchNumber": @8 } ];
+  _patches = @[];
 
   return self;
 }

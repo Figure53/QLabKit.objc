@@ -26,6 +26,7 @@ extern NSString * const QLRServersUpdatedNotification;
 @property (strong, nonatomic) NSMutableArray *servers;
 @property (copy) QLRWorkspaceHandlerBlock workspaceBlock;
 @property (unsafe_unretained) id<QLKBrowserDelegate> delegate;
+@property (assign, nonatomic) BOOL automaticallyRefresh;
 
 + (QLKBrowser *)sharedManager;
 - (void)refreshWorkspaces;
