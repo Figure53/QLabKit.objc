@@ -13,8 +13,8 @@
 
 @property (strong) QLKWorkspace *workspace;
 @property (assign) IBOutlet NSWindow *window;
-@property (weak) IBOutlet NSPopUpButton *qlab;
-@property (weak) IBOutlet NSTableView *tableView;
+@property (weak) IBOutlet NSTableView *qlab;
+@property (weak) IBOutlet NSTableView *cues;
 @property (weak) IBOutlet NSTextField *connectionLabel;
 
 - (IBAction)go:(id)sender;
