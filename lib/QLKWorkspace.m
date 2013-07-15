@@ -49,6 +49,11 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 @implementation QLKWorkspace
 
+- (void)dealloc
+{
+  NSLog(@"[workspace] dealloc: %@", self);
+}
+
 - (id)init
 {
   self = [super init];
@@ -76,10 +81,10 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
   if (!self) return nil;
 
   _name = dict[@"displayName"];
-  _server = server;
+  _serverName = server.name;
   _client = [[F53OSCClient alloc] init];
-  _client.host = server.client.host;
-  _client.port = server.client.port;
+  _client.host = server.host;
+  _client.port = server.port;
   _client.useTcp = YES;
   _client.delegate = self;
   _uniqueId = dict[@"uniqueID"];
@@ -95,19 +100,19 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 - (NSString *)fullName
 {
-  return [NSString stringWithFormat:@"%@ (%@)", self.name, self.server.name];
+  return [NSString stringWithFormat:@"%@ (%@)", self.name, self.serverName];
 }
 
 - (NSString *)fullNameWithCueList:(QLKCue *)cueList
 {
-  return [NSString stringWithFormat:@"%@ - %@ (%@)", self.name, cueList.name, self.server.name];
+  return [NSString stringWithFormat:@"%@ - %@ (%@)", self.name, cueList.name, self.serverName];
 }
 
 #pragma mark - Connection/reconnection
 
 - (void)connect
 {
-  NSLog(@"connect: %@, %@", self.name, self.server);
+  NSLog(@"connect: %@, %@", self.name, self.serverName);
   
   [self connectToWorkspace];
   [self finishConnection];

@@ -9,7 +9,7 @@
 #import "QLKAppDelegate.h"
 #import "QLabKit.h"
 
-#define REFRESH_INTERVAL 2 // seconds
+#define REFRESH_INTERVAL 1 // seconds
 
 @interface QLKAppDelegate ()
 

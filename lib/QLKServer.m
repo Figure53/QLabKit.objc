@@ -12,6 +12,11 @@
 
 @implementation QLKServer
 
+- (void)dealloc
+{
+  NSLog(@"[server] dealloc: %@", self);
+}
+
 - (id)initWithHost:(NSString *)host port:(NSInteger)port
 {
   self = [super init];

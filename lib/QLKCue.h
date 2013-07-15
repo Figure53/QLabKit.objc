@@ -108,7 +108,6 @@ typedef enum {
 - (QLKCue *)cueAtIndex:(NSInteger)index;
 - (QLKCue *)cueWithId:(NSString *)cueId;
 - (NSArray *)flattenedCues;
-//- (id)objectForKeyedSubscript:(id)key;
 - (NSString *)surfaceName;
 - (NSString *)patchName;
 

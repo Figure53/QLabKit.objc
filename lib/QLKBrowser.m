@@ -102,7 +102,7 @@
 
   // Stop bonjour
   [self.browser stop];
-  self.browser = nil;  
+  self.browser = nil;
 }
 
 - (QLKServer *)serverForHost:(NSString *)host
@@ -232,7 +232,7 @@
   [self.servers addObject:server];  
   [server refreshWorkspaces];
   
-  // Once resolved, we can remove it
+  // Once resolved, we can remove the net service
   [self.services removeObject:netService];
 }
 
