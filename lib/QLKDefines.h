@@ -19,5 +19,6 @@ typedef void (^QLRMessageHandlerBlock)(id data);
 typedef void (^QLRWorkspaceHandlerBlock)(NSArray *workspaces, NSString *ip);
 
 // Bonjour
-extern NSString * const QLKBonjourServiceType;
+extern NSString * const QLKBonjourTCPServiceType;
+extern NSString * const QLKBonjourUDPServiceType;
 extern NSString * const QLKBonjourServiceDomain;

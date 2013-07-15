@@ -8,5 +8,6 @@
 
 #import "QLKDefines.h"
 
-NSString * const QLKBonjourServiceType = @"_qlab._tcp.";
+NSString * const QLKBonjourTCPServiceType = @"_qlab._tcp.";
+NSString * const QLKBonjourUDPServiceType = @"_qlab._udp.";
 NSString * const QLKBonjourServiceDomain = @"local.";

@@ -87,7 +87,7 @@
   // Bonjour browser to find QLab instances
   self.browser = [[NSNetServiceBrowser alloc] init];
   [self.browser setDelegate:self];
-  [self.browser searchForServicesOfType:QLKBonjourServiceType inDomain:QLKBonjourServiceDomain];
+  [self.browser searchForServicesOfType:QLKBonjourUDPServiceType inDomain:QLKBonjourServiceDomain];
 }
 
 - (void)stop

@@ -85,7 +85,7 @@ extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 - (void)cue:(QLKCue *)cue updateTranslationY:(CGFloat)originY;
 - (void)cue:(QLKCue *)cue updateScaleX:(CGFloat)scaleX;
 - (void)cue:(QLKCue *)cue updateScaleY:(CGFloat)scaleY;
-- (void)cue:(QLKCue *)cue updateRotationX:(CGFloat)rotationX;
+- (void)cue:(QLKCue *)cue updateRotationX:(CGFloat)rotationX; 
 - (void)cue:(QLKCue *)cue updateRotationY:(CGFloat)rotationY;
 - (void)cue:(QLKCue *)cue updateRotationZ:(CGFloat)rotationZ;
 - (void)cue:(QLKCue *)cue updatePreserveAspectRatio:(BOOL)preserve;
