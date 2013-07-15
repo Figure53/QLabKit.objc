@@ -9,12 +9,16 @@
 #import <Cocoa/Cocoa.h>
 #import "QLKBrowser.h"
 
-@interface QLKAppDelegate : NSObject <NSApplicationDelegate, QLKBrowserDelegate>
+@interface QLKAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSplitViewDelegate, QLKBrowserDelegate>
 
+@property (strong) QLKWorkspace *workspace;
 @property (assign) IBOutlet NSWindow *window;
 @property (weak) IBOutlet NSPopUpButton *qlab;
+@property (weak) IBOutlet NSTableView *tableView;
+@property (weak) IBOutlet NSTextField *connectionLabel;
 
 - (IBAction)go:(id)sender;
 - (IBAction)stop:(id)sender;
+- (IBAction)disconnect:(id)sender;
 
 @end

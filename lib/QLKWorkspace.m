@@ -49,11 +49,6 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 @implementation QLKWorkspace
 
-- (void)dealloc
-{
-  NSLog(@"[workspace] dealloc: %@", self);
-}
-
 - (id)init
 {
   self = [super init];
