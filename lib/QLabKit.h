@@ -10,3 +10,5 @@
 #import "QLKWorkspace.h"
 #import "QLKServer.h"
 #import "QLKCue.h"
+#import "QLKClient.h"
+#import "QLKMessage.h"
