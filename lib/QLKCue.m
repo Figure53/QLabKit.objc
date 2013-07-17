@@ -1,5 +1,5 @@
 //
-//  QLRCue.m
+//  QLKCue.m
 //  QLab for iPad
 //
 //  Created by Zach Waugh on 5/11/11.
@@ -9,52 +9,52 @@
 #import "QLKCue.h"
 #import "QLKColor.h"
 
-NSString * const QLRCueUpdatedNotification = @"QLRCueUpdatedNotification";
-NSString * const QLRCueNeedsUpdateNotification = @"QLRCueNeedsUpdateNotification";
-NSString * const QLRCueEditCueNotification = @"QLRCueEditCueNotification";
+NSString * const QLKCueUpdatedNotification = @"QLKCueUpdatedNotification";
+NSString * const QLKCueNeedsUpdateNotification = @"QLKCueNeedsUpdateNotification";
+NSString * const QLKCueEditCueNotification = @"QLKCueEditCueNotification";
 
 // Cue Types
-NSString * const QLRCueTypeCue = @"Cue";
-NSString * const QLRCueTypeGroup = @"Group";
-NSString * const QLRCueTypeAudio = @"Audio";
-NSString * const QLRCueTypeFade = @"Fade";
-NSString * const QLRCueTypeMicrophone = @"Mic";
-NSString * const QLRCueTypeVideo = @"Video";
-NSString * const QLRCueTypeAnimation = @"Animation";
-NSString * const QLRCueTypeCamera = @"Camera";
-NSString * const QLRCueTypeMIDI = @"MIDI";
-NSString * const QLRCueTypeMIDISysEx = @"MIDI SysEx";
-NSString * const QLRCueTypeMTC = @"MTC";
-NSString * const QLRCueTypeMSC = @"MSC";
-NSString * const QLRCueTypeArtNet = @"ArtNet";
-NSString * const QLRCueTypeStop = @"Stop";
-NSString * const QLRCueTypeMIDIFile = @"MIDI File";
-NSString * const QLRCueTypeTimecode = @"Timecode";
-NSString * const QLRCueTypePause = @"Pause";
-NSString * const QLRCueTypeReset = @"Reset";
-NSString * const QLRCueTypeStart = @"Start";
-NSString * const QLRCueTypeDevamp = @"Devamp";
-NSString * const QLRCueTypeLoad = @"Load";
-NSString * const QLRCueTypeScript = @"Script";
-NSString * const QLRCueTypeGoto = @"Goto";
-NSString * const QLRCueTypeTarget = @"Target";
-NSString * const QLRCueTypeWait = @"Wait";
-NSString * const QLRCueTypeMemo = @"Memo";
-NSString * const QLRCueTypeArm = @"Arm";
-NSString * const QLRCueTypeDisarm = @"Disarm";
-NSString * const QLRCueTypeStagetracker = @"Stagetracker";
+NSString * const QLKCueTypeCue = @"Cue";
+NSString * const QLKCueTypeGroup = @"Group";
+NSString * const QLKCueTypeAudio = @"Audio";
+NSString * const QLKCueTypeFade = @"Fade";
+NSString * const QLKCueTypeMicrophone = @"Mic";
+NSString * const QLKCueTypeVideo = @"Video";
+NSString * const QLKCueTypeAnimation = @"Animation";
+NSString * const QLKCueTypeCamera = @"Camera";
+NSString * const QLKCueTypeMIDI = @"MIDI";
+NSString * const QLKCueTypeMIDISysEx = @"MIDI SysEx";
+NSString * const QLKCueTypeMTC = @"MTC";
+NSString * const QLKCueTypeMSC = @"MSC";
+NSString * const QLKCueTypeArtNet = @"ArtNet";
+NSString * const QLKCueTypeStop = @"Stop";
+NSString * const QLKCueTypeMIDIFile = @"MIDI File";
+NSString * const QLKCueTypeTimecode = @"Timecode";
+NSString * const QLKCueTypePause = @"Pause";
+NSString * const QLKCueTypeReset = @"Reset";
+NSString * const QLKCueTypeStart = @"Start";
+NSString * const QLKCueTypeDevamp = @"Devamp";
+NSString * const QLKCueTypeLoad = @"Load";
+NSString * const QLKCueTypeScript = @"Script";
+NSString * const QLKCueTypeGoto = @"Goto";
+NSString * const QLKCueTypeTarget = @"Target";
+NSString * const QLKCueTypeWait = @"Wait";
+NSString * const QLKCueTypeMemo = @"Memo";
+NSString * const QLKCueTypeArm = @"Arm";
+NSString * const QLKCueTypeDisarm = @"Disarm";
+NSString * const QLKCueTypeStagetracker = @"Stagetracker";
 
 // OSC key constants
-NSString * const QLROSCNameKey = @"name";
-NSString * const QLROSCNumberKey = @"number";
-NSString * const QLROSCNotesKey = @"notes";
-NSString * const QLROSCColorNameKey = @"colorName";
-NSString * const QLROSCFlaggedKey = @"flagged";
-NSString * const QLROSCArmedKey = @"armed";
+NSString * const QLKOSCNameKey = @"name";
+NSString * const QLKOSCNumberKey = @"number";
+NSString * const QLKOSCNotesKey = @"notes";
+NSString * const QLKOSCColorNameKey = @"colorName";
+NSString * const QLKOSCFlaggedKey = @"flagged";
+NSString * const QLKOSCArmedKey = @"armed";
 
 // Identifiers for "fake" cues
-NSString * const QLRActiveCueListIdentifier = @"__active__";
-NSString * const QLRRootCueIdentifier = @"__root__";
+NSString * const QLKActiveCueListIdentifier = @"__active__";
+NSString * const QLKRootCueIdentifier = @"__root__";
 
 @interface QLKCue ()
 
@@ -77,7 +77,7 @@ NSString * const QLRRootCueIdentifier = @"__root__";
   _listName = @"";
   _flagged = NO;
   _color = [QLKColor defaultColor];
-  _type = QLRCueTypeCue;
+  _type = QLKCueTypeCue;
   _cues = [NSMutableArray array];
   _depth = 0;
   _expanded = NO;
@@ -104,7 +104,7 @@ NSString * const QLRRootCueIdentifier = @"__root__";
     _color = [QLKColor colorWithName:color];
   }
   
-  if ([_type isEqualToString:QLRCueTypeGroup]) {
+  if ([_type isEqualToString:QLKCueTypeGroup]) {
     for (NSDictionary *cueDict in dict[@"cues"]) {
       [_cues addObject:[QLKCue cueWithDictionary:cueDict]];
     }
@@ -159,30 +159,30 @@ NSString * const QLRRootCueIdentifier = @"__root__";
   
   // Default properties
   
-  if (dict[QLROSCNameKey]) {
-    self.name = dict[QLROSCNameKey];
+  if (dict[QLKOSCNameKey]) {
+    self.name = dict[QLKOSCNameKey];
     [self updateDisplayName];
   }
   
-  if (dict[QLROSCNumberKey]) {
-    self.number = dict[QLROSCNumberKey];
+  if (dict[QLKOSCNumberKey]) {
+    self.number = dict[QLKOSCNumberKey];
     [self updateDisplayName];
   }
   
-  if (dict[QLROSCNotesKey]) {
-    self.notes = dict[QLROSCNotesKey];
+  if (dict[QLKOSCNotesKey]) {
+    self.notes = dict[QLKOSCNotesKey];
   }
   
-  if (dict[QLROSCColorNameKey]) {
-    self.color = [QLKColor colorWithName:dict[QLROSCColorNameKey]];
+  if (dict[QLKOSCColorNameKey]) {
+    self.color = [QLKColor colorWithName:dict[QLKOSCColorNameKey]];
   }
   
-  if (dict[QLROSCFlaggedKey]) {
-    self.flagged = [dict[QLROSCFlaggedKey] boolValue];
+  if (dict[QLKOSCFlaggedKey]) {
+    self.flagged = [dict[QLKOSCFlaggedKey] boolValue];
   }
   
-  if (dict[QLROSCArmedKey]) {
-    self.armed = [dict[QLROSCArmedKey] boolValue];
+  if (dict[QLKOSCArmedKey]) {
+    self.armed = [dict[QLKOSCArmedKey] boolValue];
   }
   
   if (dict[@"preWait"]) {
@@ -266,7 +266,7 @@ NSString * const QLRRootCueIdentifier = @"__root__";
     self.cueSize = CGSizeMake([dict[@"cueSize"][@"width"] floatValue], [dict[@"cueSize"][@"height"] floatValue]);
   }
 
-  [[NSNotificationCenter defaultCenter] postNotificationName:QLRCueUpdatedNotification object:self];
+  [[NSNotificationCenter defaultCenter] postNotificationName:QLKCueUpdatedNotification object:self];
 }
 
 - (void)updateDisplayName
@@ -293,9 +293,9 @@ NSString * const QLRRootCueIdentifier = @"__root__";
 // Map cue type to icon
 + (NSString *)iconForType:(NSString *)type
 {
-  if ([type isEqualToString:QLRCueTypeMIDIFile]) {
+  if ([type isEqualToString:QLKCueTypeMIDIFile]) {
     return @"midi-file";
-  } else if ([type isEqualToString:QLRCueTypeMicrophone]) {
+  } else if ([type isEqualToString:QLKCueTypeMicrophone]) {
     return @"microphone";
   } else {
     return [type lowercaseString];
@@ -304,17 +304,17 @@ NSString * const QLRRootCueIdentifier = @"__root__";
 
 - (BOOL)isAudio
 {
-	return ([self.type isEqualToString:QLRCueTypeAudio] || [self.type isEqualToString:QLRCueTypeMicrophone] || [self.type isEqualToString:QLRCueTypeFade] || [self isVideo]);
+	return ([self.type isEqualToString:QLKCueTypeAudio] || [self.type isEqualToString:QLKCueTypeMicrophone] || [self.type isEqualToString:QLKCueTypeFade] || [self isVideo]);
 }
 
 - (BOOL)isVideo
 {
-	return ([self.type isEqualToString:QLRCueTypeVideo] || [self.type isEqualToString:QLRCueTypeCamera]);
+	return ([self.type isEqualToString:QLKCueTypeVideo] || [self.type isEqualToString:QLKCueTypeCamera]);
 }
 
 - (BOOL)isGroup
 {
-	return [self.type isEqualToString:QLRCueTypeGroup];
+	return [self.type isEqualToString:QLKCueTypeGroup];
 }
 
 - (BOOL)hasChildren

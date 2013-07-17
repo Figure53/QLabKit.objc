@@ -1,5 +1,5 @@
 //
-//  QLRCue.h
+//  QLKCue.h
 //  QLab for iPad
 //
 //  Created by Zach Waugh on 5/11/11.
@@ -10,49 +10,49 @@
 #import <GLKit/GLKit.h>
 #import "QLKDefines.h"
 
-extern NSString * const QLRCueUpdatedNotification;
-extern NSString * const QLRCueNeedsUpdateNotification;
-extern NSString * const QLRCueEditCueNotification;
+extern NSString * const QLKCueUpdatedNotification;
+extern NSString * const QLKCueNeedsUpdateNotification;
+extern NSString * const QLKCueEditCueNotification;
 
 // Cue types
-extern NSString * const QLRCueTypeCue;
-extern NSString * const QLRCueTypeGroup;
-extern NSString * const QLRCueTypeAudio;
-extern NSString * const QLRCueTypeFade;
-extern NSString * const QLRCueTypeMicrophone;
-extern NSString * const QLRCueTypeVideo;
-extern NSString * const QLRCueTypeAnimation;
-extern NSString * const QLRCueTypeCamera;
-extern NSString * const QLRCueTypeMIDI;
-extern NSString * const QLRCueTypeMIDISysEx;
-extern NSString * const QLRCueTypeTimecode;
-extern NSString * const QLRCueTypeMTC;
-extern NSString * const QLRCueTypeMSC;
-extern NSString * const QLRCueTypeStop;
-extern NSString * const QLRCueTypeMIDIFile;
-extern NSString * const QLRCueTypePause;
-extern NSString * const QLRCueTypeReset;
-extern NSString * const QLRCueTypeStart;
-extern NSString * const QLRCueTypeDevamp;
-extern NSString * const QLRCueTypeLoad;
-extern NSString * const QLRCueTypeScript;
-extern NSString * const QLRCueTypeGoto;
-extern NSString * const QLRCueTypeTarget;
-extern NSString * const QLRCueTypeWait;
-extern NSString * const QLRCueTypeMemo;
-extern NSString * const QLRCueTypeArm;
-extern NSString * const QLRCueTypeDisarm;
-extern NSString * const QLRCueTypeStagetracker;
+extern NSString * const QLKCueTypeCue;
+extern NSString * const QLKCueTypeGroup;
+extern NSString * const QLKCueTypeAudio;
+extern NSString * const QLKCueTypeFade;
+extern NSString * const QLKCueTypeMicrophone;
+extern NSString * const QLKCueTypeVideo;
+extern NSString * const QLKCueTypeAnimation;
+extern NSString * const QLKCueTypeCamera;
+extern NSString * const QLKCueTypeMIDI;
+extern NSString * const QLKCueTypeMIDISysEx;
+extern NSString * const QLKCueTypeTimecode;
+extern NSString * const QLKCueTypeMTC;
+extern NSString * const QLKCueTypeMSC;
+extern NSString * const QLKCueTypeStop;
+extern NSString * const QLKCueTypeMIDIFile;
+extern NSString * const QLKCueTypePause;
+extern NSString * const QLKCueTypeReset;
+extern NSString * const QLKCueTypeStart;
+extern NSString * const QLKCueTypeDevamp;
+extern NSString * const QLKCueTypeLoad;
+extern NSString * const QLKCueTypeScript;
+extern NSString * const QLKCueTypeGoto;
+extern NSString * const QLKCueTypeTarget;
+extern NSString * const QLKCueTypeWait;
+extern NSString * const QLKCueTypeMemo;
+extern NSString * const QLKCueTypeArm;
+extern NSString * const QLKCueTypeDisarm;
+extern NSString * const QLKCueTypeStagetracker;
 
-extern NSString * const QLRActiveCueListIdentifier;
-extern NSString * const QLRRootCueIdentifier;
+extern NSString * const QLKActiveCueListIdentifier;
+extern NSString * const QLKRootCueIdentifier;
 
 // Continue mode type
 typedef enum {
-  QLRCueContinueModeNoContinue,
-  QLRCueContinueModeAutoContinue,
-  QLRCueContinueModeAutoFollow
-} QLRCueContinueMode;
+  QLKCueContinueModeNoContinue,
+  QLKCueContinueModeAutoContinue,
+  QLKCueContinueModeAutoFollow
+} QLKCueContinueMode;
 
 @class QLKColor;
 
@@ -73,7 +73,7 @@ typedef enum {
 @property (assign, nonatomic) double preWait;
 @property (assign, nonatomic) double postWait;
 @property (assign, nonatomic) double duration;
-@property (assign, nonatomic) QLRCueContinueMode continueMode;
+@property (assign, nonatomic) QLKCueContinueMode continueMode;
 @property (assign, nonatomic) NSInteger patch;
 @property (strong, nonatomic) NSArray *patches;
 @property (assign, nonatomic) BOOL fullScreen;

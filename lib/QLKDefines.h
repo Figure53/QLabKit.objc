@@ -15,8 +15,8 @@
 #endif
 
 // Blocks
-typedef void (^QLRMessageHandlerBlock)(id data);
-typedef void (^QLRWorkspaceHandlerBlock)(NSArray *workspaces, NSString *ip);
+typedef void (^QLKMessageHandlerBlock)(id data);
+typedef void (^QLKWorkspaceHandlerBlock)(NSArray *workspaces, NSString *ip);
 
 // Bonjour
 extern NSString * const QLKBonjourTCPServiceType;

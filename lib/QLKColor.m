@@ -46,7 +46,7 @@ static NSSet *_colors = nil;
 
 - (NSString *)description
 {
-  return [NSString stringWithFormat:@"QLRColor: %@", self.name];
+  return [NSString stringWithFormat:@"QLKColor: %@", self.name];
 }
 
 #pragma mark - Convenience class methods for predefined colors

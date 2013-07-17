@@ -62,7 +62,7 @@
   [self sendMessage:message toAddress:address block:nil];
 }
 
-- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block
+- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
 {
   NSArray *messages = (message != nil) ? @[message] : nil;
   [self sendMessages:messages toAddress:address block:block];
@@ -73,7 +73,7 @@
   [self sendMessages:messages toAddress:address block:nil];
 }
 
-- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block
+- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
 {
   if (block) {
     self.callbacks[address] = block;
@@ -142,7 +142,7 @@
       }
     }
     
-    QLRMessageHandlerBlock block = self.callbacks[address];
+    QLKMessageHandlerBlock block = self.callbacks[address];
     
     if (block) {
 			dispatch_async(dispatch_get_main_queue(), ^{

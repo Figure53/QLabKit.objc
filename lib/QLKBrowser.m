@@ -1,5 +1,5 @@
 //
-//  QLRConnectionManager.m
+//  QLKConnectionManager.m
 //  QLab for iPad
 //
 //  Created by Zach Waugh on 3/23/12.

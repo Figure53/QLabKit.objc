@@ -1,5 +1,5 @@
 //
-//  QLRConnection.h
+//  QLKConnection.h
 //  QLab for iPad
 //
 //  Created by Zach Waugh on 5/12/11.
@@ -12,11 +12,11 @@
 #import "QLKClient.h"
 #import "QLKDefines.h"
 
-extern NSString * const QLRWorkspaceDidUpdateCuesNotification;
-extern NSString * const QLRWorkspaceDidConnectNotification;
-extern NSString * const QLRWorkspaceDidDisconnectNotification;
-extern NSString * const QLRWorkspaceConnectionErrorNotification;
-extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
+extern NSString * const QLKWorkspaceDidUpdateCuesNotification;
+extern NSString * const QLKWorkspaceDidConnectNotification;
+extern NSString * const QLKWorkspaceDidDisconnectNotification;
+extern NSString * const QLKWorkspaceConnectionErrorNotification;
+extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 
 @class QLKServer;
 
@@ -32,7 +32,7 @@ extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 - (id)initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
 
 - (void)connect;
-- (void)connectWithPasscode:(NSString *)passcode block:(QLRMessageHandlerBlock)block;
+- (void)connectWithPasscode:(NSString *)passcode block:(QLKMessageHandlerBlock)block;
 - (void)finishConnection;
 - (void)disconnect;
 - (void)temporarilyDisconnect;
@@ -45,11 +45,9 @@ extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 - (QLKCue *)firstCueList;
 - (QLKCue *)cueWithId:(NSString *)uid;
 
-- (void)processMessage:(F53OSCMessage *)message;
-
 // QLab Server API
 - (void)connectToWorkspace;
-- (void)connectToWorkspaceWithPasscode:(NSString *)passcode completion:(QLRMessageHandlerBlock)block;
+- (void)connectToWorkspaceWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
 - (void)disconnectFromWorkspace;
 - (void)startReceivingUpdates;
 - (void)stopReceivingUpdates;
@@ -59,8 +57,8 @@ extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 - (void)stopAll;
 - (void)save;
 - (void)fetchCueLists;
-- (void)fetchCueListsWithCompletion:(QLRMessageHandlerBlock)block;
-- (void)fetchPlaybackPositionForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block;
+- (void)fetchCueListsWithCompletion:(QLKMessageHandlerBlock)block;
+- (void)fetchPlaybackPositionForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
 - (void)startCue:(QLKCue *)cue;
 - (void)stopCue:(QLKCue *)cue;
 - (void)pauseCue:(QLKCue *)cue;
@@ -76,7 +74,7 @@ extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 - (void)cue:(QLKCue *)cue updateArmed:(BOOL)armed;
 - (void)cue:(QLKCue *)cue updateFlagged:(BOOL)flagged;
 - (void)cue:(QLKCue *)cue updateNotes:(NSString *)notes;
-- (void)cue:(QLKCue *)cue updateContinueMode:(QLRCueContinueMode)continueMode;
+- (void)cue:(QLKCue *)cue updateContinueMode:(QLKCueContinueMode)continueMode;
 - (void)cue:(QLKCue *)cue updateChannel:(NSInteger)channel level:(double)level;
 - (void)cue:(QLKCue *)cue updatePatch:(NSInteger)patch;
 - (void)cue:(QLKCue *)cue updateColor:(NSString *)color;
@@ -98,10 +96,10 @@ extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 
 - (void)fetchMainPropertiesForCue:(QLKCue *)cue;
 - (void)fetchBasicPropertiesForCue:(QLKCue *)cue;
-- (void)fetchChildrenForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block;
+- (void)fetchChildrenForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
 - (void)fetchNotesForCue:(QLKCue *)cue;
-- (void)fetchAudioLevelsForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block;
+- (void)fetchAudioLevelsForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
 - (void)fetchDisplayAndGeometryForCue:(QLKCue *)cue;
-- (void)runningOrPausedCuesWithBlock:(QLRMessageHandlerBlock)block;
+- (void)runningOrPausedCuesWithBlock:(QLKMessageHandlerBlock)block;
 
 @end

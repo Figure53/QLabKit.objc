@@ -22,7 +22,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cuesUpdated:) name:QLRWorkspaceDidUpdateCuesNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cuesUpdated:) name:QLKWorkspaceDidUpdateCuesNotification object:nil];
   
   self.rows = [NSMutableArray array];
   

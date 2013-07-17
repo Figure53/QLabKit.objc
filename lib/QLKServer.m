@@ -1,5 +1,5 @@
 //
-//  QLRServer.m
+//  QLKServer.m
 //  QLab for iPad
 //
 //  Created by Zach Waugh on 3/26/12.

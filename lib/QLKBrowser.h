@@ -1,5 +1,5 @@
 //
-//  QLRConnectionManager.h
+//  QLKConnectionManager.h
 //  QLab for iPad
 //
 //  Created by Zach Waugh on 3/23/12.
@@ -21,7 +21,7 @@
 @interface QLKBrowser : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, F53OSCPacketDestination>
 
 @property (strong, nonatomic) NSMutableArray *servers;
-@property (copy, nonatomic) QLRWorkspaceHandlerBlock workspaceBlock;
+@property (copy, nonatomic) QLKWorkspaceHandlerBlock workspaceBlock;
 @property (unsafe_unretained, nonatomic) id<QLKBrowserDelegate> delegate;
 
 - (void)refreshWorkspaces;
