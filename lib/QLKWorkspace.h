@@ -32,7 +32,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (id)initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
 
 - (void)connect;
-- (void)connectWithPasscode:(NSString *)passcode block:(QLKMessageHandlerBlock)block;
+- (void)connectWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
 - (void)finishConnection;
 - (void)disconnect;
 - (void)temporarilyDisconnect;
@@ -46,9 +46,6 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (QLKCue *)cueWithId:(NSString *)uid;
 
 // QLab Server API
-- (void)connectToWorkspace;
-- (void)connectToWorkspaceWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
-- (void)disconnectFromWorkspace;
 - (void)startReceivingUpdates;
 - (void)stopReceivingUpdates;
 - (void)enableAlwaysReply;

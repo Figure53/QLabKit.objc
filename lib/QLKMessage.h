@@ -26,6 +26,7 @@
 - (NSString *)addressWithoutWorkspace:(NSString *)workspaceID;
 - (NSString *)body;
 - (id)response;
+- (NSArray *)arguments;
 - (NSString *)cueID;
 
 @end

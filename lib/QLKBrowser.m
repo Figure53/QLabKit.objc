@@ -12,7 +12,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define DEBUG_OSC 1
+#define DEBUG_OSC 0
 #define UDP_SERVER_PORT 53001
 
 @interface QLKBrowser ()

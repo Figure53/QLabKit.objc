@@ -63,15 +63,13 @@
   if (selectedRow == -1) return;
   
   self.workspace = self.rows[selectedRow];
-  [self.workspace connectToWorkspaceWithPasscode:nil completion:^(id data) {
+  [self.workspace connectWithPasscode:nil completion:^(id data) {
     self.connectionLabel.stringValue = [NSString stringWithFormat:@"Connected: %@", self.workspace.fullName];
-    [self.workspace fetchCueLists];
   }];
 }
 
 - (void)cuesUpdated:(NSNotification *)notification
 {
-  NSLog(@"cuesUpdated: %@", self.workspace.firstCueList.cues);
   [self.cues reloadData];
 }
 

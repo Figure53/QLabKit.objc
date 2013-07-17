@@ -34,6 +34,11 @@
   return self;
 }
 
+- (NSString *)description
+{
+  return [NSString stringWithFormat:@"address: %@, arguments: %@", self.address, [self.arguments componentsJoinedByString:@" - "]];
+}
+
 - (BOOL)isReply
 {
   return [self.OSCMessage.addressPattern hasPrefix:@"/reply"];
@@ -78,10 +83,15 @@
   if ([self isCueUpdate]) {
     return self.addressParts[5];
   } else if ([self isPlaybackPositionUpdate]) {
-    return self.OSCMessage.arguments[0];
+    return self.arguments[0];
   } else {
     return nil;
   }
+}
+
+- (NSArray *)arguments
+{
+  return self.OSCMessage.arguments;
 }
 
 - (NSString *)address

@@ -106,14 +106,33 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 {
   NSLog(@"connect: %@, %@", self.name, self.serverName);
   
-  [self connectToWorkspace];
+  [self connectWithPasscode:nil completion:nil];
   [self finishConnection];
 }
 
-- (void)connectWithPasscode:(NSString *)passcode block:(QLKMessageHandlerBlock)block;
+- (void)connectWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
 {
-  NSLog(@"connect with passcode: %@, %@", self.name, passcode);
-  [self connectToWorkspaceWithPasscode:passcode completion:block];
+  NSLog(@"[workspace] connect with passcode: %@, %@", self.name, passcode);
+  
+  if ([self.client connect]) {
+		NSLog(@"[workspace] connected to server");
+	} else {
+    NSLog(@"*** Error: couldn't connect to server");
+    // Notify that we are unable to connect to workspace
+    [self notifyAboutConnectionError];
+    return;
+  }
+	
+  // Save passcode for automatic reconnection
+  if (passcode) {
+    self.passcode = passcode;
+  }
+  
+  // Tell QLab we're connecting
+  [self.client sendMessage:passcode toAddress:@"/connect" block:^(id data) {
+    [self finishConnection];
+    if (block) block(data);
+  }];
 }
 
 // Called when a connection is successfully made
@@ -143,7 +162,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
   NSLog(@"reconnecting...");
 
   // Try to use some password as before
-  [self connectToWorkspaceWithPasscode:self.passcode completion:^(id data) {
+  [self connectWithPasscode:self.passcode completion:^(id data) {
     NSLog(@"reconnect response: %@", data);
     if ([data isEqualToString:@"ok"]) {
       NSLog(@"reconnected successfully: %@", data);
@@ -188,35 +207,9 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 - (QLKCue *)cueWithId:(NSString *)uid
 {
   return [self.root cueWithId:uid];
-  //return [[self.cue.cues filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"uid = %@", uid]] lastObject];
 }
 
 #pragma mark - Workspace Methods
-
-- (void)connectToWorkspace
-{
-  [self connectToWorkspaceWithPasscode:nil completion:nil];
-}
-
-- (void)connectToWorkspaceWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block
-{
-	if ([self.client connect]) {
-		NSLog(@"connected to server");
-	} else {
-    NSLog(@"*** Error: couldn't connect to server");
-    // Notify that we are unable to connect to workspace
-    [self notifyAboutConnectionError];
-    return;
-  }
-	
-  if (passcode) {
-    self.passcode = passcode;
-  }
-  
-  [self.client sendMessage:passcode toAddress:@"/connect" block:^(id data) {
-    if (block) block(data);
-  }];
-}
 
 - (void)disconnectFromWorkspace
 {
@@ -247,9 +240,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (void)fetchCueLists
 {
-  [self fetchCueListsWithCompletion:^(id data) {
-    NSArray *cueLists = (NSArray *)data;
-    
+  [self fetchCueListsWithCompletion:^(NSArray *cueLists) {    
     NSMutableArray *children = [NSMutableArray array];
     
     for (NSDictionary *cueList in cueLists) {

@@ -12,6 +12,8 @@
 #import "QLKMessage.h"
 #import "F53OSC.h"
 
+#define DEBUG_OSC 1
+
 @interface QLKClient ()
 
 @property (strong) F53OSCClient *OSCClient;
@@ -20,6 +22,11 @@
 @end
 
 @implementation QLKClient
+
+- (void)dealloc
+{
+  _OSCClient.delegate = nil;
+}
 
 - (id)initWithHost:(NSString *)host port:(NSInteger)port
 {
@@ -124,7 +131,7 @@
 - (void)processMessage:(QLKMessage *)message
 {
 #if DEBUG_OSC
-  NSLog(@"[osc] received message: %@", message);
+  NSLog(@"[OSC <-] message: %@", message);
 #endif
   
   if ([message isReply]) {
