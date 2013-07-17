@@ -24,6 +24,22 @@ describe(@"message", ^{
     expect(message).toNot.beNil();
   });
   
+  specify(@"address parts", ^{
+    osc.addressPattern = @"/update/workspace/{workspace_id}/cue_id/{cue_id}";
+    QLKMessage *message = [QLKMessage messageWithOSCMessage:osc];
+    
+    NSArray *parts = message.addressParts;
+    
+    expect(parts.count).to.beGreaterThan(0);
+    expect(parts[0]).toNot.equal(@"/");
+    expect(parts.count).to.equal(5);
+    expect(parts[0]).to.equal(@"update");
+    expect(parts[1]).to.equal(@"workspace");
+    expect(parts[2]).to.equal(@"{workspace_id}");
+    expect(parts[3]).to.equal(@"cue_id");
+    expect(parts[4]).to.equal(@"{cue_id}");
+  });
+  
   context(@"reply", ^{
     it(@"should be a reply", ^{
       osc.addressPattern = @"/reply/workspace/IDDQD-IDKFA/cueLists";
