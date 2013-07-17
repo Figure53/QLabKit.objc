@@ -10,6 +10,13 @@
 
 @interface QLKMessageTest : SenTestCase
 
+- (void)testMessageWithOSCMessage;
+- (void)testAddressParts;
 - (void)testIsUpdate;
+- (void)testIsNotCueUpdate;
+- (void)testIsReply;
+- (void)testIsCueUpdate;
+- (void)testIsWorkspaceUpdate;
+- (void)testIsPlaybackPositionUpdate;
 
 @end

@@ -22,6 +22,7 @@
 - (BOOL)isPlaybackPositionUpdate;
 - (BOOL)isDisconnect;
 - (NSString *)address;
+- (NSArray *)addressParts;
 - (NSString *)replyAddress;
 - (NSString *)addressWithoutWorkspace:(NSString *)workspaceID;
 - (NSString *)body;

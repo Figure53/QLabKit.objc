@@ -54,7 +54,7 @@
   // /update/workspace/{workspace_id}
   NSArray *parts = self.addressParts;
   
-  return (parts.count == 4 && [parts[1] isEqualToString:@"workspace"]);
+  return (parts.count == 3 && [parts[1] isEqualToString:@"workspace"]);
 }
 
 - (BOOL)isCueUpdate
@@ -62,7 +62,7 @@
   // /update/workspace/{workspace_id}/cue_id/{cue_id}
   NSArray *parts = self.addressParts;
   
-  return (parts.count == 6 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"cue_id"]);
+  return (parts.count == 5 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"cue_id"]);
 }
 
 - (BOOL)isPlaybackPositionUpdate
@@ -70,7 +70,7 @@
   // /update/workspace/{workspace_id}/cueList/{cue_list_id}/playbackPosition {cue_id}
   NSArray *parts = self.addressParts;
   
-  return (parts.count == 7 && [self.address hasSuffix:@"/playbackPosition"]);
+  return (parts.count == 6 && [self.address hasSuffix:@"/playbackPosition"]);
 }
 
 - (BOOL)isDisconnect
@@ -118,7 +118,8 @@
 
 - (NSArray *)addressParts
 {
-  return [self.address pathComponents];
+  NSArray *parts = [self.address pathComponents];
+  return [parts subarrayWithRange:NSMakeRange(1, parts.count - 1)];
 }
 
 - (NSString *)body
