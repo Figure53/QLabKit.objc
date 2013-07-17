@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		921DB1CE1796F65800ADDB2D /* QLKMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 921DB1CD1796F65700ADDB2D /* QLKMessage.m */; };
 		92F3E9ED178B1BC500A4C617 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F3E9EC178B1BC500A4C617 /* Cocoa.framework */; };
 		92F3E9F7178B1BC500A4C617 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 92F3E9F5178B1BC500A4C617 /* InfoPlist.strings */; };
 		92F3E9F9178B1BC500A4C617 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3E9F8178B1BC500A4C617 /* main.m */; };
@@ -54,6 +55,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		921DB1CC1796F65700ADDB2D /* QLKMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKMessage.h; sourceTree = "<group>"; };
+		921DB1CD1796F65700ADDB2D /* QLKMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKMessage.m; sourceTree = "<group>"; };
 		92F3E9E9178B1BC500A4C617 /* QLabKitDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QLabKitDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92F3E9EC178B1BC500A4C617 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		92F3E9EF178B1BC500A4C617 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -250,6 +253,8 @@
 				92F3EA60178C597D00A4C617 /* QLKCue.m */,
 				92F3EA65178C5D4100A4C617 /* QLKColor.h */,
 				92F3EA66178C5D4100A4C617 /* QLKColor.m */,
+				921DB1CC1796F65700ADDB2D /* QLKMessage.h */,
+				921DB1CD1796F65700ADDB2D /* QLKMessage.m */,
 			);
 			name = QLabKit;
 			path = lib;
@@ -429,6 +434,7 @@
 				92F3EA64178C5CF300A4C617 /* QLKDefines.m in Sources */,
 				92F3EA67178C5D4100A4C617 /* QLKColor.m in Sources */,
 				92F3EA6F178C6A8200A4C617 /* QLKClient.m in Sources */,
+				921DB1CE1796F65800ADDB2D /* QLKMessage.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

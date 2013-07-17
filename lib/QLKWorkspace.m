@@ -9,6 +9,7 @@
 #import "QLKWorkspace.h"
 #import "QLKCue.h"
 #import "QLKServer.h"
+#import "QLKClient.h"
 #import "F53OSC.h"
 
 #define HEARTBEAT_INTERVAL 5 // seconds
@@ -25,8 +26,7 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 @interface QLKWorkspace ()
 
-@property (strong, readonly) F53OSCClient *client;
-@property (strong, nonatomic) NSMutableDictionary *callbacks;
+@property (strong, readonly) QLKClient *client;
 @property (strong) NSTimer *heartbeatTimeout;
 @property (assign) NSInteger attempts;
 @property (strong, nonatomic) NSString *passcode;
@@ -40,10 +40,10 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 - (NSString *)workspacePrefix;
 - (NSString *)addressWithoutWorkspace:(NSString *)address;
 - (NSString *)addressForCue:(QLKCue *)cue action:(NSString *)action;
-- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address;
-- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block;
-- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address;
-- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block;
+//- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address;
+//- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block;
+//- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address;
+//- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block;
 
 @end
 
@@ -64,7 +64,6 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
   _root.name = @"Cue Lists";
   _root.type = QLRCueTypeGroup;
   
-  _callbacks = [[NSMutableDictionary alloc] init];
   _hasPasscode = NO;
 
   return self;
@@ -77,10 +76,8 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
   _name = dict[@"displayName"];
   _serverName = server.name;
-  _client = [[F53OSCClient alloc] init];
-  _client.host = server.host;
-  _client.port = server.port;
-  _client.useTcp = YES;
+  _client = [[QLKClient alloc] initWithHost:server.host port:server.port];
+  _client.useTCP = YES;
   _client.delegate = self;
   _uniqueId = dict[@"uniqueID"];
   _hasPasscode = [dict[@"hasPasscode"] boolValue];
@@ -136,7 +133,6 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
   self.connected = NO;
   [self.client disconnect];
   self.root.cues = nil;
-  self.callbacks = [NSMutableDictionary dictionary];
   
   [[NSNotificationCenter defaultCenter] postNotificationName:QLRWorkspaceDidDisconnectNotification object:self];
 }
@@ -219,36 +215,36 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
     self.passcode = passcode;
   }
   
-  [self sendMessage:passcode toAddress:@"/connect" block:^(id data) {
+  [self.client sendMessage:passcode toAddress:@"/connect" block:^(id data) {
     if (block) block(data);
   }];
 }
 
 - (void)disconnectFromWorkspace
 {
-  [self sendMessage:nil toAddress:@"/disconnect"];
+  [self.client sendMessage:nil toAddress:@"/disconnect"];
 }
 
 - (void)startReceivingUpdates
 {
-  [self sendMessage:@YES toAddress:@"/updates"];
+  [self.client sendMessage:@YES toAddress:@"/updates"];
 }
 
 - (void)stopReceivingUpdates
 {
-  [self sendMessage:@NO toAddress:@"/updates"];
+  [self.client sendMessage:@NO toAddress:@"/updates"];
 }
 
 - (void)enableAlwaysReply
 {
   F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:@"/alwaysReply" arguments:@[@YES]];
-  [self.client sendPacket:message];
+  [self.client sendMessage:message];
 }
 
 - (void)disableAlwaysReply
 {
   F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:@"/alwaysReply" arguments:@[@NO]];
-  [self.client sendPacket:message];
+  [self.client sendMessage:message];
 }
 
 - (void)fetchCueLists
@@ -280,27 +276,27 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 - (void)fetchCueListsWithCompletion:(QLRMessageHandlerBlock)block
 {
-  [self sendMessage:nil toAddress:@"/cueLists" block:block];
+  [self.client sendMessage:nil toAddress:@"/cueLists" block:block];
 }
 
 - (void)fetchPlaybackPositionForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block
 {
-  [self sendMessage:nil toAddress:[self addressForCue:cue action:@"playbackPositionId"] block:block];
+  [self.client sendMessage:nil toAddress:[self addressForCue:cue action:@"playbackPositionId"] block:block];
 }
 
 - (void)go
 {
-  [self sendMessage:nil toAddress:@"/go"];
+  [self.client sendMessage:nil toAddress:@"/go"];
 }
 
 - (void)stopAll
 {
-  [self sendMessage:nil toAddress:@"/stop"];
+  [self.client sendMessage:nil toAddress:@"/stop"];
 }
 
 - (void)save
 {
-  [self sendMessage:nil toAddress:@"/save"];
+  [self.client sendMessage:nil toAddress:@"/save"];
 }
 
 #pragma mark - Heartbeat
@@ -328,12 +324,12 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 - (void)sendHeartbeat
 {
   //NSLog(@"sending heartbeat...");
-  [self sendMessage:nil toAddress:@"/thump" block:^(id data) {
+  [self.client sendMessage:nil toAddress:@"/thump" block:^(id data) {
     [self clearHeartbeatTimeout];
     //NSLog(@"heartbeat received");
     
     // Ignore if we have manually disconnected while waiting for response
-    if (self.isConnected) {
+    if (self.client.connected) {
       [self performSelector:@selector(sendHeartbeat) withObject:nil afterDelay:HEARTBEAT_INTERVAL];
     }
   }];
@@ -358,32 +354,32 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 
 - (void)startCue:(QLKCue *)cue
 {
-  [self sendMessage:nil toAddress:[self addressForCue:cue action:@"start"]];
+  [self.client sendMessage:nil toAddress:[self addressForCue:cue action:@"start"]];
 }
 
 - (void)stopCue:(QLKCue *)cue
 {
-  [self sendMessage:nil toAddress:[self addressForCue:cue action:@"stop"]];
+  [self.client sendMessage:nil toAddress:[self addressForCue:cue action:@"stop"]];
 }
 
 - (void)pauseCue:(QLKCue *)cue
 {
-  [self sendMessage:nil toAddress:[self addressForCue:cue action:@"pause"]];
+  [self.client sendMessage:nil toAddress:[self addressForCue:cue action:@"pause"]];
 }
 
 - (void)loadCue:(QLKCue *)cue
 {
-  [self sendMessage:nil toAddress:[self addressForCue:cue action:@"load"]];
+  [self.client sendMessage:nil toAddress:[self addressForCue:cue action:@"load"]];
 }
 
 - (void)resetCue:(QLKCue *)cue
 {
-  [self sendMessage:nil toAddress:[self addressForCue:cue action:@"reset"]];
+  [self.client sendMessage:nil toAddress:[self addressForCue:cue action:@"reset"]];
 }
 
 - (void)deleteCue:(QLKCue *)cue
 {
-  [self sendMessage:nil toAddress:@"/delete"];
+  [self.client sendMessage:nil toAddress:@"/delete"];
 }
 
 #pragma mark - Cue Getters
@@ -391,13 +387,13 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 - (void)cue:(QLKCue *)cue valuesForKeys:(NSArray *)keys
 {
   NSString *JSONKeys = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:keys options:0 error:nil] encoding:NSUTF8StringEncoding];
-  [self sendMessage:JSONKeys toAddress:[self addressForCue:cue action:@"valuesForKeys"] block:nil];
+  [self.client sendMessage:JSONKeys toAddress:[self addressForCue:cue action:@"valuesForKeys"] block:nil];
 }
 
 - (void)fetchAudioLevelsForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block
 {
   NSString *address = [self addressForCue:cue action:@"sliderLevels"];
-  [self sendMessage:nil toAddress:address block:block];
+  [self.client sendMessage:nil toAddress:address block:block];
 }
 
 - (void)fetchMainPropertiesForCue:(QLKCue *)cue
@@ -427,152 +423,152 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
 - (void)fetchChildrenForCue:(QLKCue *)cue completion:(QLRMessageHandlerBlock)block
 {
   NSString *address = [self addressForCue:cue action:@"children"];
-  [self sendMessage:nil toAddress:address block:block];
+  [self.client sendMessage:nil toAddress:address block:block];
 }
 
 - (void)runningOrPausedCuesWithBlock:(QLRMessageHandlerBlock)block
 {
-  [self sendMessages:nil toAddress:@"/runningOrPausedCues" block:block];
+  [self.client sendMessages:nil toAddress:@"/runningOrPausedCues" block:block];
 }
 
 #pragma mark - Cue Setters
 
 - (void)cue:(QLKCue *)cue updateName:(NSString *)name
 {
-  [self sendMessage:name toAddress:[self addressForCue:cue action:@"name"]];
+  [self.client sendMessage:name toAddress:[self addressForCue:cue action:@"name"]];
 }
 
 - (void)cue:(QLKCue *)cue updateNotes:(NSString *)notes
 {
-  [self sendMessage:notes toAddress:[self addressForCue:cue action:@"notes"]];
+  [self.client sendMessage:notes toAddress:[self addressForCue:cue action:@"notes"]];
 }
 
 - (void)cue:(QLKCue *)cue updateNumber:(NSString *)number
 {
-  [self sendMessage:number toAddress:[self addressForCue:cue action:@"number"]];
+  [self.client sendMessage:number toAddress:[self addressForCue:cue action:@"number"]];
 }
 
 - (void)cue:(QLKCue *)cue updatePreWait:(float)preWait
 {
-  [self sendMessage:@(preWait) toAddress:[self addressForCue:cue action:@"preWait"]];
+  [self.client sendMessage:@(preWait) toAddress:[self addressForCue:cue action:@"preWait"]];
 }
 
 - (void)cue:(QLKCue *)cue updatePostWait:(float)postWait
 {
-  [self sendMessage:@(postWait) toAddress:[self addressForCue:cue action:@"postWait"]];
+  [self.client sendMessage:@(postWait) toAddress:[self addressForCue:cue action:@"postWait"]];
 }
 
 - (void)cue:(QLKCue *)cue updateDuration:(float)duration
 {
-  [self sendMessage:@(duration) toAddress:[self addressForCue:cue action:@"duration"]];
+  [self.client sendMessage:@(duration) toAddress:[self addressForCue:cue action:@"duration"]];
 }
 
 - (void)cue:(QLKCue *)cue updateArmed:(BOOL)armed
 {
-  [self sendMessage:@(armed) toAddress:[self addressForCue:cue action:@"armed"]];
+  [self.client sendMessage:@(armed) toAddress:[self addressForCue:cue action:@"armed"]];
 }
 
 - (void)cue:(QLKCue *)cue updateFlagged:(BOOL)flagged
 {
-  [self sendMessage:@(flagged) toAddress:[self addressForCue:cue action:@"flagged"]];
+  [self.client sendMessage:@(flagged) toAddress:[self addressForCue:cue action:@"flagged"]];
 }
 
 - (void)cue:(QLKCue *)cue updateColor:(NSString *)color
 {
-  [self sendMessage:color toAddress:[self addressForCue:cue action:@"colorName"]];
+  [self.client sendMessage:color toAddress:[self addressForCue:cue action:@"colorName"]];
 }
 
 - (void)cue:(QLKCue *)cue updateContinueMode:(QLRCueContinueMode)continueMode
 {
-  [self sendMessage:@(continueMode) toAddress:[self addressForCue:cue action:@"continueMode"]];
+  [self.client sendMessage:@(continueMode) toAddress:[self addressForCue:cue action:@"continueMode"]];
 }
 
 - (void)cue:(QLKCue *)cue updateChannel:(NSInteger)channel level:(double)level
 {
 	NSArray *params = @[@(channel), @(level)];
-  [self sendMessages:params toAddress:[self addressForCue:cue action:@"sliderLevel"]];
+  [self.client sendMessages:params toAddress:[self addressForCue:cue action:@"sliderLevel"]];
 }
 
 - (void)cue:(QLKCue *)cue updatePatch:(NSInteger)patch
 {
-  [self sendMessage:@(patch) toAddress:[self addressForCue:cue action:@"patch"]];
+  [self.client sendMessage:@(patch) toAddress:[self addressForCue:cue action:@"patch"]];
 }
 
 - (void)cue:(QLKCue *)cue updatePlaybackPosition:(QLKCue *)playbackCue
 {
-  [self sendMessage:playbackCue.uid toAddress:[self addressForCue:cue action:@"playbackPositionId"]];
+  [self.client sendMessage:playbackCue.uid toAddress:[self addressForCue:cue action:@"playbackPositionId"]];
 }
 
 - (void)cue:(QLKCue *)cue updateStartNextCueWhenSliceEnds:(BOOL)start
 {
-  [self sendMessage:@(start) toAddress:[self addressForCue:cue action:@"startNextCueWhenSliceEnds"]];
+  [self.client sendMessage:@(start) toAddress:[self addressForCue:cue action:@"startNextCueWhenSliceEnds"]];
 }
 
 - (void)cue:(QLKCue *)cue updateStopTargetWhenSliceEnds:(BOOL)stop
 {
-  [self sendMessage:@(stop) toAddress:[self addressForCue:cue action:@"stopTargetWhenSliceEnds"]];
+  [self.client sendMessage:@(stop) toAddress:[self addressForCue:cue action:@"stopTargetWhenSliceEnds"]];
 }
 
 #pragma mark - OSC Video methods
 
 - (void)cue:(QLKCue *)cue updateSurfaceID:(NSInteger)surfaceID
 {
-  [self sendMessage:@(surfaceID) toAddress:[self addressForCue:cue action:@"surfaceID"]];
+  [self.client sendMessage:@(surfaceID) toAddress:[self addressForCue:cue action:@"surfaceID"]];
 }
 
 - (void)cue:(QLKCue *)cue updateFullScreen:(BOOL)fullScreen
 {
-  [self sendMessage:@(fullScreen) toAddress:[self addressForCue:cue action:@"fullScreen"]];
+  [self.client sendMessage:@(fullScreen) toAddress:[self addressForCue:cue action:@"fullScreen"]];
 }
 
 - (void)cue:(QLKCue *)cue updateTranslationX:(CGFloat)translationX
 {
-  [self sendMessage:@(translationX) toAddress:[self addressForCue:cue action:@"translationX"]];
+  [self.client sendMessage:@(translationX) toAddress:[self addressForCue:cue action:@"translationX"]];
 }
 
 - (void)cue:(QLKCue *)cue updateTranslationY:(CGFloat)translationY
 {
-  [self sendMessage:@(translationY) toAddress:[self addressForCue:cue action:@"translationY"]];
+  [self.client sendMessage:@(translationY) toAddress:[self addressForCue:cue action:@"translationY"]];
 }
 
 - (void)cue:(QLKCue *)cue updateScaleX:(CGFloat)scaleX
 {
-  [self sendMessage:@(scaleX) toAddress:[self addressForCue:cue action:@"scaleX"]];
+  [self.client sendMessage:@(scaleX) toAddress:[self addressForCue:cue action:@"scaleX"]];
 }
 
 - (void)cue:(QLKCue *)cue updateScaleY:(CGFloat)scaleY
 {
-  [self sendMessage:@(scaleY) toAddress:[self addressForCue:cue action:@"scaleY"]];
+  [self.client sendMessage:@(scaleY) toAddress:[self addressForCue:cue action:@"scaleY"]];
 }
 
 - (void)cue:(QLKCue *)cue updateRotationX:(CGFloat)rotationX
 {
-  [self sendMessage:@(rotationX) toAddress:[self addressForCue:cue action:@"rotationX"]];
+  [self.client sendMessage:@(rotationX) toAddress:[self addressForCue:cue action:@"rotationX"]];
 }
 
 - (void)cue:(QLKCue *)cue updateRotationY:(CGFloat)rotationY
 {
-  [self sendMessage:@(rotationY) toAddress:[self addressForCue:cue action:@"rotationY"]];
+  [self.client sendMessage:@(rotationY) toAddress:[self addressForCue:cue action:@"rotationY"]];
 }
 
 - (void)cue:(QLKCue *)cue updateRotationZ:(CGFloat)rotationZ
 {
-  [self sendMessage:@(rotationZ) toAddress:[self addressForCue:cue action:@"rotationZ"]];
+  [self.client sendMessage:@(rotationZ) toAddress:[self addressForCue:cue action:@"rotationZ"]];
 }
 
 - (void)cue:(QLKCue *)cue updatePreserveAspectRatio:(BOOL)preserve
 {
-  [self sendMessage:@(preserve) toAddress:[self addressForCue:cue action:@"preserveAspectRatio"]];
+  [self.client sendMessage:@(preserve) toAddress:[self addressForCue:cue action:@"preserveAspectRatio"]];
 }
 
 - (void)cue:(QLKCue *)cue updateLayer:(NSInteger)layer
 {
-  [self sendMessage:@(layer) toAddress:[self addressForCue:cue action:@"layer"]];
+  [self.client sendMessage:@(layer) toAddress:[self addressForCue:cue action:@"layer"]];
 }
 
 - (void)cue:(QLKCue *)cue updateOpacity:(CGFloat)opacity
 {
-  [self sendMessage:@(opacity) toAddress:[self addressForCue:cue action:@"opacity"]];
+  [self.client sendMessage:@(opacity) toAddress:[self addressForCue:cue action:@"opacity"]];
 }
 
 #pragma mark - OSC address helpers
@@ -587,170 +583,205 @@ NSString * const QLRWorkspaceDidChangePlaybackPositionNotification = @"QLRWorksp
   return [NSString stringWithFormat:@"/workspace/%@", self.uniqueId];
 }
 
-- (NSString *)addressWithoutWorkspace:(NSString *)address
+#pragma mark - QLKClientDelegate
+
+- (NSString *)workspaceID
 {
-  if ([address hasPrefix:[self workspacePrefix]]) {
-    return [address substringFromIndex:[[self workspacePrefix] length]];
-  } else {
-    return address;
+  return self.uniqueId;
+}
+
+- (void)workspaceUpdated
+{
+  [self fetchCueLists];
+}
+
+- (void)cueUpdated:(NSString *)cueID
+{
+  QLKCue *cue = [self cueWithId:cueID];
+  
+  NSLog(@"update cue: %@", cue);
+  
+  if ([cue isGroup]) {
+    [self fetchChildrenForCue:cue completion:^(id data) {
+      NSMutableArray *children = [NSMutableArray array];
+      
+      for (NSDictionary *dict in data) {
+        QLKCue *cue = [QLKCue cueWithDictionary:dict];
+        [children addObject:cue];
+      }
+      
+      cue.cues = children;
+      
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:QLRCueUpdatedNotification object:cue];
+        [[NSNotificationCenter defaultCenter] postNotificationName:QLRWorkspaceDidUpdateCuesNotification object:self];
+      });
+    }];
   }
+  
+  if (cue) {
+    [self fetchMainPropertiesForCue:cue];
+    [[NSNotificationCenter defaultCenter] postNotificationName:QLRCueNeedsUpdateNotification object:cue];
+  }
+}
+
+- (void)cueUpdated:(NSString *)cueID withProperties:(NSDictionary *)properties
+{
+  QLKCue *cue = [self cueWithId:cueID];
+  [cue updatePropertiesWithDictionary:properties];
+}
+
+- (void)playbackPositionUpdated:(NSString *)cueID
+{
+  QLKCue *cue = nil;
+  
+  if (cueID) {
+    cue = [self cueWithId:cueID];
+  }
+  
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [[NSNotificationCenter defaultCenter] postNotificationName:QLRWorkspaceDidChangePlaybackPositionNotification object:cue];
+  });
 }
 
 #pragma mark - OSC message senders
 
-- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address
-{
-  [self sendMessage:message toAddress:address block:nil];
-}
-
-- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block
-{
-  NSArray *messages = (message != nil) ? @[message] : nil;
-  [self sendMessages:messages toAddress:address block:block];
-}
-
-- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address
-{
-  [self sendMessages:messages toAddress:address block:nil];
-}
-
-- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block
-{
-  NSAssert(self.client != nil, @"Workspace has no client!");
-  
-  if (block) {
-    self.callbacks[address] = block;
-  }
-  
-  NSString *fullAddress = [NSString stringWithFormat:@"%@%@", [self workspacePrefix], address];
- 
-#if DEBUG_OSC
-  NSLog(@"[OSC] to: %@, data: %@", fullAddress, messages);
-#endif
-  
-  F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:fullAddress arguments:messages];
-  [self.client sendPacket:message];
-}
-
-#pragma mark - F53OSCPacketDestination
-
-- (void)takeMessage:(F53OSCMessage *)message
-{
-  [self processMessage:message];
-}
-
-#pragma mark - F53OSCClientDelegate
-
-- (void)clientDidConnect:(F53OSCClient *)client
-{
-  NSLog(@"clientDidConnect: %@", client);
-}
-
-- (void)clientDidDisconnect:(F53OSCClient *)client
-{
-  NSLog(@"clientDidDisconnect: %@, connected? %d", client, self.connected);
-  
-  // Only care if we think we're connected
-  if (self.connected) {
-    [self notifyAboutConnectionError];
-  }
-}
+//- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address
+//{
+//  [self.client sendMessage:message toAddress:address block:nil];
+//}
+//
+//- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block
+//{
+//  NSArray *messages = (message != nil) ? @[message] : nil;
+//  [self.client sendMessages:messages toAddress:address block:block];
+//}
+//
+//- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address
+//{
+//  [self.client sendMessages:messages toAddress:address block:nil];
+//}
+//
+//- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLRMessageHandlerBlock)block
+//{
+//  NSAssert(self.client != nil, @"Workspace has no client!");
+//  
+//  if (block) {
+//    self.callbacks[address] = block;
+//  }
+//  
+//  NSString *fullAddress = [NSString stringWithFormat:@"%@%@", [self workspacePrefix], address];
+// 
+//#if DEBUG_OSC
+//  NSLog(@"[OSC] to: %@, data: %@", fullAddress, messages);
+//#endif
+//  
+//  F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:fullAddress arguments:messages];
+//  [self.client sendPacket:message];
+//}
 
 #pragma mark - OSC processing
 
-- (void)processMessage:(F53OSCMessage *)message
-{
-#if DEBUG_OSC
-  NSLog(@"[osc] received message: %@", message);
-#endif
-  
-  // Reply to a message we sent
-  if ([message.addressPattern hasPrefix:@"/reply"]) {
-    NSString *address = [self addressWithoutWorkspace:[message.addressPattern substringFromIndex:@"/reply".length]];
-    NSString *body = message.arguments[0];
-    NSError *error = nil;
-    NSDictionary *response = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
-    
-    if (error) {
-      NSLog(@"error decoding JSON: %@, %@", error, message.arguments);
-    }
-    
-    id data = response[@"data"];
-         
-    if ([address hasPrefix:@"/cue_id"]) {
-      NSString *cueId = [address componentsSeparatedByString:@"/"][2];
-      QLKCue *cue = [self cueWithId:cueId];
-      
-      if ([data isKindOfClass:[NSDictionary class]]) {
-        [cue updatePropertiesWithDictionary:data];
-      }
-    }
-    
-    QLRMessageHandlerBlock block = self.callbacks[address];
-    
-    if (block) {
-			dispatch_async(dispatch_get_main_queue(), ^{
-				block(data);
-        
-        // Clear handler for address
-        [self.callbacks removeObjectForKey:address];
-			});
-    }
-  } else if ([message.addressPattern hasPrefix:@"/update"]) {
-    // QLab has informed us we need to update
-    NSString *relativeAddress = message.addressPattern;
-    id data = message.arguments;
-    NSArray *parts = [relativeAddress pathComponents];
+// Updates:
+// - Cue
+// - Playback position
+// - Workspace
+// Reply to request
+// 
 
-    if (parts.count == 4) {
-      // Workspace updated - /update/workspace/<workspace_id>
-      [self fetchCueLists];
-    } else if (parts.count == 6) {
-      // Individual cue updated - /update/workspace/<workspace_id>/cue_id/<cue_id>
-      NSString *cueId = parts[5];
-      QLKCue *cue = [self cueWithId:cueId];
-    
-      //NSLog(@"update cue: %@", cue);
-      
-      if ([cue isGroup]) {
-        [self fetchChildrenForCue:cue completion:^(id data) {
-          NSMutableArray *children = [NSMutableArray array];
-          
-          for (NSDictionary *dict in data) {
-            QLKCue *cue = [QLKCue cueWithDictionary:dict];
-            [children addObject:cue];
-          }
-          
-          cue.cues = children;
-          
-          dispatch_async(dispatch_get_main_queue(), ^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:QLRCueUpdatedNotification object:cue];
-            [[NSNotificationCenter defaultCenter] postNotificationName:QLRWorkspaceDidUpdateCuesNotification object:self];
-          });
-        }];
-      }
-      
-      if (cue) {
-        [self fetchMainPropertiesForCue:cue];
-        [[NSNotificationCenter defaultCenter] postNotificationName:QLRCueNeedsUpdateNotification object:cue];
-      }
-    } else if (parts.count == 7 && [relativeAddress hasSuffix:@"/playbackPosition"]) {
-      // Special update, playback position has changed
-      QLKCue *cue = nil;
-      
-      if ([data count] > 0) {
-        cue = [self cueWithId:data[0]];
-      }
-      
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:QLRWorkspaceDidChangePlaybackPositionNotification object:cue];
-      });
-    } else if ([relativeAddress hasSuffix:@"/disconnect"]) {
-      [self notifyAboutConnectionError];
-    } else {
-      NSLog(@"unhandled update message: %@", relativeAddress);
-    }
-  }
-}
+//- (void)processMessage:(F53OSCMessage *)message
+//{
+//#if DEBUG_OSC
+//  NSLog(@"[osc] received message: %@", message);
+//#endif
+//  
+//  // Reply to a message we sent
+//  if ([message.addressPattern hasPrefix:@"/reply"]) {
+//    NSString *address = [self addressWithoutWorkspace:[message.addressPattern substringFromIndex:@"/reply".length]];
+//    NSString *body = message.arguments[0];
+//    NSError *error = nil;
+//    NSDictionary *response = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
+//    
+//    if (error) {
+//      NSLog(@"error decoding JSON: %@, %@", error, message.arguments);
+//    }
+//    
+//    id data = response[@"data"];
+//         
+//    if ([address hasPrefix:@"/cue_id"]) {
+//      NSString *cueId = [address componentsSeparatedByString:@"/"][2];
+//      QLKCue *cue = [self cueWithId:cueId];
+//      
+//      if ([data isKindOfClass:[NSDictionary class]]) {
+//        [cue updatePropertiesWithDictionary:data];
+//      }
+//    }
+//    
+//    QLRMessageHandlerBlock block = self.callbacks[address];
+//    
+//    if (block) {
+//			dispatch_async(dispatch_get_main_queue(), ^{
+//				block(data);
+//        
+//        // Clear handler for address
+//        [self.callbacks removeObjectForKey:address];
+//			});
+//    }
+//  } else if ([message.addressPattern hasPrefix:@"/update"]) {
+//    // QLab has informed us we need to update
+//    NSString *relativeAddress = message.addressPattern;
+//    id data = message.arguments;
+//    NSArray *parts = [relativeAddress pathComponents];
+//
+//    if (parts.count == 4) {
+//      // Workspace updated - /update/workspace/<workspace_id>
+//      [self fetchCueLists];
+//    } else if (parts.count == 6) {
+//      // Individual cue updated - /update/workspace/<workspace_id>/cue_id/<cue_id>
+//      NSString *cueId = parts[5];
+//      QLKCue *cue = [self cueWithId:cueId];
+//    
+//      //NSLog(@"update cue: %@", cue);
+//      
+//      if ([cue isGroup]) {
+//        [self fetchChildrenForCue:cue completion:^(id data) {
+//          NSMutableArray *children = [NSMutableArray array];
+//          
+//          for (NSDictionary *dict in data) {
+//            QLKCue *cue = [QLKCue cueWithDictionary:dict];
+//            [children addObject:cue];
+//          }
+//          
+//          cue.cues = children;
+//          
+//          dispatch_async(dispatch_get_main_queue(), ^{
+//            [[NSNotificationCenter defaultCenter] postNotificationName:QLRCueUpdatedNotification object:cue];
+//            [[NSNotificationCenter defaultCenter] postNotificationName:QLRWorkspaceDidUpdateCuesNotification object:self];
+//          });
+//        }];
+//      }
+//      
+//      if (cue) {
+//        [self fetchMainPropertiesForCue:cue];
+//        [[NSNotificationCenter defaultCenter] postNotificationName:QLRCueNeedsUpdateNotification object:cue];
+//      }
+//    } else if (parts.count == 7 && [relativeAddress hasSuffix:@"/playbackPosition"]) {
+//      // Special update, playback position has changed
+//      QLKCue *cue = nil;
+//      
+//      if ([data count] > 0) {
+//        cue = [self cueWithId:data[0]];
+//      }
+//      
+//      dispatch_async(dispatch_get_main_queue(), ^{
+//        [[NSNotificationCenter defaultCenter] postNotificationName:QLRWorkspaceDidChangePlaybackPositionNotification object:cue];
+//      });
+//    } else if ([relativeAddress hasSuffix:@"/disconnect"]) {
+//      [self notifyAboutConnectionError];
+//    } else {
+//      NSLog(@"unhandled update message: %@", relativeAddress);
+//    }
+//  }
+//}
 
 @end

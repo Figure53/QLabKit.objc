@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "F53OSC.h"
 #import "QLKCue.h"
+#import "QLKClient.h"
 #import "QLKDefines.h"
 
 extern NSString * const QLRWorkspaceDidUpdateCuesNotification;
@@ -19,14 +20,14 @@ extern NSString * const QLRWorkspaceDidChangePlaybackPositionNotification;
 
 @class QLKServer;
 
-@interface QLKWorkspace : NSObject <F53OSCPacketDestination, F53OSCClientDelegate>
+@interface QLKWorkspace : NSObject <QLKClientDelegate>
 
 @property (copy, nonatomic) NSString *name;
 @property (copy, nonatomic) NSString *uniqueId;
 @property (strong, nonatomic) NSString *serverName;
 @property (strong, nonatomic) QLKCue *root;
-@property (assign, nonatomic, getter=isConnected) BOOL connected;
 @property (assign, nonatomic) BOOL hasPasscode;
+@property (assign, nonatomic) BOOL connected;
 
 - (id)initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
 
