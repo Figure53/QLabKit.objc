@@ -10,6 +10,12 @@
 #import "QLKWorkspace.h"
 #import "F53OSC.h"
 
+@interface QLKServer ()
+
+@property (strong, nonatomic) F53OSCClient *client;
+
+@end
+
 @implementation QLKServer
 
 - (id)initWithHost:(NSString *)host port:(NSInteger)port

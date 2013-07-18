@@ -12,6 +12,7 @@
 #import "QLKClient.h"
 #import "QLKDefines.h"
 
+// Notifications sent by workspaces
 extern NSString * const QLKWorkspaceDidUpdateCuesNotification;
 extern NSString * const QLKWorkspaceDidConnectNotification;
 extern NSString * const QLKWorkspaceDidDisconnectNotification;
@@ -22,11 +23,22 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 
 @interface QLKWorkspace : NSObject <QLKClientDelegate>
 
+// Name of this workspace
 @property (copy, nonatomic) NSString *name;
+
+// A unique internal id
 @property (copy, nonatomic) NSString *uniqueId;
+
+// Name of the server (QLab machine) this workspace is on
 @property (strong, nonatomic) NSString *serverName;
+
+// The root cue is the parent of all the cues in this workspace
 @property (strong, nonatomic) QLKCue *root;
+
+// Whether or not this workspace is protected by a passcode
 @property (assign, nonatomic) BOOL hasPasscode;
+
+// Whether we currently have a conection
 @property (assign, nonatomic) BOOL connected;
 
 - (id)initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
