@@ -101,7 +101,7 @@
 - (NSString *)cueID
 {
   if ([self isCueUpdate]) {
-    return self.addressParts[5];
+    return self.addressParts[4];
   } else if ([self isPlaybackPositionUpdate]) {
     return self.arguments[0];
   } else {

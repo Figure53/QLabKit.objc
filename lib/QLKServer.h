@@ -51,6 +51,7 @@
 
 // Send a message to this server to update the list of workspaces
 - (void)refreshWorkspaces;
+- (void)refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
 
 // Update the server
 - (void)updateWorkspaces:(NSArray *)workspaces;

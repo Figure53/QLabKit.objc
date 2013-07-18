@@ -28,11 +28,11 @@
 
 #import "QLKServer.h"
 #import "QLKWorkspace.h"
-#import "F53OSC.h"
+#import "QLKClient.h"
 
 @interface QLKServer ()
 
-@property (strong, nonatomic) F53OSCClient *client;
+@property (strong, nonatomic) QLKClient *client;
 
 @end
 
@@ -47,9 +47,7 @@
   _port = port;
   _workspaces = [[NSMutableArray alloc] init];
   
-  _client = [[F53OSCClient alloc] init];
-  _client.host = host;
-  _client.port = port;
+  _client = [[QLKClient alloc] initWithHost:host port:port];
   
   return self;
 }
@@ -63,7 +61,12 @@
 
 - (void)refreshWorkspaces
 {
-  [self.client sendPacket:[F53OSCMessage messageWithAddressPattern:@"/workspaces" arguments:nil]];
+  [self.client sendMessage:[F53OSCMessage messageWithAddressPattern:@"/workspaces" arguments:nil]];
+}
+
+- (void)refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block
+{
+  
 }
 
 - (void)updateWorkspaces:(NSArray *)workspaces

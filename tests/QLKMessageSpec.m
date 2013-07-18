@@ -64,7 +64,7 @@ describe(@"message", ^{
     context(@"cue update", ^{
       __block QLKMessage *message;
       beforeEach(^{
-        osc.addressPattern = @"/update/workspace/{workspace_id}/cue_id/{cue_id}";
+        osc.addressPattern = @"/update/workspace/{workspace_id}/cue_id/12345";
         message = [QLKMessage messageWithOSCMessage:osc];
       });
       
@@ -78,6 +78,10 @@ describe(@"message", ^{
       
       it(@"should not be a playback position update", ^{
         expect(message.isPlaybackPositionUpdate).to.beFalsy();
+      });
+      
+      it(@"should have a cue id", ^{
+        expect(message.cueID).to.equal(@"12345");
       });
     });
     

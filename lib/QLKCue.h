@@ -29,6 +29,7 @@
 #import <GLKit/GLKit.h>
 #import "QLKDefines.h"
 
+// Notifications
 extern NSString * const QLKCueUpdatedNotification;
 extern NSString * const QLKCueNeedsUpdateNotification;
 extern NSString * const QLKCueEditCueNotification;
@@ -63,6 +64,7 @@ extern NSString * const QLKCueTypeArm;
 extern NSString * const QLKCueTypeDisarm;
 extern NSString * const QLKCueTypeStagetracker;
 
+// Special cue identifiers
 extern NSString * const QLKActiveCueListIdentifier;
 extern NSString * const QLKRootCueIdentifier;
 

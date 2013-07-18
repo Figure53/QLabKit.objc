@@ -35,7 +35,6 @@
 
 // Blocks
 typedef void (^QLKMessageHandlerBlock)(id data);
-typedef void (^QLKWorkspaceHandlerBlock)(NSArray *workspaces, NSString *ip);
 
 // Bonjour
 extern NSString * const QLKBonjourTCPServiceType;
