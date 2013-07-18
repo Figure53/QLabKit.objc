@@ -47,6 +47,21 @@ describe(@"message", ^{
     });
   });
   
+//  context(@"when there is a response", ^{
+//    __block QLKMessage *message;
+//    
+//    beforeEach(^{
+//      NSString *json = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:@[@{@"data": @[@"a", @"b", @"c"]}] options:0 error:nil] encoding:NSUTF8StringEncoding];
+//      osc.arguments = @[json];
+//      message = [QLKMessage messageWithOSCMessage:osc];
+//    });
+//    
+//    it(@"should have a response", ^{
+//      expect(message.response).toNot.beNil();
+//      expect(message.response).to.haveCountOf(3);
+//    });
+//  });
+  
   context(@"update", ^{
     it(@"should be an update", ^{
       osc.addressPattern = @"/update/workspace/{workspace_id}";

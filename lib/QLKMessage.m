@@ -109,6 +109,11 @@
   }
 }
 
+- (NSString *)host
+{
+  return self.OSCMessage.replySocket.host;
+}
+
 - (NSArray *)arguments
 {
   return self.OSCMessage.arguments;
@@ -142,14 +147,9 @@
   return [parts subarrayWithRange:NSMakeRange(1, parts.count - 1)];
 }
 
-- (NSString *)body
-{
-  return self.OSCMessage.arguments[0];
-}
-
 - (id)response
 {
-  NSString *body = self.body;
+  NSString *body = self.OSCMessage.arguments[0];
   NSError *error = nil;
   NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
   

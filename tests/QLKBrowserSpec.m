@@ -36,7 +36,7 @@ describe(@"browser", ^{
     });
     
     it(@"should have no services", ^{
-      expect(browser.services).to.haveCountOf(0);
+      expect(browser.services).to.beEmpty();
     });
     
     it(@"should not be running", ^{
@@ -59,6 +59,18 @@ describe(@"browser", ^{
         
     it(@"should have an osc server", ^{
       expect(browser.server).toNot.beNil();
+    });
+  });
+  
+  context(@"when auto updating", ^{
+    beforeEach(^{
+      [browser start];
+      [browser enableAutoRefreshWithInterval:1];
+    });
+    
+    it(@"should have a timer", ^{
+      expect(browser.refreshTimer).toNot.beNil();
+      expect(browser.refreshTimer.timeInterval).to.equal(1);
     });
   });
 });

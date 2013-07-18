@@ -29,6 +29,7 @@
 #import "QLKBrowser.h"
 #import "QLKWorkspace.h"
 #import "QLKServer.h"
+#import "QLKMessage.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -149,47 +150,35 @@
 
 #pragma mark - OSC server delegate
 
-- (void)takeMessage:(F53OSCMessage *)message
+- (void)takeMessage:(F53OSCMessage *)OSCMessage
 {
-  NSString *host = message.replySocket.host;
+  QLKMessage *message = [QLKMessage messageWithOSCMessage:OSCMessage];
+  NSString *host = message.host;
 
 #if DEBUG_OSC
-  NSLog(@"[OSC/UDP %@] message received - address: %@, arguments: %@", host, message.addressPattern, message.arguments);
+  NSLog(@"[OSC/server <-] message: %@", message);
 #endif
   
   // We only care about replies for the /workspaces request
-  if ([message.addressPattern hasPrefix:@"/reply"]) {
-    NSString *body = message.arguments[0];
-    NSError *error = nil;
-    NSDictionary *reply = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
-    NSString *address = [message.addressPattern substringFromIndex:@"/reply".length];
-    id data = reply[@"data"];
+  if ([message isReply] && [message.replyAddress isEqualToString:@"/workspaces"]) {
+    NSArray *workspaces = (NSArray *)message.response;
     
-    if (error) {
-      NSLog(@"error decoding JSON from OSC message: %@", error);
-    }
+    QLKServer *server = [self serverForHost:host];
+    [server updateWorkspaces:workspaces];
     
-    // Workspaces gets handled here
-    if ([address isEqualToString:@"/workspaces"]) {
-      NSArray *workspaces = (NSArray *)data;
-      
-      QLKServer *server = [self serverForHost:host];
-      [server updateWorkspaces:workspaces];
-      
-      // Make sure this is dispatched on main thread
-      dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.delegate) {
-          [self.delegate browserDidUpdateServers:self];
-        }
-      });
-      
-      return;
-    }
+    // Make sure this is dispatched on main thread
+    dispatch_async(dispatch_get_main_queue(), ^{
+      if (self.delegate) {
+        [self.delegate browserDidUpdateServers:self];
+      }
+    });
+    
+    return;
   }
   
   // Some other message - we don't care about
 #if DEBUG_OSC
-  NSLog(@"[OSC] unhandled reply: %@ from %@", message, host);
+  NSLog(@"[OSC/server] unhandled reply: %@ from %@", message, host);
 #endif
 }
 

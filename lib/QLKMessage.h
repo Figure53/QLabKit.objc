@@ -40,11 +40,11 @@
 - (BOOL)isCueUpdate;
 - (BOOL)isPlaybackPositionUpdate;
 - (BOOL)isDisconnect;
+- (NSString *)host;
 - (NSString *)address;
 - (NSArray *)addressParts;
 - (NSString *)replyAddress;
 - (NSString *)addressWithoutWorkspace:(NSString *)workspaceID;
-- (NSString *)body;
 - (id)response;
 - (NSArray *)arguments;
 - (NSString *)cueID;
