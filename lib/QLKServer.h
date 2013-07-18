@@ -35,10 +35,10 @@
 @property (strong, nonatomic) NSString *name;
 
 // Host should almost always be IP address, i.e. @"10.0.1.1"
-@property (strong, nonatomic) NSString *host;
+@property (strong, nonatomic, readonly) NSString *host;
 
 // Port to connect to on the server, 53000 by default
-@property (assign, nonatomic) NSInteger port;
+@property (assign, nonatomic, readonly) NSInteger port;
 
 // The netservice used to discover this server (you don't have to worry about this)
 @property (strong, nonatomic) NSNetService *netService;

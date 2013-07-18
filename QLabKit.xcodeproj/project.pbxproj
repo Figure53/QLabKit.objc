@@ -11,6 +11,7 @@
 		921DB1D117970D7200ADDB2D /* QLKMessageTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 921DB1D017970D7200ADDB2D /* QLKMessageTest.m */; };
 		92314E4C179725BE0044158A /* QLKMessageSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 92314E4B179725BE0044158A /* QLKMessageSpec.m */; };
 		92314E5C1798784F0044158A /* QLKServerSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 92314E5B1798784F0044158A /* QLKServerSpec.m */; };
+		92DD79AF17988DDC00DD0C3E /* QLKBrowserSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 92DD79AE17988DDC00DD0C3E /* QLKBrowserSpec.m */; };
 		92F3E9ED178B1BC500A4C617 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F3E9EC178B1BC500A4C617 /* Cocoa.framework */; };
 		92F3E9F7178B1BC500A4C617 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 92F3E9F5178B1BC500A4C617 /* InfoPlist.strings */; };
 		92F3E9F9178B1BC500A4C617 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3E9F8178B1BC500A4C617 /* main.m */; };
@@ -66,6 +67,7 @@
 		921DB1D217970F3C00ADDB2D /* QLabKitTests-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "QLabKitTests-Prefix.pch"; sourceTree = "<group>"; };
 		92314E4B179725BE0044158A /* QLKMessageSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKMessageSpec.m; sourceTree = "<group>"; };
 		92314E5B1798784F0044158A /* QLKServerSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKServerSpec.m; sourceTree = "<group>"; };
+		92DD79AE17988DDC00DD0C3E /* QLKBrowserSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKBrowserSpec.m; sourceTree = "<group>"; };
 		92F3E9E9178B1BC500A4C617 /* QLabKitDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QLabKitDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92F3E9EC178B1BC500A4C617 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		92F3E9EF178B1BC500A4C617 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -232,6 +234,7 @@
 				921DB1D017970D7200ADDB2D /* QLKMessageTest.m */,
 				92314E4B179725BE0044158A /* QLKMessageSpec.m */,
 				92314E5B1798784F0044158A /* QLKServerSpec.m */,
+				92DD79AE17988DDC00DD0C3E /* QLKBrowserSpec.m */,
 				92F3EA10178B1BC600A4C617 /* Supporting Files */,
 			);
 			name = QLabKitTests;
@@ -489,6 +492,7 @@
 				921DB1D117970D7200ADDB2D /* QLKMessageTest.m in Sources */,
 				92314E4C179725BE0044158A /* QLKMessageSpec.m in Sources */,
 				92314E5C1798784F0044158A /* QLKServerSpec.m in Sources */,
+				92DD79AF17988DDC00DD0C3E /* QLKBrowserSpec.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
