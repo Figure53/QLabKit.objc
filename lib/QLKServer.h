@@ -44,7 +44,7 @@
 @property (strong, nonatomic) NSNetService *netService;
 
 // Array of QLKWorkspace objects that belong to this server
-@property (strong, nonatomic) NSMutableArray *workspaces;
+@property (strong, nonatomic, readonly) NSMutableArray *workspaces;
 
 // Create a server with the host and port to connect
 - (id)initWithHost:(NSString *)host port:(NSInteger)port;
@@ -56,7 +56,7 @@
 // Update the server
 - (void)updateWorkspaces:(NSArray *)workspaces;
 
-// Add a workspace to the 
+// Add a workspace to the server
 - (void)addWorkspace:(QLKWorkspace *)workspace;
 - (void)removeWorkspace:(QLKWorkspace *)workspace;
 - (void)removeAllWorkspaces;

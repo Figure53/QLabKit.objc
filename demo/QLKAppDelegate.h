@@ -32,8 +32,8 @@
 
 @property (strong) QLKWorkspace *workspace;
 @property (assign) IBOutlet NSWindow *window;
-@property (weak) IBOutlet NSTableView *qlab;
-@property (weak) IBOutlet NSTableView *cues;
+@property (weak) IBOutlet NSTableView *serversTableView;
+@property (weak) IBOutlet NSTableView *cuesTableView;
 @property (weak) IBOutlet NSTextField *connectionLabel;
 
 - (IBAction)go:(id)sender;

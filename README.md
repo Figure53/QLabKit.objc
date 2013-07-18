@@ -15,7 +15,7 @@ There are four primary classes you will use for talking to QLab:
 - `QLKWorkspace` - a single workspace on a server
 - `QLKCue` - a simplified representation of a cue. A cue list is also represented as a cue
 
-There are other classes in QLabKit that these classes rely on that you need not worry about. Read the headers of these primary classes for more usage information. All classes in QLabKit use ARC.
+There are other  classes in QLabKit that these classes rely on that you need not worry about. Read the headers of these primary classes for more usage information. All classes in QLabKit use ARC.
 
 ## Usage
 
@@ -51,8 +51,6 @@ Implement the single delegate method. The browser has a `servers` property that 
 ```
 
 ### Manual
-
-*Note: this is not implemented yet*
 
 If you don't want to automatically discover QLab, you can also do it manually by first creating a server:
 

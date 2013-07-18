@@ -6,7 +6,6 @@
 //  Copyright (c) 2013 Figure 53. All rights reserved.
 //
 
-#import "specta.h"
 #import "QLKMessage.h"
 #import "F53OSCMessage.h"
 

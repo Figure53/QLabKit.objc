@@ -43,6 +43,7 @@
   self = [super init];
   if (!self) return nil;
   
+  _name = @"";
   _host = host;
   _port = port;
   _workspaces = [[NSMutableArray alloc] init];
@@ -66,7 +67,16 @@
 
 - (void)refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block
 {
-  
+  // Create TCP connection so we can receive the response
+  self.client.useTCP = YES;
+  [self.client connect];
+  [self.client sendMessage:nil toAddress:@"/workspaces" block:^(NSArray *data) {
+    [self.client disconnect];
+    self.client.useTCP = NO;
+    
+    [self updateWorkspaces:data];
+    if (block) block(self.workspaces);
+  }];
 }
 
 - (void)updateWorkspaces:(NSArray *)workspaces

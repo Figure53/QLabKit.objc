@@ -29,6 +29,9 @@
 #import "QLabKit.h"
 
 #define REFRESH_INTERVAL 5 // seconds
+#define AUTOMATIC_CONNECTION 0
+#define QLAB_IP @"10.0.1.201"
+#define QLAB_PORT 53000
 
 @interface QLKAppDelegate ()
 
@@ -45,13 +48,26 @@
   
   self.rows = [NSMutableArray array];
   
-  self.browser = [[QLKBrowser alloc] init];
-  self.browser.delegate = self;
-  [self.browser start];
-  [self.browser enableAutoRefreshWithInterval:REFRESH_INTERVAL];
+  if (AUTOMATIC_CONNECTION) {
+    // Find QLab using continuously updating browser
+    self.browser = [[QLKBrowser alloc] init];
+    self.browser.delegate = self;
+    [self.browser start];
+    [self.browser enableAutoRefreshWithInterval:REFRESH_INTERVAL];
+  } else {
+    // Manual connect to server and get workspaces
+    QLKServer *server = [[QLKServer alloc] initWithHost:QLAB_IP port:QLAB_PORT];
+    server.name = @"QLab";
+    [server refreshWorkspacesWithCompletion:^(NSArray *workspaces) {
+      [self.rows addObject:server];
+      [self.rows addObjectsFromArray:server.workspaces];
+      
+      [self.serversTableView reloadData];
+    }];
+  }
   
-  self.qlab.doubleAction = @selector(connect:);
-  self.qlab.target = self;
+  self.serversTableView.doubleAction = @selector(connect:);
+  self.serversTableView.target = self;
 }
 
 - (IBAction)go:(id)sender
@@ -78,7 +94,7 @@
 {
   [self disconnect:nil];
   
-  NSInteger selectedRow = self.qlab.selectedRow;
+  NSInteger selectedRow = self.serversTableView.selectedRow;
   if (selectedRow == -1) return;
   
   self.workspace = self.rows[selectedRow];
@@ -89,7 +105,7 @@
 
 - (void)cuesUpdated:(NSNotification *)notification
 {
-  [self.cues reloadData];
+  [self.cuesTableView reloadData];
 }
 
 #pragma mark - QLKBrowserDelegate
@@ -103,21 +119,21 @@
     [self.rows addObjectsFromArray:server.workspaces];
   }
   
-  [self.qlab reloadData];
+  [self.serversTableView reloadData];
 }
 
 #pragma mark - NSTableViewDelegate
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
 {
-  return (tableView == self.qlab) ? self.rows.count : self.workspace.firstCueList.cues.count;
+  return (tableView == self.serversTableView) ? self.rows.count : self.workspace.firstCueList.cues.count;
 }
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
   NSTableCellView *cellView = [tableView makeViewWithIdentifier:@"MainCell" owner:self];
 
-  if (tableView == self.qlab) {
+  if (tableView == self.serversTableView) {
     id obj = self.rows[row];
     cellView.textField.stringValue = [(QLKWorkspace *)obj name];
   } else {
@@ -130,7 +146,7 @@
 
 - (BOOL)tableView:(NSTableView *)tableView isGroupRow:(NSInteger)row
 {
-  return (tableView == self.qlab) ? [self.rows[row] isKindOfClass:[QLKServer class]] : NO;
+  return (tableView == self.serversTableView) ? [self.rows[row] isKindOfClass:[QLKServer class]] : NO;
 }
 
 - (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row
