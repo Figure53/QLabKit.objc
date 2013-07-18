@@ -1,6 +1,6 @@
 # QLabKit
 
-QLabKit is an Objective-C library for controlling QLab over the new OSC API introduced in QLab 3.
+QLabKit is an Objective-C library for controlling QLab over the new OSC API introduced in QLab 3. It runs on OS X (10.7+) and iOS (6.0+).
 
 ## Installation
 
@@ -15,7 +15,7 @@ There are four primary classes you will use for talking to QLab:
 - `QLKWorkspace` - a single workspace on a server
 - `QLKCue` - a simplified representation of a cue. A cue list is also represented as a cue
 
-There are other classes in QLabKit that these classes rely on that you need not worry about. Read the headers of these primary classes for more usage information.
+There are other classes in QLabKit that these classes rely on that you need not worry about. Read the headers of these primary classes for more usage information. All classes in QLabKit use ARC.
 
 ## Usage
 

@@ -26,8 +26,9 @@
 //
 
 #import "QLKBrowser.h"
-#import "QLKWorkspace.h"
 #import "QLKServer.h"
-#import "QLKCue.h"
 #import "QLKClient.h"
+#import "QLKWorkspace.h"
+#import "QLKCue.h"
 #import "QLKMessage.h"
+#import "QLKColor.h"

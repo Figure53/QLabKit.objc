@@ -173,10 +173,6 @@
     if ([address isEqualToString:@"/workspaces"]) {
       NSArray *workspaces = (NSArray *)data;
       
-      if (self.workspaceBlock) {
-        self.workspaceBlock(workspaces, host);
-      }
-      
       QLKServer *server = [self serverForHost:host];
       [server updateWorkspaces:workspaces];
       
