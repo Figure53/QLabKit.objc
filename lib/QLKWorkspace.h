@@ -131,4 +131,14 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void)fetchDisplayAndGeometryForCue:(QLKCue *)cue;
 - (void)runningOrPausedCuesWithBlock:(QLKMessageHandlerBlock)block;
 
+// Lower level API
+- (void)sendMessage:(id)object toAddress:(NSString *)address;
+- (void)sendMessage:(id)object toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
+
+// Helper for sending messages to this workspace: /workspace/<workspace_id>
+- (NSString *)workspacePrefix;
+
+// Helper for sending message to a specific cue: /cue_id/<cue.uid>/action
+- (NSString *)addressForCue:(QLKCue *)cue action:(NSString *)action;
+
 @end

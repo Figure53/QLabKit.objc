@@ -57,9 +57,6 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 - (void)sendHeartbeat;
 - (void)heartbeatTimeout:(NSTimer *)timer;
 
-- (NSString *)workspacePrefix;
-- (NSString *)addressForCue:(QLKCue *)cue action:(NSString *)action;
-
 @end
 
 @implementation QLKWorkspace
@@ -124,10 +121,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (void)connect
 {
-  NSLog(@"connect: %@, %@", self.name, self.serverName);
-  
   [self connectWithPasscode:nil completion:nil];
-  [self finishConnection];
 }
 
 - (void)connectWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
@@ -582,6 +576,17 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 }
 
 #pragma mark - OSC address helpers
+
+
+- (void)sendMessage:(id)object toAddress:(NSString *)address
+{
+  [self sendMessage:object toAddress:address block:nil];
+}
+
+- (void)sendMessage:(id)object toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
+{
+  [self.client sendMessage:object toAddress:address block:block];
+}
 
 - (NSString *)addressForCue:(QLKCue *)cue action:(NSString *)action
 {
