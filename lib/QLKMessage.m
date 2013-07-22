@@ -98,12 +98,20 @@
   return [self.address hasSuffix:@"/disconnect"];
 }
 
+- (BOOL)isReplyCueUpdate
+{
+  // /reply/cue_id/1/action
+  return [self.address hasPrefix:@"/reply/cue_id"];
+}
+
 - (NSString *)cueID
 {
   if ([self isCueUpdate]) {
     return self.addressParts[4];
   } else if ([self isPlaybackPositionUpdate]) {
-    return self.arguments[0];
+    return (self.arguments.count > 0) ? self.arguments[0] : nil;
+  } else if ([self isReplyCueUpdate]) {
+    return self.addressParts[2];
   } else {
     return nil;
   }
@@ -126,7 +134,7 @@
 
 - (NSString *)replyAddress
 {
-  return [self.address substringFromIndex:@"/reply".length];
+  return (self.isReply) ? [self.address substringFromIndex:@"/reply".length] : self.address;
 }
 
 - (NSString *)addressWithoutWorkspace:(NSString *)workspaceID

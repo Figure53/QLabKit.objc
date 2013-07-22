@@ -26,7 +26,6 @@ describe(@"message", ^{
   specify(@"address parts", ^{
     osc.addressPattern = @"/update/workspace/{workspace_id}/cue_id/{cue_id}";
     QLKMessage *message = [QLKMessage messageWithOSCMessage:osc];
-    
     NSArray *parts = message.addressParts;
     
     expect(parts.count).to.beGreaterThan(0);
@@ -39,11 +38,30 @@ describe(@"message", ^{
     expect(parts[4]).to.equal(@"{cue_id}");
   });
   
+  specify(@"address without a workspace should not have a workspace", ^{
+    osc.addressPattern = @"/reply/workspace/0A296D1A-85CD-4398-ACBE-800119C788B7/connect";
+    QLKMessage *message = [QLKMessage messageWithOSCMessage:osc];
+    
+    expect([message addressWithoutWorkspace:@"0A296D1A-85CD-4398-ACBE-800119C788B7"]).to.equal(@"/connect");
+  });
+  
   context(@"reply", ^{
     it(@"should be a reply", ^{
       osc.addressPattern = @"/reply/workspace/IDDQD-IDKFA/cueLists";
       QLKMessage *message = [QLKMessage messageWithOSCMessage:osc];
       expect([message isReply]).to.beTruthy();
+    });
+    
+    specify(@"reply address should not contain /reply", ^{
+      osc.addressPattern = @"/reply/workspace/IDDQD-IDKFA/cueLists";
+      QLKMessage *message = [QLKMessage messageWithOSCMessage:osc];
+      expect(message.replyAddress).to.equal(@"/workspace/IDDQD-IDKFA/cueLists");
+    });
+    
+    specify(@"non-reply address should not be modified", ^{
+      osc.addressPattern = @"/workspace/IDDQD-IDKFA/cueLists";
+      QLKMessage *message = [QLKMessage messageWithOSCMessage:osc];
+      expect(message.replyAddress).to.equal(@"/workspace/IDDQD-IDKFA/cueLists");
     });
   });
   

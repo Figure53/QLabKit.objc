@@ -102,14 +102,14 @@
 - (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
 {
   if (block) {
+    NSLog(@"[client] saving block for address: %@", address);
     self.callbacks[address] = block;
   }
   
-  // FIXME: need to use workspace prefix
-  NSString *fullAddress = address; //[NSString stringWithFormat:@"%@%@", [self workspacePrefix], address];
+  NSString *fullAddress = [NSString stringWithFormat:@"%@%@", [self workspacePrefix], address];
   
 #if DEBUG_OSC
-  NSLog(@"[OSC ->] to: %@, data: %@", fullAddress, messages);
+  NSLog(@"[OSC ->] %@, data: %@", fullAddress, messages);
 #endif
   
   F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:fullAddress arguments:messages];
@@ -121,6 +121,11 @@
 - (void)notifyAboutConnectionError
 {
   
+}
+
+- (NSString *)workspacePrefix
+{
+  return [NSString stringWithFormat:@"/workspace/%@", [self.delegate workspaceID]];
 }
 
 #pragma mark - F53OSCPacketDestination
@@ -150,32 +155,30 @@
 - (void)processMessage:(QLKMessage *)message
 {
 #if DEBUG_OSC
-  NSLog(@"[OSC <-] message: %@", message);
+  NSLog(@"[OSC <-] %@", message);
 #endif
   
-  if ([message isReply]) {
-    // Reply to a message we sent
-    NSString *address = [message addressWithoutWorkspace:[self.delegate workspaceID]];
-
+  if ([message isReply]) {    
     id data = message.response;
     
     // Special case, want to update cue properties
-    if ([address hasPrefix:@"/cue_id"]) {
-      NSString *cueID = [address componentsSeparatedByString:@"/"][2];
-      
+    if ([message isReplyCueUpdate]) {
       if ([data isKindOfClass:[NSDictionary class]]) {
-        [self.delegate cueUpdated:cueID withProperties:data];
+        NSLog(@"[client] cue: %@, updated with properties: %@", message.cueID, data);
+        [self.delegate cueUpdated:message.cueID withProperties:data];
       }
     }
     
-    QLKMessageHandlerBlock block = self.callbacks[address];
+    // Reply to a message we sent
+    NSString *relativeAddress = [message addressWithoutWorkspace:[self.delegate workspaceID]];
+    QLKMessageHandlerBlock block = self.callbacks[relativeAddress];
     
     if (block) {
 			dispatch_async(dispatch_get_main_queue(), ^{
 				block(data);
         
-        // Clear handler for address
-        [self.callbacks removeObjectForKey:address];
+        // Remove handler for address
+        [self.callbacks removeObjectForKey:relativeAddress];
 			});
     }
   } else if ([message isUpdate]) {

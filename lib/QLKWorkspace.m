@@ -150,6 +150,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
   
   // Tell QLab we're connecting
   [self.client sendMessage:passcode toAddress:@"/connect" block:^(id data) {
+    NSLog(@"workspace did connect");
     [self finishConnection];
     if (block) block(data);
   }];
@@ -607,9 +608,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 - (void)cueUpdated:(NSString *)cueID
 {
   QLKCue *cue = [self cueWithId:cueID];
-  
-  NSLog(@"update cue: %@", cue);
-  
+    
   if ([cue isGroup]) {
     [self fetchChildrenForCue:cue completion:^(id data) {
       NSMutableArray *children = [NSMutableArray array];

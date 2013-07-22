@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		921DB1CE1796F65800ADDB2D /* QLKMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 921DB1CD1796F65700ADDB2D /* QLKMessage.m */; };
-		921DB1D117970D7200ADDB2D /* QLKMessageTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 921DB1D017970D7200ADDB2D /* QLKMessageTest.m */; };
 		92314E4C179725BE0044158A /* QLKMessageSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 92314E4B179725BE0044158A /* QLKMessageSpec.m */; };
 		92314E5C1798784F0044158A /* QLKServerSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 92314E5B1798784F0044158A /* QLKServerSpec.m */; };
 		92DD79AF17988DDC00DD0C3E /* QLKBrowserSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 92DD79AE17988DDC00DD0C3E /* QLKBrowserSpec.m */; };
@@ -62,8 +61,6 @@
 		89F51E14F3AD4ED2BD46A4AD /* Pods-test.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-test.xcconfig"; path = "Pods/Pods-test.xcconfig"; sourceTree = SOURCE_ROOT; };
 		921DB1CC1796F65700ADDB2D /* QLKMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKMessage.h; sourceTree = "<group>"; };
 		921DB1CD1796F65700ADDB2D /* QLKMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKMessage.m; sourceTree = "<group>"; };
-		921DB1CF17970D7200ADDB2D /* QLKMessageTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKMessageTest.h; sourceTree = "<group>"; };
-		921DB1D017970D7200ADDB2D /* QLKMessageTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKMessageTest.m; sourceTree = "<group>"; };
 		921DB1D217970F3C00ADDB2D /* QLabKitTests-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "QLabKitTests-Prefix.pch"; sourceTree = "<group>"; };
 		92314E4B179725BE0044158A /* QLKMessageSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKMessageSpec.m; sourceTree = "<group>"; };
 		92314E5B1798784F0044158A /* QLKServerSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKServerSpec.m; sourceTree = "<group>"; };
@@ -230,8 +227,6 @@
 		92F3EA0F178B1BC600A4C617 /* QLabKitTests */ = {
 			isa = PBXGroup;
 			children = (
-				921DB1CF17970D7200ADDB2D /* QLKMessageTest.h */,
-				921DB1D017970D7200ADDB2D /* QLKMessageTest.m */,
 				92314E4B179725BE0044158A /* QLKMessageSpec.m */,
 				92314E5B1798784F0044158A /* QLKServerSpec.m */,
 				92DD79AE17988DDC00DD0C3E /* QLKBrowserSpec.m */,
@@ -489,7 +484,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				921DB1D117970D7200ADDB2D /* QLKMessageTest.m in Sources */,
 				92314E4C179725BE0044158A /* QLKMessageSpec.m in Sources */,
 				92314E5C1798784F0044158A /* QLKServerSpec.m in Sources */,
 				92DD79AF17988DDC00DD0C3E /* QLKBrowserSpec.m in Sources */,
