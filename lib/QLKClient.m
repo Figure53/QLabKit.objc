@@ -101,12 +101,17 @@
 
 - (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
 {
+  [self sendMessages:messages toAddress:address workspace:NO block:block];
+}
+
+- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block
+{
   if (block) {
     NSLog(@"[client] saving block for address: %@", address);
     self.callbacks[address] = block;
   }
   
-  NSString *fullAddress = [NSString stringWithFormat:@"%@%@", [self workspacePrefix], address];
+  NSString *fullAddress = (toWorkspace && self.delegate) ? [NSString stringWithFormat:@"%@%@", [self workspacePrefix], address] : address;
   
 #if DEBUG_OSC
   NSLog(@"[OSC ->] %@, data: %@", fullAddress, messages);

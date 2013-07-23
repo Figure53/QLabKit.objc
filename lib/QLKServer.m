@@ -69,8 +69,14 @@
 {
   // Create TCP connection so we can receive the response
   self.client.useTCP = YES;
-  [self.client connect];
-  [self.client sendMessage:nil toAddress:@"/workspaces" block:^(NSArray *data) {
+  if (![self.client connect]) {
+    NSLog(@"[server] error connecting to server: %@:%d", self.host, self.port);
+  }
+  
+  NSLog(@"[server] fetching workspaces...");
+  
+  [self.client sendMessages:@[] toAddress:@"/workspaces" workspace:NO block:^(NSArray *data) {
+    NSLog(@"[server] workspaces fetched");
     [self.client disconnect];
     self.client.useTCP = NO;
     
