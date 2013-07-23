@@ -47,8 +47,8 @@
 + (QLKColor *)colorWithName:(NSString *)name;
 - (BOOL)isEqualToColor:(QLKColor *)color;
 
-+ (QLKColor *)panelColor;
-+ (QLKColor *)navBarColor;
++ (QLKColorClass *)panelColor;
++ (QLKColorClass *)navBarColor;
 
 + (QLKColorClass *)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha;
 + (QLKColorClass *)colorWithWhite:(CGFloat)white alpha:(CGFloat)alpha;
