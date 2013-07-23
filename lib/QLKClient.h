@@ -57,5 +57,6 @@
 - (void)sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
 - (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address;
 - (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
+- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block;
 
 @end
