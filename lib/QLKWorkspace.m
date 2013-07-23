@@ -126,12 +126,12 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (void)connectWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
 {
-  NSLog(@"[workspace] connect with passcode: %@, %@", self.name, passcode);
+  NSLog(@"[workspace] connect with passcode: %@, passcode? %d", self.name, (passcode != nil));
   
   if ([self.client connect]) {
 		NSLog(@"[workspace] connected to server");
 	} else {
-    NSLog(@"*** Error: couldn't connect to server");
+    NSLog(@"[workspace] *** Error: couldn't connect to server");
     // Notify that we are unable to connect to workspace
     [self notifyAboutConnectionError];
     return;
@@ -144,7 +144,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
   
   // Tell QLab we're connecting
   [self.client sendMessage:passcode toAddress:@"/connect" block:^(id data) {
-    NSLog(@"workspace did connect");
+    NSLog(@"[workspace] did connect: %@", data);
     [self finishConnection];
     if (block) block(data);
   }];
@@ -161,7 +161,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (void)disconnect
 {
-  NSLog(@"disconnect: %@", self.name);
+  NSLog(@"[workspace] disconnect: %@", self.name);
   [self disconnectFromWorkspace];
   [self stopReceivingUpdates];
   self.connected = NO;
@@ -174,16 +174,16 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 // Reconnect when app wakes from sleep
 - (void)reconnect
 {
-  NSLog(@"reconnecting...");
+  NSLog(@"[workspace] reconnecting...");
 
   // Try to use some password as before
   [self connectWithPasscode:self.passcode completion:^(id data) {
-    NSLog(@"reconnect response: %@", data);
+    NSLog(@"[workspace] reconnect response: %@", data);
     if ([data isEqualToString:@"ok"]) {
-      NSLog(@"reconnected successfully: %@", data);
+      NSLog(@"[workspace] reconnected successfully: %@", data);
       [self finishConnection];
     } else {
-      NSLog(@"error reconnecting");
+      NSLog(@"[workspace] error reconnecting");
       [self notifyAboutConnectionError];
     }
   }];
@@ -192,7 +192,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 // Temporary disconnect when going to sleep
 - (void)temporarilyDisconnect
 {
-  NSLog(@"temp disconnect");
+  NSLog(@"[workspace] temp disconnect");
   [self disconnectFromWorkspace];
   [self stopHeartbeat];
   [self stopReceivingUpdates];
@@ -203,7 +203,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (void)notifyAboutConnectionError
 {
-  NSLog(@"notifyAboutConnectionError: main thread? %d", [NSThread isMainThread]);
+  NSLog(@"[workspace] notifyAboutConnectionError: main thread? %d", [NSThread isMainThread]);
   [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceConnectionErrorNotification object:self];
 }
 
@@ -242,15 +242,13 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 }
 
 - (void)enableAlwaysReply
-{
-  F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:@"/alwaysReply" arguments:@[@YES]];
-  [self.client sendMessage:message];
+{  
+  [self.client sendMessages:@[@YES] toAddress:@"/alwaysReply" workspace:NO block:nil];
 }
 
 - (void)disableAlwaysReply
 {
-  F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:@"/alwaysReply" arguments:@[@NO]];
-  [self.client sendMessage:message];
+  [self.client sendMessages:@[@NO] toAddress:@"/alwaysReply" workspace:NO block:nil];
 }
 
 - (void)fetchCueLists

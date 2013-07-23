@@ -34,6 +34,7 @@
 #include <arpa/inet.h>
 
 #define DEBUG_OSC 1
+#define DEBUG_BROWSER 0
 #define UDP_SERVER_PORT 53001
 
 @interface QLKBrowser ()
@@ -53,6 +54,7 @@
 - (void)dealloc
 {
   [self disableAutoRefresh];
+  self.server.delegate = nil;
   [self.server stopListening];
   [self.browser stop];
 }
@@ -113,7 +115,7 @@
 
 - (void)stop
 {
-  NSLog(@"stop listening for servers...");
+  NSLog(@"[browser] stopping OSC server and bonjour");
   self.running = NO;
 
   // Remove all servers and stop OSC server
@@ -156,7 +158,7 @@
   NSString *host = message.host;
 
 #if DEBUG_OSC
-  NSLog(@"[OSC/server <-] message: %@", message);
+  NSLog(@"[OSC:server <-] %@", message);
 #endif
   
   // We only care about replies for the /workspaces request
@@ -178,14 +180,14 @@
   
   // Some other message - we don't care about
 #if DEBUG_OSC
-  NSLog(@"[OSC/server] unhandled reply: %@ from %@", message, host);
+  NSLog(@"[OSC:server] unhandled reply: %@ from %@", message, host);
 #endif
 }
 
 - (void)takeBundle:(F53OSCBundle *)bundle
 {
 #if DEBUG_OSC
-  NSLog(@"[OSC] bundle received: %@", bundle);
+  NSLog(@"[OSC:server] bundle received: %@", bundle);
 #endif
 }
 
@@ -193,7 +195,7 @@
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
 {
-#if DEBUG
+#if DEBUG_BROWSER
   NSLog(@"netServiceBrowser:didFindService: %@", netService);
 #endif
   
@@ -206,7 +208,10 @@
 // Remove the server and all workspaces
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)netService moreComing:(BOOL)moreComing
 {
-  NSLog(@"didRemoveService: %@", netService);
+#if DEBUG_BROWSER
+  NSLog(@"netServiceBrowser:didRemoveService: %@", netService);
+#endif
+  
   QLKServer *server = [self serverForNetService:netService];
   [self.servers removeObject:server];
   
@@ -223,7 +228,10 @@
 // Resolved address for net service, now get workspaces
 - (void)netServiceDidResolveAddress:(NSNetService *)netService
 {
+#if DEBUG_BROWSER
   NSLog(@"netServiceDidResolveAddress: %@", netService);
+#endif
+  
   NSString *ip = [self IPAddressFromData:netService.addresses[0]];
   NSInteger port = netService.port;
   

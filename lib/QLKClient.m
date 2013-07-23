@@ -80,6 +80,10 @@
 
 - (void)sendMessage:(F53OSCMessage *)message
 {
+#if DEBUG_OSC
+  NSLog(@"[OSC:client ->] %@", message.addressPattern);
+#endif
+  
   [self.OSCClient sendPacket:message];
 }
 
@@ -101,20 +105,19 @@
 
 - (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
 {
-  [self sendMessages:messages toAddress:address workspace:NO block:block];
+  [self sendMessages:messages toAddress:address workspace:YES block:block];
 }
 
 - (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block
 {
   if (block) {
-    NSLog(@"[client] saving block for address: %@", address);
     self.callbacks[address] = block;
   }
   
   NSString *fullAddress = (toWorkspace && self.delegate) ? [NSString stringWithFormat:@"%@%@", [self workspacePrefix], address] : address;
   
 #if DEBUG_OSC
-  NSLog(@"[OSC ->] %@, data: %@", fullAddress, messages);
+  NSLog(@"[OSC:client ->] %@, data: %@", fullAddress, messages);
 #endif
   
   F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:fullAddress arguments:messages];
@@ -144,12 +147,12 @@
 
 - (void)clientDidConnect:(F53OSCClient *)client
 {
-  NSLog(@"clientDidConnect: %@", client);
+  NSLog(@"[client] clientDidConnect: %@", client);
 }
 
 - (void)clientDidDisconnect:(F53OSCClient *)client
 {
-  NSLog(@"clientDidDisconnect: %@, connected? %d", client, self.connected);
+  NSLog(@"[client] clientDidDisconnect: %@, connected? %d", client, self.connected);
   
   // Only care if we think we're connected
   if (self.connected) {
@@ -160,7 +163,7 @@
 - (void)processMessage:(QLKMessage *)message
 {
 #if DEBUG_OSC
-  NSLog(@"[OSC <-] %@", message);
+  NSLog(@"[OSC:client <-] %@", message);
 #endif
   
   if ([message isReply]) {    
@@ -197,7 +200,7 @@
     } else if ([message isDisconnect]) {
       [self notifyAboutConnectionError];
     } else {
-      NSLog(@"unhandled update message: %@", message.address);
+      NSLog(@"[client] unhandled update message: %@", message.address);
     }
   }
 }
