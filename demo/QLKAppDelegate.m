@@ -87,6 +87,7 @@
     self.workspace = nil;
     
     self.connectionLabel.stringValue = @"";
+    [self.cuesTableView reloadData];
   }
 }
 
@@ -99,6 +100,7 @@
   
   self.workspace = self.rows[selectedRow];
   [self.workspace connectWithPasscode:nil completion:^(id data) {
+    NSLog(@"[app delegate] workspace did connect");
     self.connectionLabel.stringValue = [NSString stringWithFormat:@"Connected: %@", self.workspace.fullName];
   }];
 }
@@ -135,7 +137,7 @@
 
   if (tableView == self.serversTableView) {
     id obj = self.rows[row];
-    cellView.textField.stringValue = [(QLKWorkspace *)obj name];
+    cellView.textField.stringValue = ([obj isKindOfClass:[QLKServer class]]) ? [(QLKServer *)obj name].uppercaseString : [(QLKWorkspace *)obj name];
   } else {
     QLKCue *cue = self.workspace.firstCueList.cues[row];
     cellView.textField.stringValue = ([tableColumn.identifier isEqualToString:@"number"]) ? cue.number : cue.displayName;
