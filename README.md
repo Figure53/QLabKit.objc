@@ -78,6 +78,14 @@ QLKWorkspace *workspace; // assume this exists as a result of one of the earlier
 // Tell workspace to GO
 [workspace go];
 
+// Update name of a cue, assuming you have a cue object
+[workspace cue:cue updateName:@"New name"];
+```
+
+The workspace exposes higher level methods so you don't have to directly deal with formatting the correct message and address. However, there may be API calls that the workspace class doesn't currently support, and you can use the lower-level methods to manually send a message.
+
+```
+[workspace sendMessage:@"New Name" toAddress:"/workspace/<workspace_id>/cue_id/<cue_id>/name"];
 ```
 
 There is also working demo project that shows how you might hook all of this together to find servers on the network, show their workspaces, connect to a workspace, and finally fetch and display all the cues. Open `QLabKit.xcworkspace` and run the `QLabKitDemo` project.
