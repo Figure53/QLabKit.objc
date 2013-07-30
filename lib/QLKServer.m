@@ -55,7 +55,7 @@
 
 - (NSString *)description
 {
-  return [NSString stringWithFormat:@"%@ - %@ - %@:%ld", [super description], self.name, self.host, self.port];
+  return [NSString stringWithFormat:@"%@ - %@ - %@:%ld", [super description], self.name, self.host, (long)self.port];
 }
 
 #pragma mark - Workspaces
@@ -73,10 +73,7 @@
     NSLog(@"[server] error connecting to server: %@:%d", self.host, self.port);
   }
   
-  NSLog(@"[server] fetching workspaces...");
-  
   [self.client sendMessages:@[] toAddress:@"/workspaces" workspace:NO block:^(NSArray *data) {
-    NSLog(@"[server] workspaces fetched");
     [self.client disconnect];
     self.client.useTCP = NO;
     

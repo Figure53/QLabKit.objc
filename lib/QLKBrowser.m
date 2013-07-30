@@ -242,8 +242,12 @@
   
   NSLog(@"added server: %@", server);
   
-  [self.servers addObject:server];  
+  [self.servers addObject:server];
   [server refreshWorkspaces];
+  
+  if (self.delegate) {
+    [self.delegate browserDidUpdateServers:self];
+  }
   
   // Once resolved, we can remove the net service
   [self.services removeObject:netService];

@@ -81,7 +81,7 @@
 - (void)sendMessage:(F53OSCMessage *)message
 {
 #if DEBUG_OSC
-  NSLog(@"[OSC:client ->] %@", message.addressPattern);
+  NSLog(@"[OSC:client ->] %@ (%@:%d)", message.addressPattern, self.OSCClient.host, self.OSCClient.port);
 #endif
   
   [self.OSCClient sendPacket:message];
@@ -117,7 +117,7 @@
   NSString *fullAddress = (toWorkspace && self.delegate) ? [NSString stringWithFormat:@"%@%@", [self workspacePrefix], address] : address;
   
 #if DEBUG_OSC
-  NSLog(@"[OSC:client ->] %@, data: %@", fullAddress, messages);
+  NSLog(@"[OSC:client ->] %@, data: %@ (%@:%d)", fullAddress, messages, self.OSCClient.host, self.OSCClient.port);
 #endif
   
   F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:fullAddress arguments:messages];
