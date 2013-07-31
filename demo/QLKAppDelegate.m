@@ -30,7 +30,7 @@
 
 #define REFRESH_INTERVAL 3 // seconds
 #define AUTOMATIC_CONNECTION 1
-#define QLAB_IP @"10.0.1.201"
+#define QLAB_IP @"10.0.1.111"
 #define QLAB_PORT 53000
 
 @interface QLKAppDelegate ()
