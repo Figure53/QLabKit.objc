@@ -125,12 +125,8 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 }
 
 - (void)connectWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
-{
-  NSLog(@"[workspace] connect with passcode: %@, passcode? %d", self.name, (passcode != nil));
-  
-  if ([self.client connect]) {
-		NSLog(@"[workspace] connected to server");
-	} else {
+{  
+  if (![self.client connect]) {
     NSLog(@"[workspace] *** Error: couldn't connect to server");
     // Notify that we are unable to connect to workspace
     [self notifyAboutConnectionError];
@@ -144,7 +140,6 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
   
   // Tell QLab we're connecting
   [self.client sendMessage:passcode toAddress:@"/connect" block:^(id data) {
-    NSLog(@"[workspace] did connect: %@", data);
     [self finishConnection];
     if (block) block(data);
   }];

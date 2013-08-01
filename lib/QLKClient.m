@@ -31,7 +31,7 @@
 #import "QLKMessage.h"
 #import "F53OSC.h"
 
-#define DEBUG_OSC 1
+#define DEBUG_OSC 0
 
 @interface QLKClient ()
 
@@ -147,13 +147,10 @@
 
 - (void)clientDidConnect:(F53OSCClient *)client
 {
-  NSLog(@"[client] clientDidConnect: %@", client);
 }
 
 - (void)clientDidDisconnect:(F53OSCClient *)client
-{
-  NSLog(@"[client] clientDidDisconnect: %@, connected? %d", client, self.connected);
-  
+{  
   // Only care if we think we're connected
   if (self.connected) {
     [self notifyAboutConnectionError];
@@ -172,7 +169,6 @@
     // Special case, want to update cue properties
     if ([message isReplyCueUpdate]) {
       if ([data isKindOfClass:[NSDictionary class]]) {
-        NSLog(@"[client] cue: %@, updated with properties: %@", message.cueID, data);
         [self.delegate cueUpdated:message.cueID withProperties:data];
       }
     }
