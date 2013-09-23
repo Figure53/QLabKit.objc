@@ -506,6 +506,11 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
   [self.client sendMessage:@(stop) toAddress:[self addressForCue:cue action:@"stopTargetWhenSliceEnds"]];
 }
 
+- (void)cue:(QLKCue *)cue updateTargetID:(int) uid
+{
+  [self.client sendMessage:@(uid) toAddress:[self addressForCue:cue action:@"targetId"]];
+}
+
 #pragma mark - OSC Video methods
 
 - (void)cue:(QLKCue *)cue updateSurfaceID:(NSInteger)surfaceID
