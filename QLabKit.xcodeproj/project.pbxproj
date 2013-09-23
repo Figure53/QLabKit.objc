@@ -309,7 +309,8 @@
 				92F3EA41178B1DA300A4C617 /* NSString+F53OSCString.m */,
 				92F3EA42178B1DA300A4C617 /* README.markdown */,
 			);
-			path = F53OSC;
+			name = F53OSC;
+			path = "../../../Space Map/F53OSC-master";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
