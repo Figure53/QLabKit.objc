@@ -126,11 +126,6 @@
 
 #pragma mark - 
 
-- (void)notifyAboutConnectionError
-{
-  
-}
-
 - (NSString *)workspacePrefix
 {
   return [NSString stringWithFormat:@"/workspace/%@", [self.delegate workspaceID]];
@@ -150,11 +145,8 @@
 }
 
 - (void)clientDidDisconnect:(F53OSCClient *)client
-{  
-  // Only care if we think we're connected
-  if (self.connected) {
-    [self notifyAboutConnectionError];
-  }
+{
+  [self.delegate clientConnectionErrorOccurred];
 }
 
 - (void)processMessage:(QLKMessage *)message
@@ -194,7 +186,7 @@
     } else if ([message isPlaybackPositionUpdate]) {
       [self.delegate playbackPositionUpdated:message.cueID];
     } else if ([message isDisconnect]) {
-      [self notifyAboutConnectionError];
+      [self.delegate clientConnectionErrorOccurred];
     } else {
       NSLog(@"[client] unhandled update message: %@", message.address);
     }

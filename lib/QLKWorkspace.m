@@ -198,7 +198,6 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (void)notifyAboutConnectionError
 {
-  NSLog(@"[workspace] notifyAboutConnectionError: main thread? %d", [NSThread isMainThread]);
   [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceConnectionErrorNotification object:self];
 }
 
@@ -648,6 +647,16 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
   dispatch_async(dispatch_get_main_queue(), ^{
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceDidChangePlaybackPositionNotification object:cue];
   });
+}
+
+- (void)clientConnectionErrorOccurred
+{
+  if (self.connected) {
+    [self notifyAboutConnectionError];
+    
+    // Mark as disconnected so we ignore multiple connection error messages
+    self.connected = NO;
+  }
 }
 
 @end
