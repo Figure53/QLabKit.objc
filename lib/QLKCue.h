@@ -116,8 +116,8 @@ typedef enum {
 + (QLKCue *)cueWithDictionary:(NSDictionary *)dict;
 - (id)initWithDictionary:(NSDictionary *)dict;
 - (BOOL)isEqualToCue:(QLKCue *)cue;
-- (NSString *)displayName;
 - (NSString *)iconFile;
+- (NSString *)nonEmptyName;
 + (NSString *)iconForType:(NSString *)type;
 - (BOOL)hasChildren;
 - (BOOL)isAudio;

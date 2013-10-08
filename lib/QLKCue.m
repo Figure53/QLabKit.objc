@@ -291,8 +291,15 @@ NSString * const QLKRootCueIdentifier = @"__root__";
 
 - (void)updateDisplayName
 {
-  NSString *name;
+  NSString *name = [self nonEmptyName];
   NSString *number = (![self.number isEqualToString:@""]) ? [NSString stringWithFormat:@"%@: ", self.number] : @"";
+  
+  self.displayName = [NSString stringWithFormat:@"%@%@",number, name];
+}
+
+- (NSString *)nonEmptyName
+{
+  NSString *name;
   
   if (self.name && ![self.name isEqualToString:@""]) {
     name = self.name;
@@ -302,7 +309,7 @@ NSString * const QLKRootCueIdentifier = @"__root__";
     name = [NSString stringWithFormat:@"(Untitled %@ Cue)", self.type];
   }
   
-  self.displayName = [NSString stringWithFormat:@"%@%@",number, name];
+  return name;
 }
 
 - (NSString *)iconFile
