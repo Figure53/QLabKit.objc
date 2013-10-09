@@ -125,8 +125,8 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 }
 
 - (void)connectWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
-{  
-  if (![self.client connect]) {
+{
+  if (!self.connected && ![self.client connect]) {
     NSLog(@"[workspace] *** Error: couldn't connect to server");
     // Notify that we are unable to connect to workspace
     [self notifyAboutConnectionError];
