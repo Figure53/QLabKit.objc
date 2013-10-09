@@ -49,7 +49,6 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 @property (strong, readonly) QLKClient *client;
 @property (strong) NSTimer *heartbeatTimeout;
 @property (assign) NSInteger attempts;
-@property (strong, nonatomic) NSString *passcode;
 
 - (void)startHeartbeat;
 - (void)stopHeartbeat;
@@ -140,7 +139,10 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
   
   // Tell QLab we're connecting
   [self.client sendMessage:passcode toAddress:@"/connect" block:^(id data) {
-    [self finishConnection];
+    if (!passcode || (passcode && [data isEqualToString:@"ok"])) {
+      [self finishConnection];
+    }
+    
     if (block) block(data);
   }];
 }

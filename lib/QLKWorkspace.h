@@ -58,6 +58,9 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 // Whether or not this workspace is protected by a passcode
 @property (assign, nonatomic) BOOL hasPasscode;
 
+// Cached passcode for this workspace after entered by user
+@property (strong, nonatomic) NSString *passcode;
+
 // Whether we currently have a conection
 @property (assign, nonatomic) BOOL connected;
 
