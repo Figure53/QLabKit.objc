@@ -43,7 +43,7 @@
   self = [super init];
   if (!self) return nil;
   
-  _name = @"";
+  _name = host;
   _host = host;
   _port = port;
   _workspaces = [[NSMutableArray alloc] init];
