@@ -129,6 +129,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     NSLog(@"[workspace] *** Error: couldn't connect to server");
     // Notify that we are unable to connect to workspace
     [self notifyAboutConnectionError];
+    if (block) block(@"error");
     return;
   }
 	
@@ -141,6 +142,8 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
   [self.client sendMessage:passcode toAddress:@"/connect" block:^(id data) {
     if (!passcode || (passcode && [data isEqualToString:@"ok"])) {
       [self finishConnection];
+    } else {
+      [self disconnect];
     }
     
     if (block) block(data);
