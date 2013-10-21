@@ -3,6 +3,12 @@
 #import "SpectaUtility.h"
 
 @implementation Specta
+
++ (void)initialize {
+#ifndef __clang__
+  printf("<Specta> WARNING: Support for asynchronous testing (^AsyncBlock) is disabled because Specta is not compiled with the Apple LLVM Compiler (Clang, not GCC).\n\n");
+#endif
+}
 @end
 
 #define SPT_currentSpec  [[[NSThread currentThread] threadDictionary] objectForKey:@"SPT_currentSpec"]
@@ -113,7 +119,7 @@ void SPT_itShouldBehaveLike(const char *fileName, NSUInteger lineNumber, NSStrin
       id (^dataBlock)(void) = [[dictionaryOrBlock copy] autorelease];
 
       describe(name, ^{
-        __block NSMutableDictionary *dataDict = [NSMutableDictionary dictionary];
+        __block NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
 
         beforeEach(^{
           NSDictionary *blockData = dataBlock();
@@ -122,6 +128,11 @@ void SPT_itShouldBehaveLike(const char *fileName, NSUInteger lineNumber, NSStrin
         });
 
         block(dataDict);
+
+        afterAll(^{
+          [dataDict release];
+          dataDict = nil;
+        });
       });
     } else {
       NSDictionary *data = dictionaryOrBlock;

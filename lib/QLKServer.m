@@ -70,7 +70,7 @@
   // Create TCP connection so we can receive the response
   self.client.useTCP = YES;
   if (![self.client connect]) {
-    NSLog(@"[server] error connecting to server: %@:%d", self.host, self.port);
+    NSLog(@"[server] error connecting to server: %@:%ld", self.host, (long)self.port);
   }
   
   [self.client sendMessages:@[] toAddress:@"/workspaces" workspace:NO block:^(NSArray *data) {

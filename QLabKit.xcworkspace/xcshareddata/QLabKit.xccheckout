@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>C1DEE53E-695E-44A4-A3E3-A4275B22A2AC</string>
+	<key>IDESourceControlProjectName</key>
+	<string>QLabKit</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>7508052E-F66A-4B8C-9261-FF79AA87A047</key>
+		<string>ssh://github.com/Figure53/QLabKit.objc.git</string>
+		<key>75255E0C-17C6-4C13-A7EE-C557EB49A09E</key>
+		<string>ssh://github.com/Figure53/F53OSC.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>QLabKit.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>7508052E-F66A-4B8C-9261-FF79AA87A047</key>
+		<string>..</string>
+		<key>75255E0C-17C6-4C13-A7EE-C557EB49A09E</key>
+		<string>../lib/F53OSC</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>ssh://github.com/Figure53/QLabKit.objc.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>7508052E-F66A-4B8C-9261-FF79AA87A047</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>75255E0C-17C6-4C13-A7EE-C557EB49A09E</string>
+			<key>IDESourceControlWCCName</key>
+			<string>F53OSC</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>7508052E-F66A-4B8C-9261-FF79AA87A047</string>
+			<key>IDESourceControlWCCName</key>
+			<string>QLabKit</string>
+		</dict>
+	</array>
+</dict>
+</plist>

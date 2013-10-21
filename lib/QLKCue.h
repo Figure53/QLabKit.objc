@@ -118,12 +118,11 @@ typedef enum {
 - (BOOL)isEqualToCue:(QLKCue *)cue;
 - (NSString *)iconFile;
 - (NSString *)nonEmptyName;
-+ (NSString *)iconForType:(NSString *)type;
-- (BOOL)hasChildren;
 - (BOOL)isAudio;
 - (BOOL)isVideo;
 - (BOOL)isGroup;
 - (void)updatePropertiesWithDictionary:(NSDictionary *)dict;
+- (BOOL)hasChildren;
 - (QLKCue *)firstCue;
 - (QLKCue *)lastCue;
 - (QLKCue *)cueAtIndex:(NSInteger)index;
@@ -131,5 +130,6 @@ typedef enum {
 - (NSArray *)flattenedCues;
 - (NSString *)surfaceName;
 - (NSString *)patchName;
++ (NSString *)iconForType:(NSString *)type;
 
 @end

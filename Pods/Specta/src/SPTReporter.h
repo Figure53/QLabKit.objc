@@ -1,6 +1,8 @@
 #import <SenTestingKit/SenTestingKit.h>
 
-@interface SPTReporter : SenTestObserver
+@interface SPTReporter : SenTestObserver {
+  NSArray *_runStack;
+}
 
 // ===== SHARED REPORTER ===============================================================================================
 #pragma mark - Shared Reporter
@@ -10,7 +12,7 @@
 // ===== RUN STACK =====================================================================================================
 #pragma mark - Run Stack
 
-@property (readonly, strong, NS_NONATOMIC_IOSONLY) NSArray * runStack;
+@property (nonatomic, retain) NSArray *runStack;
 
 // ===== TEST SUITE ====================================================================================================
 #pragma mark - Test Suite
