@@ -11,6 +11,8 @@
 		92314E4C179725BE0044158A /* QLKMessageSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 92314E4B179725BE0044158A /* QLKMessageSpec.m */; };
 		92314E5C1798784F0044158A /* QLKServerSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 92314E5B1798784F0044158A /* QLKServerSpec.m */; };
 		924037471815840600EFE26C /* QLKWorkspaceSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 924037461815840600EFE26C /* QLKWorkspaceSpec.m */; };
+		92B25429181859A300710257 /* QLKCueTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 92B25428181859A300710257 /* QLKCueTest.m */; };
+		92B2542B18185A2800710257 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92B2542A18185A2800710257 /* XCTest.framework */; };
 		92DD79AF17988DDC00DD0C3E /* QLKBrowserSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 92DD79AE17988DDC00DD0C3E /* QLKBrowserSpec.m */; };
 		92F3E9ED178B1BC500A4C617 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F3E9EC178B1BC500A4C617 /* Cocoa.framework */; };
 		92F3E9F7178B1BC500A4C617 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 92F3E9F5178B1BC500A4C617 /* InfoPlist.strings */; };
@@ -18,7 +20,6 @@
 		92F3E9FD178B1BC500A4C617 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 92F3E9FB178B1BC500A4C617 /* Credits.rtf */; };
 		92F3EA00178B1BC500A4C617 /* QLKAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3E9FF178B1BC500A4C617 /* QLKAppDelegate.m */; };
 		92F3EA03178B1BC500A4C617 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 92F3EA01178B1BC500A4C617 /* MainMenu.xib */; };
-		92F3EA0B178B1BC600A4C617 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F3EA0A178B1BC600A4C617 /* SenTestingKit.framework */; };
 		92F3EA0C178B1BC600A4C617 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F3E9EC178B1BC500A4C617 /* Cocoa.framework */; };
 		92F3EA14178B1BC600A4C617 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 92F3EA12178B1BC600A4C617 /* InfoPlist.strings */; };
 		92F3EA43178B1DA300A4C617 /* F53OSCBundle.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA24178B1DA300A4C617 /* F53OSCBundle.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -66,6 +67,8 @@
 		92314E4B179725BE0044158A /* QLKMessageSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKMessageSpec.m; sourceTree = "<group>"; };
 		92314E5B1798784F0044158A /* QLKServerSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKServerSpec.m; sourceTree = "<group>"; };
 		924037461815840600EFE26C /* QLKWorkspaceSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKWorkspaceSpec.m; sourceTree = "<group>"; };
+		92B25428181859A300710257 /* QLKCueTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKCueTest.m; sourceTree = "<group>"; };
+		92B2542A18185A2800710257 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		92DD79AE17988DDC00DD0C3E /* QLKBrowserSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKBrowserSpec.m; sourceTree = "<group>"; };
 		92F3E9E9178B1BC500A4C617 /* QLabKitDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QLabKitDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92F3E9EC178B1BC500A4C617 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -80,8 +83,7 @@
 		92F3E9FE178B1BC500A4C617 /* QLKAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QLKAppDelegate.h; sourceTree = "<group>"; };
 		92F3E9FF178B1BC500A4C617 /* QLKAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QLKAppDelegate.m; sourceTree = "<group>"; };
 		92F3EA02178B1BC500A4C617 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		92F3EA09178B1BC600A4C617 /* QLabKitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QLabKitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
-		92F3EA0A178B1BC600A4C617 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		92F3EA09178B1BC600A4C617 /* QLabKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QLabKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		92F3EA11178B1BC600A4C617 /* QLabKitTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "QLabKitTests-Info.plist"; sourceTree = "<group>"; };
 		92F3EA13178B1BC600A4C617 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		92F3EA22178B1DA300A4C617 /* F53OSC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F53OSC.h; sourceTree = "<group>"; };
@@ -150,7 +152,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				92F3EA0B178B1BC600A4C617 /* SenTestingKit.framework in Frameworks */,
+				92B2542B18185A2800710257 /* XCTest.framework in Frameworks */,
 				92F3EA0C178B1BC600A4C617 /* Cocoa.framework in Frameworks */,
 				BCAA3B171AEA462A9DD114F1 /* libPods-test.a in Frameworks */,
 			);
@@ -175,7 +177,7 @@
 			isa = PBXGroup;
 			children = (
 				92F3E9E9178B1BC500A4C617 /* QLabKitDemo.app */,
-				92F3EA09178B1BC600A4C617 /* QLabKitTests.octest */,
+				92F3EA09178B1BC600A4C617 /* QLabKitTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -183,9 +185,9 @@
 		92F3E9EB178B1BC500A4C617 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				92B2542A18185A2800710257 /* XCTest.framework */,
 				92F3EA68178C5F6A00A4C617 /* Security.framework */,
 				92F3E9EC178B1BC500A4C617 /* Cocoa.framework */,
-				92F3EA0A178B1BC600A4C617 /* SenTestingKit.framework */,
 				92F3E9EE178B1BC500A4C617 /* Other Frameworks */,
 				E68276D4AA4C40329B34CF6D /* libPods-test.a */,
 			);
@@ -233,6 +235,7 @@
 				92314E4B179725BE0044158A /* QLKMessageSpec.m */,
 				92314E5B1798784F0044158A /* QLKServerSpec.m */,
 				924037461815840600EFE26C /* QLKWorkspaceSpec.m */,
+				92B25428181859A300710257 /* QLKCueTest.m */,
 				92F3EA10178B1BC600A4C617 /* Supporting Files */,
 			);
 			name = Tests;
@@ -353,8 +356,8 @@
 			);
 			name = QLabKitTests;
 			productName = QLabKitTests;
-			productReference = 92F3EA09178B1BC600A4C617 /* QLabKitTests.octest */;
-			productType = "com.apple.product-type.bundle";
+			productReference = 92F3EA09178B1BC600A4C617 /* QLabKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -488,6 +491,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				92314E4C179725BE0044158A /* QLKMessageSpec.m in Sources */,
+				92B25429181859A300710257 /* QLKCueTest.m in Sources */,
 				92314E5C1798784F0044158A /* QLKServerSpec.m in Sources */,
 				92DD79AF17988DDC00DD0C3E /* QLKBrowserSpec.m in Sources */,
 				924037471815840600EFE26C /* QLKWorkspaceSpec.m in Sources */,
@@ -627,13 +631,15 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/QLabKitDemo.app/Contents/MacOS/QLabKitDemo";
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = "\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS = (
+					"\\\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\\\"",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "tests/QLabKitTests-Prefix.pch";
 				INFOPLIST_FILE = "tests/QLabKitTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = octest;
 			};
 			name = Debug;
 		};
@@ -643,13 +649,15 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/QLabKitDemo.app/Contents/MacOS/QLabKitDemo";
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = "\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS = (
+					"\\\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\\\"",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "tests/QLabKitTests-Prefix.pch";
 				INFOPLIST_FILE = "tests/QLabKitTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = octest;
 			};
 			name = Release;
 		};
