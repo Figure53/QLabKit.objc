@@ -40,3 +40,6 @@ typedef void (^QLKMessageHandlerBlock)(id data);
 extern NSString * const QLKBonjourTCPServiceType;
 extern NSString * const QLKBonjourUDPServiceType;
 extern NSString * const QLKBonjourServiceDomain;
+extern NSString * const QLKWorkspaceGotReply;
+
+#define QLKReplyMsg @"QLKReplyMsg"

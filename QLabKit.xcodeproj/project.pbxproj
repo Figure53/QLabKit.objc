@@ -301,7 +301,8 @@
 				92F3EA37178B1DA300A4C617 /* GCDAsyncUdpSocket.h */,
 				92F3EA38178B1DA300A4C617 /* GCDAsyncUdpSocket.m */,
 			);
-			path = F53OSC;
+			name = F53OSC;
+			path = "../../../Space Map/F53OSC-master";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

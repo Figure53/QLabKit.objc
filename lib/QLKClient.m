@@ -157,6 +157,11 @@
   
   if ([message isReply]) {    
     id data = message.response;
+      
+  NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:message, QLKReplyMsg, nil];
+  [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceGotReply
+                                                      object:nil
+                                                    userInfo:dict];
     
     // Special case, want to update cue properties
     if ([message isReplyCueUpdate]) {

@@ -114,6 +114,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void)cue:(QLKCue *)cue updateFullScreen:(BOOL)fullScreen;
 - (void)cue:(QLKCue *)cue updateTranslationX:(CGFloat)originX;
 - (void)cue:(QLKCue *)cue updateTranslationY:(CGFloat)originY;
+- (void)cue:(QLKCue *)cue updateTargetID:(int) uid;
 - (void)cue:(QLKCue *)cue updateScaleX:(CGFloat)scaleX;
 - (void)cue:(QLKCue *)cue updateScaleY:(CGFloat)scaleY;
 - (void)cue:(QLKCue *)cue updateRotationX:(CGFloat)rotationX; 
