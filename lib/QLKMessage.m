@@ -33,139 +33,151 @@
 
 @property (strong) F53OSCMessage *OSCMessage;
 
-- (NSArray *)addressParts;
+- (NSArray *) addressParts;
 
 @end
 
 @implementation QLKMessage
 
-+ (QLKMessage *)messageWithOSCMessage:(F53OSCMessage *)message
++ (QLKMessage *) messageWithOSCMessage:(F53OSCMessage *)message
 {
-  return [[QLKMessage alloc] initWithOSCMessage:message];
+    return [[QLKMessage alloc] initWithOSCMessage:message];
 }
 
-- (id)initWithOSCMessage:(F53OSCMessage *)message
+- (id) initWithOSCMessage:(F53OSCMessage *)message
 {
-  self = [super init];
-  if (!self) return nil;
-  
-  _OSCMessage = message;
-  
-  return self;
+    self = [super init];
+    if ( !self )
+        return nil;
+
+    _OSCMessage = message;
+
+    return self;
 }
 
-- (NSString *)description
+- (NSString *) description
 {
-  return [NSString stringWithFormat:@"address: %@, arguments: %@", self.address, [self.arguments componentsJoinedByString:@" - "]];
+    return [NSString stringWithFormat:@"address: %@, arguments: %@", self.address, [self.arguments componentsJoinedByString:@" - "]];
 }
 
-- (BOOL)isReply
+- (BOOL) isReply
 {
-  return [self.OSCMessage.addressPattern hasPrefix:@"/reply"];
+    return [self.OSCMessage.addressPattern hasPrefix:@"/reply"];
 }
 
-- (BOOL)isUpdate
+- (BOOL) isUpdate
 {
-  return [self.OSCMessage.addressPattern hasPrefix:@"/update"];
+    return [self.OSCMessage.addressPattern hasPrefix:@"/update"];
 }
 
-- (BOOL)isWorkspaceUpdate
+- (BOOL) isWorkspaceUpdate
 {
-  // /update/workspace/{workspace_id}
-  NSArray *parts = self.addressParts;
-  
-  return (parts.count == 3 && [parts[1] isEqualToString:@"workspace"]);
+    // /update/workspace/{workspace_id}
+    NSArray *parts = self.addressParts;
+
+    return (parts.count == 3 && [parts[1] isEqualToString:@"workspace"]);
 }
 
-- (BOOL)isCueUpdate
+- (BOOL) isCueUpdate
 {
-  // /update/workspace/{workspace_id}/cue_id/{cue_id}
-  NSArray *parts = self.addressParts;
-  
-  return (parts.count == 5 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"cue_id"]);
+    // /update/workspace/{workspace_id}/cue_id/{cue_id}
+    NSArray *parts = self.addressParts;
+
+    return (parts.count == 5 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"cue_id"]);
 }
 
-- (BOOL)isPlaybackPositionUpdate
+- (BOOL) isPlaybackPositionUpdate
 {
-  // /update/workspace/{workspace_id}/cueList/{cue_list_id}/playbackPosition {cue_id}
-  NSArray *parts = self.addressParts;
-  
-  return (parts.count == 6 && [self.address hasSuffix:@"/playbackPosition"]);
+    // /update/workspace/{workspace_id}/cueList/{cue_list_id}/playbackPosition {cue_id}
+    NSArray *parts = self.addressParts;
+
+    return (parts.count == 6 && [self.address hasSuffix:@"/playbackPosition"]);
 }
 
-- (BOOL)isDisconnect
+- (BOOL) isDisconnect
 {
-  return [self.address hasSuffix:@"/disconnect"];
+    return [self.address hasSuffix:@"/disconnect"];
 }
 
-- (BOOL)isReplyCueUpdate
+- (BOOL) isReplyCueUpdate
 {
-  // /reply/cue_id/1/action
-  return [self.address hasPrefix:@"/reply/cue_id"];
+    // /reply/cue_id/1/action
+    return [self.address hasPrefix:@"/reply/cue_id"];
 }
 
-- (NSString *)cueID
+- (NSString *) cueID
 {
-  if ([self isCueUpdate]) {
-    return self.addressParts[4];
-  } else if ([self isPlaybackPositionUpdate]) {
-    return (self.arguments.count > 0) ? self.arguments[0] : nil;
-  } else if ([self isReplyCueUpdate]) {
-    return self.addressParts[2];
-  } else {
-    return nil;
-  }
+    if ( [self isCueUpdate] )
+    {
+        return self.addressParts[4];
+    }
+    else if ( [self isPlaybackPositionUpdate] )
+    {
+        return (self.arguments.count > 0) ? self.arguments[0] : nil;
+    }
+    else if ( [self isReplyCueUpdate] )
+    {
+        return self.addressParts[2];
+    }
+    else
+    {
+        return nil;
+    }
 }
 
-- (NSString *)host
+- (NSString *) host
 {
-  return self.OSCMessage.replySocket.host;
+    return self.OSCMessage.replySocket.host;
 }
 
-- (NSArray *)arguments
+- (NSArray *) arguments
 {
-  return self.OSCMessage.arguments;
+    return self.OSCMessage.arguments;
 }
 
-- (NSString *)address
+- (NSString *) address
 {
-  return self.OSCMessage.addressPattern;
+    return self.OSCMessage.addressPattern;
 }
 
-- (NSString *)replyAddress
+- (NSString *) replyAddress
 {
-  return (self.isReply) ? [self.address substringFromIndex:@"/reply".length] : self.address;
+    return (self.isReply) ? [self.address substringFromIndex:@"/reply".length] : self.address;
 }
 
-- (NSString *)addressWithoutWorkspace:(NSString *)workspaceID
+- (NSString *) addressWithoutWorkspace:(NSString *)workspaceID
 {
-  NSString *workspacePrefix = [NSString stringWithFormat:@"/workspace/%@", workspaceID];
-  NSString *address = self.replyAddress;
-  
-  if ([address hasPrefix:workspacePrefix]) {
-    return [address substringFromIndex:workspacePrefix.length];
-  } else {
-    return address;
-  }
+    NSString *workspacePrefix = [NSString stringWithFormat:@"/workspace/%@", workspaceID];
+    NSString *address = self.replyAddress;
+
+    if ( [address hasPrefix:workspacePrefix] )
+    {
+        return [address substringFromIndex:workspacePrefix.length];
+    }
+    else
+    {
+        return address;
+    }
 }
 
-- (NSArray *)addressParts
+- (NSArray *) addressParts
 {
-  NSArray *parts = [self.address pathComponents];
-  return [parts subarrayWithRange:NSMakeRange(1, parts.count - 1)];
+    NSArray *parts = [self.address pathComponents];
+    return [parts subarrayWithRange:NSMakeRange( 1, parts.count - 1 )];
 }
 
-- (id)response
+- (id) response
 {
-  NSString *body = self.OSCMessage.arguments[0];
-  NSError *error = nil;
-  NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
-  
-  if (error) {
-    NSLog(@"error decoding JSON: %@, %@", error, self.OSCMessage.arguments);
-  }
-  
-  return dict[@"data"];
+    NSString *body = self.OSCMessage.arguments[0];
+    NSError *error = nil;
+    NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
+
+    if ( error )
+    {
+        NSLog( @"error decoding JSON: %@, %@", error, self.OSCMessage.arguments );
+    }
+
+    return dict[@"data"];
 }
 
 @end

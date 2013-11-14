@@ -64,84 +64,84 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 // Whether we currently have a conection
 @property (assign, nonatomic) BOOL connected;
 
-- (id)initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
+- (id) initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
 
-- (void)connect;
-- (void)connectWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
-- (void)finishConnection;
-- (void)disconnect;
-- (void)temporarilyDisconnect;
-- (void)reconnect;
+- (void) connect;
+- (void) connectWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
+- (void) finishConnection;
+- (void) disconnect;
+- (void) temporarilyDisconnect;
+- (void) reconnect;
 
-- (NSString *)fullName;
-- (NSString *)fullNameWithCueList:(QLKCue *)cueList;
+- (NSString *) fullName;
+- (NSString *) fullNameWithCueList:(QLKCue *)cueList;
 
-- (QLKCue *)firstCue;
-- (QLKCue *)firstCueList;
-- (QLKCue *)cueWithId:(NSString *)uid;
+- (QLKCue *) firstCue;
+- (QLKCue *) firstCueList;
+- (QLKCue *) cueWithId:(NSString *)uid;
 
 // QLab Server API
-- (void)startReceivingUpdates;
-- (void)stopReceivingUpdates;
-- (void)enableAlwaysReply;
-- (void)disableAlwaysReply;
-- (void)go;
-- (void)stopAll;
-- (void)save;
-- (void)fetchCueLists;
-- (void)fetchCueListsWithCompletion:(QLKMessageHandlerBlock)block;
-- (void)fetchPlaybackPositionForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
-- (void)startCue:(QLKCue *)cue;
-- (void)stopCue:(QLKCue *)cue;
-- (void)pauseCue:(QLKCue *)cue;
-- (void)loadCue:(QLKCue *)cue;
-- (void)resetCue:(QLKCue *)cue;
-- (void)deleteCue:(QLKCue *)cue;
-- (void)cue:(QLKCue *)cue valuesForKeys:(NSArray *)keys;
-- (void)cue:(QLKCue *)cue updateName:(NSString *)name;
-- (void)cue:(QLKCue *)cue updateNumber:(NSString *)number;
-- (void)cue:(QLKCue *)cue updatePreWait:(float)preWait;
-- (void)cue:(QLKCue *)cue updatePostWait:(float)postWait;
-- (void)cue:(QLKCue *)cue updateDuration:(float)duration;
-- (void)cue:(QLKCue *)cue updateArmed:(BOOL)armed;
-- (void)cue:(QLKCue *)cue updateFlagged:(BOOL)flagged;
-- (void)cue:(QLKCue *)cue updateNotes:(NSString *)notes;
-- (void)cue:(QLKCue *)cue updateContinueMode:(QLKCueContinueMode)continueMode;
-- (void)cue:(QLKCue *)cue updateChannel:(NSInteger)channel level:(double)level;
-- (void)cue:(QLKCue *)cue updatePatch:(NSInteger)patch;
-- (void)cue:(QLKCue *)cue updateColor:(NSString *)color;
-- (void)cue:(QLKCue *)cue updateSurfaceID:(NSInteger)surfaceID;
-- (void)cue:(QLKCue *)cue updateFullScreen:(BOOL)fullScreen;
-- (void)cue:(QLKCue *)cue updateTranslationX:(CGFloat)originX;
-- (void)cue:(QLKCue *)cue updateTranslationY:(CGFloat)originY;
-- (void)cue:(QLKCue *)cue updateScaleX:(CGFloat)scaleX;
-- (void)cue:(QLKCue *)cue updateScaleY:(CGFloat)scaleY;
-- (void)cue:(QLKCue *)cue updateRotationX:(CGFloat)rotationX; 
-- (void)cue:(QLKCue *)cue updateRotationY:(CGFloat)rotationY;
-- (void)cue:(QLKCue *)cue updateRotationZ:(CGFloat)rotationZ;
-- (void)cue:(QLKCue *)cue updatePreserveAspectRatio:(BOOL)preserve;
-- (void)cue:(QLKCue *)cue updatePlaybackPosition:(QLKCue *)playbackCue;
-- (void)cue:(QLKCue *)cue updateLayer:(NSInteger)layer;
-- (void)cue:(QLKCue *)cue updateOpacity:(CGFloat)opacity;
-- (void)cue:(QLKCue *)cue updateStartNextCueWhenSliceEnds:(BOOL)start;
-- (void)cue:(QLKCue *)cue updateStopTargetWhenSliceEnds:(BOOL)stop;
+- (void) startReceivingUpdates;
+- (void) stopReceivingUpdates;
+- (void) enableAlwaysReply;
+- (void) disableAlwaysReply;
+- (void) go;
+- (void) stopAll;
+- (void) save;
+- (void) fetchCueLists;
+- (void) fetchCueListsWithCompletion:(QLKMessageHandlerBlock)block;
+- (void) fetchPlaybackPositionForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
+- (void) startCue:(QLKCue *)cue;
+- (void) stopCue:(QLKCue *)cue;
+- (void) pauseCue:(QLKCue *)cue;
+- (void) loadCue:(QLKCue *)cue;
+- (void) resetCue:(QLKCue *)cue;
+- (void) deleteCue:(QLKCue *)cue;
+- (void) cue:(QLKCue *)cue valuesForKeys:(NSArray *)keys;
+- (void) cue:(QLKCue *)cue updateName:(NSString *)name;
+- (void) cue:(QLKCue *)cue updateNumber:(NSString *)number;
+- (void) cue:(QLKCue *)cue updatePreWait:(float)preWait;
+- (void) cue:(QLKCue *)cue updatePostWait:(float)postWait;
+- (void) cue:(QLKCue *)cue updateDuration:(float)duration;
+- (void) cue:(QLKCue *)cue updateArmed:(BOOL)armed;
+- (void) cue:(QLKCue *)cue updateFlagged:(BOOL)flagged;
+- (void) cue:(QLKCue *)cue updateNotes:(NSString *)notes;
+- (void) cue:(QLKCue *)cue updateContinueMode:(QLKCueContinueMode)continueMode;
+- (void) cue:(QLKCue *)cue updateChannel:(NSInteger)channel level:(double)level;
+- (void) cue:(QLKCue *)cue updatePatch:(NSInteger)patch;
+- (void) cue:(QLKCue *)cue updateColor:(NSString *)color;
+- (void) cue:(QLKCue *)cue updateSurfaceID:(NSInteger)surfaceID;
+- (void) cue:(QLKCue *)cue updateFullScreen:(BOOL)fullScreen;
+- (void) cue:(QLKCue *)cue updateTranslationX:(CGFloat)originX;
+- (void) cue:(QLKCue *)cue updateTranslationY:(CGFloat)originY;
+- (void) cue:(QLKCue *)cue updateScaleX:(CGFloat)scaleX;
+- (void) cue:(QLKCue *)cue updateScaleY:(CGFloat)scaleY;
+- (void) cue:(QLKCue *)cue updateRotationX:(CGFloat)rotationX;
+- (void) cue:(QLKCue *)cue updateRotationY:(CGFloat)rotationY;
+- (void) cue:(QLKCue *)cue updateRotationZ:(CGFloat)rotationZ;
+- (void) cue:(QLKCue *)cue updatePreserveAspectRatio:(BOOL)preserve;
+- (void) cue:(QLKCue *)cue updatePlaybackPosition:(QLKCue *)playbackCue;
+- (void) cue:(QLKCue *)cue updateLayer:(NSInteger)layer;
+- (void) cue:(QLKCue *)cue updateOpacity:(CGFloat)opacity;
+- (void) cue:(QLKCue *)cue updateStartNextCueWhenSliceEnds:(BOOL)start;
+- (void) cue:(QLKCue *)cue updateStopTargetWhenSliceEnds:(BOOL)stop;
 
-- (void)fetchMainPropertiesForCue:(QLKCue *)cue;
-- (void)fetchBasicPropertiesForCue:(QLKCue *)cue;
-- (void)fetchChildrenForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
-- (void)fetchNotesForCue:(QLKCue *)cue;
-- (void)fetchAudioLevelsForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
-- (void)fetchDisplayAndGeometryForCue:(QLKCue *)cue;
-- (void)runningOrPausedCuesWithBlock:(QLKMessageHandlerBlock)block;
+- (void) fetchMainPropertiesForCue:(QLKCue *)cue;
+- (void) fetchBasicPropertiesForCue:(QLKCue *)cue;
+- (void) fetchChildrenForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
+- (void) fetchNotesForCue:(QLKCue *)cue;
+- (void) fetchAudioLevelsForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
+- (void) fetchDisplayAndGeometryForCue:(QLKCue *)cue;
+- (void) runningOrPausedCuesWithBlock:(QLKMessageHandlerBlock)block;
 
 // Lower level API
-- (void)sendMessage:(id)object toAddress:(NSString *)address;
-- (void)sendMessage:(id)object toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
+- (void) sendMessage:(id)object toAddress:(NSString *)address;
+- (void) sendMessage:(id)object toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
 
 // Helper for sending messages to this workspace: /workspace/<workspace_id>
-- (NSString *)workspacePrefix;
+- (NSString *) workspacePrefix;
 
 // Helper for sending message to a specific cue: /cue_id/<cue.uid>/action
-- (NSString *)addressForCue:(QLKCue *)cue action:(NSString *)action;
+- (NSString *) addressForCue:(QLKCue *)cue action:(NSString *)action;
 
 @end

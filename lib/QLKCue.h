@@ -113,23 +113,23 @@ typedef enum {
 @property (strong, nonatomic) NSArray *surfaces;
 @property (assign, nonatomic) BOOL expanded;
 
-+ (QLKCue *)cueWithDictionary:(NSDictionary *)dict;
-- (id)initWithDictionary:(NSDictionary *)dict;
-- (BOOL)isEqualToCue:(QLKCue *)cue;
-- (NSString *)iconFile;
-- (NSString *)nonEmptyName;
-- (BOOL)isAudio;
-- (BOOL)isVideo;
-- (BOOL)isGroup;
-- (void)updatePropertiesWithDictionary:(NSDictionary *)dict;
-- (BOOL)hasChildren;
-- (QLKCue *)firstCue;
-- (QLKCue *)lastCue;
-- (QLKCue *)cueAtIndex:(NSInteger)index;
-- (QLKCue *)cueWithId:(NSString *)cueId;
-- (NSArray *)flattenedCues;
-- (NSString *)surfaceName;
-- (NSString *)patchName;
-+ (NSString *)iconForType:(NSString *)type;
++ (QLKCue *) cueWithDictionary:(NSDictionary *)dict;
+- (id) initWithDictionary:(NSDictionary *)dict;
+- (BOOL) isEqualToCue:(QLKCue *)cue;
+- (NSString *) iconFile;
+- (NSString *) nonEmptyName;
+- (BOOL) isAudio;
+- (BOOL) isVideo;
+- (BOOL) isGroup;
+- (void) updatePropertiesWithDictionary:(NSDictionary *)dict;
+- (BOOL) hasChildren;
+- (QLKCue *) firstCue;
+- (QLKCue *) lastCue;
+- (QLKCue *) cueAtIndex:(NSInteger)index;
+- (QLKCue *) cueWithId:(NSString *)cueId;
+- (NSArray *) flattenedCues;
+- (NSString *) surfaceName;
+- (NSString *) patchName;
++ (NSString *) iconForType:(NSString *)type;
 
 @end

@@ -38,73 +38,79 @@
 
 @implementation QLKServer
 
-- (id)initWithHost:(NSString *)host port:(NSInteger)port
+- (id) initWithHost:(NSString *)host port:(NSInteger)port
 {
-  self = [super init];
-  if (!self) return nil;
-  
-  _name = host;
-  _host = host;
-  _port = port;
-  _workspaces = [[NSMutableArray alloc] init];
-  
-  _client = [[QLKClient alloc] initWithHost:host port:port];
-  
-  return self;
+    self = [super init];
+    if ( !self )
+        return nil;
+
+    _name = host;
+    _host = host;
+    _port = port;
+    _workspaces = [[NSMutableArray alloc] init];
+
+    _client = [[QLKClient alloc] initWithHost:host port:port];
+
+    return self;
 }
 
-- (NSString *)description
+- (NSString *) description
 {
   return [NSString stringWithFormat:@"%@ - %@ - %@:%ld", [super description], self.name, self.host, (long)self.port];
 }
 
 #pragma mark - Workspaces
 
-- (void)refreshWorkspaces
+- (void) refreshWorkspaces
 {
-  [self.client sendMessage:[F53OSCMessage messageWithAddressPattern:@"/workspaces" arguments:nil]];
+    [self.client sendMessage:[F53OSCMessage messageWithAddressPattern:@"/workspaces" arguments:nil]];
 }
 
-- (void)refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block
+- (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block
 {
-  // Create TCP connection so we can receive the response
-  self.client.useTCP = YES;
-  if (![self.client connect]) {
-    NSLog(@"[server] error connecting to server: %@:%ld", self.host, (long)self.port);
-  }
+    // Create TCP connection so we can receive the response
+    self.client.useTCP = YES;
+    if ( ![self.client connect] )
+    {
+        NSLog(@"[server] error connecting to server: %@:%ld", self.host, (long)self.port);
+    }
+
+    [self.client sendMessages:@[] toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
+    {
+        [self.client disconnect];
+        self.client.useTCP = NO;
+
+        [self updateWorkspaces:data];
+        
+        if ( block )
+            block( self.workspaces );
+    }];
+}
+
+- (void) updateWorkspaces:(NSArray *)workspaces
+{
+    [self removeAllWorkspaces];
   
-  [self.client sendMessages:@[] toAddress:@"/workspaces" workspace:NO block:^(NSArray *data) {
-    [self.client disconnect];
-    self.client.useTCP = NO;
-    
-    [self updateWorkspaces:data];
-    if (block) block(self.workspaces);
-  }];
+    for ( NSDictionary *dict in workspaces )
+    {
+        QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:self];
+        [self addWorkspace:workspace];
+    }
 }
 
-- (void)updateWorkspaces:(NSArray *)workspaces
+- (void) addWorkspace:(QLKWorkspace *)workspace
 {
-  [self removeAllWorkspaces];
-  
-  for (NSDictionary *dict in workspaces) {
-    QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:self];
-    [self addWorkspace:workspace];
-  }
+    [self.workspaces addObject:workspace];
 }
 
-- (void)addWorkspace:(QLKWorkspace *)workspace
+- (void) removeWorkspace:(QLKWorkspace *)workspace
 {
-  [self.workspaces addObject:workspace];
+    [self.workspaces removeObject:workspace];
 }
 
-- (void)removeWorkspace:(QLKWorkspace *)workspace
+- (void) removeAllWorkspaces
 {
-  [self.workspaces removeObject:workspace];
-}
-
-- (void)removeAllWorkspaces
-{
-  [self.workspaces removeAllObjects];
+    [self.workspaces removeAllObjects];
 }
 
 @end

@@ -34,12 +34,12 @@
 
 @protocol QLKClientDelegate <NSObject>
 
-- (void)cueUpdated:(NSString *)cueID;
-- (void)cueUpdated:(NSString *)cueID withProperties:(NSDictionary *)properties;
-- (void)workspaceUpdated;
-- (void)playbackPositionUpdated:(NSString *)cueID;
-- (NSString *)workspaceID;
-- (void)clientConnectionErrorOccurred;
+- (void) cueUpdated:(NSString *)cueID;
+- (void) cueUpdated:(NSString *)cueID withProperties:(NSDictionary *)properties;
+- (void) workspaceUpdated;
+- (void) playbackPositionUpdated:(NSString *)cueID;
+- (NSString *) workspaceID;
+- (void) clientConnectionErrorOccurred;
 
 @end
 
@@ -49,15 +49,15 @@
 @property (assign, nonatomic) BOOL useTCP;
 @property (assign) BOOL connected;
 
-- (id)initWithHost:(NSString *)host port:(NSInteger)port;
-- (void)disconnect;
-- (BOOL)connect;
+- (id) initWithHost:(NSString *)host port:(NSInteger)port;
+- (void) disconnect;
+- (BOOL) connect;
 
-- (void)sendMessage:(F53OSCMessage *)message;
-- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address;
-- (void)sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
-- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address;
-- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
-- (void)sendMessages:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block;
+- (void) sendMessage:(F53OSCMessage *)message;
+- (void) sendMessage:(NSObject *)message toAddress:(NSString *)address;
+- (void) sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
+- (void) sendMessages:(NSArray *)messages toAddress:(NSString *)address;
+- (void) sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
+- (void) sendMessages:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block;
 
 @end

@@ -31,40 +31,40 @@
 
 @interface QLKMessage : NSObject
 
-- (id)initWithOSCMessage:(F53OSCMessage *)message;
-+ (QLKMessage *)messageWithOSCMessage:(F53OSCMessage *)message;
+- (id) initWithOSCMessage:(F53OSCMessage *)message;
++ (QLKMessage *) messageWithOSCMessage:(F53OSCMessage *)message;
 
 // Identifying the different types of messages we're dealing with
-- (BOOL)isReply;
-- (BOOL)isReplyCueUpdate;
-- (BOOL)isUpdate;
-- (BOOL)isWorkspaceUpdate;
-- (BOOL)isCueUpdate;
-- (BOOL)isPlaybackPositionUpdate;
-- (BOOL)isDisconnect;
+- (BOOL) isReply;
+- (BOOL) isReplyCueUpdate;
+- (BOOL) isUpdate;
+- (BOOL) isWorkspaceUpdate;
+- (BOOL) isCueUpdate;
+- (BOOL) isPlaybackPositionUpdate;
+- (BOOL) isDisconnect;
 
 // Host the message came from, almost always will be the IP address
-- (NSString *)host;
+- (NSString *) host;
 
 // Full address path of this message: /update/workspace/12345/cue_id/4
-- (NSString *)address;
+- (NSString *) address;
 
 // Individual address parts separated by "/": ("update", "workspace", "12345", "cue_id", "4")
-- (NSArray *)addressParts;
+- (NSArray *) addressParts;
 
 // Address without reply: "/reply/workspace/12345/connect" -> "/workspace/12345/connect"
-- (NSString *)replyAddress;
+- (NSString *) replyAddress;
 
 // Address with workspace prefix removed, will also remove /reply: "/workspace/12345/connect" -> "/connect"
-- (NSString *)addressWithoutWorkspace:(NSString *)workspaceID;
+- (NSString *) addressWithoutWorkspace:(NSString *)workspaceID;
 
 // Deserialized JSON from the "data" key of the response
-- (id)response;
+- (id) response;
 
 // Direct arguments from OSC message
-- (NSArray *)arguments;
+- (NSArray *) arguments;
 
 // Cue ID for this message, parsed out depending on what kind of message it is
-- (NSString *)cueID;
+- (NSString *) cueID;
 
 @end

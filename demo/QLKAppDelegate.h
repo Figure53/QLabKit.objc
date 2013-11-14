@@ -36,8 +36,8 @@
 @property (weak) IBOutlet NSTableView *cuesTableView;
 @property (weak) IBOutlet NSTextField *connectionLabel;
 
-- (IBAction)go:(id)sender;
-- (IBAction)stop:(id)sender;
-- (IBAction)disconnect:(id)sender;
+- (IBAction) go:(id)sender;
+- (IBAction) stop:(id)sender;
+- (IBAction) disconnect:(id)sender;
 
 @end

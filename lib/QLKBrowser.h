@@ -34,7 +34,7 @@
 @protocol QLKBrowserDelegate <NSObject>
 
 // Servers were updated, a server may have been added or removed, or may have updated its workspaces
-- (void)browserDidUpdateServers:(QLKBrowser *)browser;
+- (void) browserDidUpdateServers:(QLKBrowser *)browser;
 
 @end
 
@@ -46,18 +46,18 @@
 // delegate object implementing QLKBrowserDelegate protocol
 @property (unsafe_unretained, nonatomic) id<QLKBrowserDelegate> delegate;
 
-- (void)refreshWorkspaces;
+- (void) refreshWorkspaces;
 
 // Start discovery
-- (void)start;
+- (void) start;
 
 // Stop discovery
-- (void)stop;
+- (void) stop;
 
 // Continuously poll workspaces of all servers with given interval (in seconds)
-- (void)enableAutoRefreshWithInterval:(NSTimeInterval)interval;
+- (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval;
 
 // Stop auto refresh
-- (void)disableAutoRefresh;
+- (void) disableAutoRefresh;
 
 @end

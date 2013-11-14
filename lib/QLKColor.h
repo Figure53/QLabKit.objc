@@ -35,22 +35,22 @@
 @property (strong, nonatomic) QLKColorClass *startColor;
 @property (strong, nonatomic) QLKColorClass *endColor;
 
-+ (NSSet *)colors;
-+ (QLKColor *)defaultColor;
-+ (QLKColor *)redColor;
-+ (QLKColor *)orangeColor;
-+ (QLKColor *)lightblueColor;
-+ (QLKColor *)blueColor;
-+ (QLKColor *)yellowColor;
-+ (QLKColor *)greenColor;
-+ (QLKColor *)purpleColor;
-+ (QLKColor *)colorWithName:(NSString *)name;
-- (BOOL)isEqualToColor:(QLKColor *)color;
++ (NSSet *) colors;
++ (QLKColor *) defaultColor;
++ (QLKColor *) redColor;
++ (QLKColor *) orangeColor;
++ (QLKColor *) lightblueColor;
++ (QLKColor *) blueColor;
++ (QLKColor *) yellowColor;
++ (QLKColor *) greenColor;
++ (QLKColor *) purpleColor;
++ (QLKColor *) colorWithName:(NSString *)name;
+- (BOOL) isEqualToColor:(QLKColor *)color;
 
-+ (QLKColorClass *)panelColor;
-+ (QLKColorClass *)navBarColor;
++ (QLKColorClass *) panelColor;
++ (QLKColorClass *) navBarColor;
 
-+ (QLKColorClass *)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha;
-+ (QLKColorClass *)colorWithWhite:(CGFloat)white alpha:(CGFloat)alpha;
++ (QLKColorClass *) colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha;
++ (QLKColorClass *) colorWithWhite:(CGFloat)white alpha:(CGFloat)alpha;
 
 @end

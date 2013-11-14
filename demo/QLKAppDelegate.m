@@ -42,125 +42,136 @@
 
 @implementation QLKAppDelegate
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+- (void) applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cuesUpdated:) name:QLKWorkspaceDidUpdateCuesNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector( cuesUpdated: )
+                                                 name:QLKWorkspaceDidUpdateCuesNotification
+                                               object:nil];
   
-  self.rows = [NSMutableArray array];
+    self.rows = [NSMutableArray array];
   
-  if (AUTOMATIC_CONNECTION) {
-    // Find QLab using continuously updating browser
-    self.browser = [[QLKBrowser alloc] init];
-    self.browser.delegate = self;
-    [self.browser start];
-    [self.browser enableAutoRefreshWithInterval:REFRESH_INTERVAL];
-  } else {
-    // Manual connect to server and get workspaces
-    QLKServer *server = [[QLKServer alloc] initWithHost:QLAB_IP port:QLAB_PORT];
-    server.name = @"QLab";
-    [server refreshWorkspacesWithCompletion:^(NSArray *workspaces) {
-      [self.rows addObject:server];
-      [self.rows addObjectsFromArray:server.workspaces];
-      
-      [self.serversTableView reloadData];
+    if ( AUTOMATIC_CONNECTION )
+    {
+        // Find QLab using continuously updating browser
+        self.browser = [[QLKBrowser alloc] init];
+        self.browser.delegate = self;
+        [self.browser start];
+        [self.browser enableAutoRefreshWithInterval:REFRESH_INTERVAL];
+    }
+    else
+    {
+        // Manual connect to server and get workspaces
+        QLKServer *server = [[QLKServer alloc] initWithHost:QLAB_IP port:QLAB_PORT];
+        server.name = @"QLab";
+        [server refreshWorkspacesWithCompletion:^(NSArray *workspaces) {
+            [self.rows addObject:server];
+            [self.rows addObjectsFromArray:server.workspaces];
+            [self.serversTableView reloadData];
+        }];
+    }
+
+    self.serversTableView.doubleAction = @selector(connect:);
+    self.serversTableView.target = self;
+}
+
+- (IBAction) go:(id)sender
+{
+    [self.workspace go];
+}
+
+- (IBAction) stop:(id)sender
+{
+    [self.workspace stopAll];
+}
+
+- (IBAction) disconnect:(id)sender
+{
+    if ( self.workspace )
+    {
+        [self.workspace disconnect];
+        self.workspace = nil;
+
+        self.connectionLabel.stringValue = @"";
+        [self.cuesTableView reloadData];
+    }
+}
+
+- (void) connect:(id)sender
+{
+    [self disconnect:nil];
+
+    NSInteger selectedRow = self.serversTableView.selectedRow;
+    if ( selectedRow == -1 )
+        return;
+
+    self.workspace = self.rows[selectedRow];
+    [self.workspace connectWithPasscode:nil completion:^(id data) {
+        NSLog(@"[app delegate] workspace did connect");
+        self.connectionLabel.stringValue = [NSString stringWithFormat:@"Connected: %@", self.workspace.fullName];
     }];
-  }
-  
-  self.serversTableView.doubleAction = @selector(connect:);
-  self.serversTableView.target = self;
 }
 
-- (IBAction)go:(id)sender
+- (void) cuesUpdated:(NSNotification *)notification
 {
-  [self.workspace go];
-}
-
-- (IBAction)stop:(id)sender
-{
-  [self.workspace stopAll];
-}
-
-- (IBAction)disconnect:(id)sender
-{
-  if (self.workspace) {
-    [self.workspace disconnect];
-    self.workspace = nil;
-    
-    self.connectionLabel.stringValue = @"";
     [self.cuesTableView reloadData];
-  }
-}
-
-- (void)connect:(id)sender
-{
-  [self disconnect:nil];
-  
-  NSInteger selectedRow = self.serversTableView.selectedRow;
-  if (selectedRow == -1) return;
-  
-  self.workspace = self.rows[selectedRow];
-  [self.workspace connectWithPasscode:nil completion:^(id data) {
-    NSLog(@"[app delegate] workspace did connect");
-    self.connectionLabel.stringValue = [NSString stringWithFormat:@"Connected: %@", self.workspace.fullName];
-  }];
-}
-
-- (void)cuesUpdated:(NSNotification *)notification
-{
-  [self.cuesTableView reloadData];
 }
 
 #pragma mark - QLKBrowserDelegate
 
-- (void)browserDidUpdateServers:(QLKBrowser *)browser
+- (void) browserDidUpdateServers:(QLKBrowser *)browser
 {
-  [self.rows removeAllObjects];
-  
-  for (QLKServer *server in browser.servers) {
-    [self.rows addObject:server];
-    [self.rows addObjectsFromArray:server.workspaces];
-  }
-  
-  [self.serversTableView reloadData];
+    [self.rows removeAllObjects];
+
+    for ( QLKServer *server in browser.servers )
+    {
+        [self.rows addObject:server];
+        [self.rows addObjectsFromArray:server.workspaces];
+    }
+
+    [self.serversTableView reloadData];
 }
 
 #pragma mark - NSTableViewDelegate
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
+- (NSInteger) numberOfRowsInTableView:(NSTableView *)tableView
 {
-  return (tableView == self.serversTableView) ? self.rows.count : self.workspace.firstCueList.cues.count;
+    return (tableView == self.serversTableView) ? self.rows.count : self.workspace.firstCueList.cues.count;
 }
 
-- (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+- (NSView *) tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-  NSTableCellView *cellView = [tableView makeViewWithIdentifier:@"MainCell" owner:self];
+    NSTableCellView *cellView = [tableView makeViewWithIdentifier:@"MainCell" owner:self];
 
-  if (tableView == self.serversTableView) {
-    id obj = self.rows[row];
-    cellView.textField.stringValue = ([obj isKindOfClass:[QLKServer class]]) ? [(QLKServer *)obj name].uppercaseString : [(QLKWorkspace *)obj name];
-  } else {
-    QLKCue *cue = self.workspace.firstCueList.cues[row];
-    cellView.textField.stringValue = ([tableColumn.identifier isEqualToString:@"number"]) ? cue.number : cue.displayName;
-  }
+    if ( tableView == self.serversTableView )
+    {
+        id obj = self.rows[row];
+        cellView.textField.stringValue = ([obj isKindOfClass:[QLKServer class]]) ? [(QLKServer *)obj name].uppercaseString : [(QLKWorkspace *)obj name];
+    }
+    else
+    {
+        QLKCue *cue = self.workspace.firstCueList.cues[row];
+        cellView.textField.stringValue = ([tableColumn.identifier isEqualToString:@"number"]) ? cue.number : cue.displayName;
+    }
   
-  return cellView;
+    return cellView;
 }
 
-- (BOOL)tableView:(NSTableView *)tableView isGroupRow:(NSInteger)row
+- (BOOL) tableView:(NSTableView *)tableView isGroupRow:(NSInteger)row
 {
-  return (tableView == self.serversTableView) ? [self.rows[row] isKindOfClass:[QLKServer class]] : NO;
+    return (tableView == self.serversTableView) ? [self.rows[row] isKindOfClass:[QLKServer class]] : NO;
 }
 
-- (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row
+- (BOOL) tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row
 {
-  return ![self tableView:tableView isGroupRow:row];
+    return ![self tableView:tableView isGroupRow:row];
 }
 
 #pragma mark - NSSplitViewDelegate
 
-- (BOOL)splitView:(NSSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view
+- (BOOL) splitView:(NSSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view
 {
-  return (splitView.subviews[0] != view);
+    return (splitView.subviews[0] != view);
 }
 
 @end

@@ -47,18 +47,18 @@
 @property (strong, nonatomic, readonly) NSMutableArray *workspaces;
 
 // Create a server with the host and port to connect
-- (id)initWithHost:(NSString *)host port:(NSInteger)port;
+- (id) initWithHost:(NSString *)host port:(NSInteger)port;
 
 // Send a message to this server to update the list of workspaces
-- (void)refreshWorkspaces;
-- (void)refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
+- (void) refreshWorkspaces;
+- (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
 
 // Update the server
-- (void)updateWorkspaces:(NSArray *)workspaces;
+- (void) updateWorkspaces:(NSArray *)workspaces;
 
 // Add a workspace to the server
-- (void)addWorkspace:(QLKWorkspace *)workspace;
-- (void)removeWorkspace:(QLKWorkspace *)workspace;
-- (void)removeAllWorkspaces;
+- (void) addWorkspace:(QLKWorkspace *)workspace;
+- (void) removeWorkspace:(QLKWorkspace *)workspace;
+- (void) removeAllWorkspaces;
 
 @end
