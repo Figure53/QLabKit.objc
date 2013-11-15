@@ -45,7 +45,7 @@
 // Name of the machine running QLab.
 @property (strong, nonatomic) NSString *name;
 
-// The netservice used to discover this server (you don't have to worry about this).
+// The netservice used to discover this server (if any). You probably don't need this.
 @property (strong, nonatomic) NSNetService *netService;
 
 // Array of QLKWorkspace objects that belong to this server.
