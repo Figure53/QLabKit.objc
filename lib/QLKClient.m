@@ -42,31 +42,41 @@
 
 @implementation QLKClient
 
-- (void) dealloc
-{
-    _OSCClient.delegate = nil;
-}
-
 - (id) initWithHost:(NSString *)host port:(NSInteger)port
 {
     self = [super init];
     if ( !self )
         return nil;
-
-    _callbacks = [[NSMutableDictionary alloc] init];
+    
     _OSCClient = [[F53OSCClient alloc] init];
     _OSCClient.host = host;
     _OSCClient.port = port;
+    _OSCClient.useTcp = NO;
     _OSCClient.delegate = self;
-    _connected = NO;
-
+    _callbacks = [[NSMutableDictionary alloc] init];
+    _delegate = nil;
+    
     return self;
+}
+
+- (void) dealloc
+{
+    _OSCClient.delegate = nil;
+}
+
+- (BOOL) useTCP
+{
+    return self.OSCClient.useTcp;
 }
 
 - (void) setUseTCP:(BOOL)useTCP
 {
-    _useTCP = useTCP;
     self.OSCClient.useTcp = useTCP;
+}
+
+- (BOOL) isConnected
+{
+    return self.OSCClient.isConnected;
 }
 
 - (BOOL) connect
@@ -126,8 +136,6 @@
     [self.OSCClient sendPacket:message];
 }
 
-#pragma mark - 
-
 - (NSString *) workspacePrefix
 {
     return [NSString stringWithFormat:@"/workspace/%@", [self.delegate workspaceID]];
@@ -150,6 +158,8 @@
 {
     [self.delegate clientConnectionErrorOccurred];
 }
+
+#pragma mark - 
 
 - (void) processMessage:(QLKMessage *)message
 {

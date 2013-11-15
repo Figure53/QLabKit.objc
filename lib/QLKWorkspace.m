@@ -60,12 +60,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 @implementation QLKWorkspace
 
-- (void) dealloc
-{
-    self.client.delegate = nil;
-}
-
-- (id)init
+- (id) init
 {
     self = [super init];
     if ( !self )
@@ -101,6 +96,11 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     _hasPasscode = [dict[@"hasPasscode"] boolValue];
 
     return self;
+}
+
+- (void) dealloc
+{
+    self.client.delegate = nil;
 }
 
 - (NSString *) description
@@ -338,7 +338,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
         //NSLog( @"heartbeat received" );
 
         // Ignore if we have manually disconnected while waiting for response
-        if ( self.client.connected )
+        if ( self.client.isConnected )
         {
             [self performSelector:@selector( sendHeartbeat )
                        withObject:nil
@@ -625,6 +625,18 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self fetchCueLists];
 }
 
+- (void) playbackPositionUpdated:(NSString *)cueID
+{
+    QLKCue *cue = nil;
+    
+    if ( cueID )
+        cue = [self cueWithId:cueID];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceDidChangePlaybackPositionNotification object:cue];
+    });
+}
+
 - (void) cueUpdated:(NSString *)cueID
 {
     QLKCue *cue = [self cueWithId:cueID];
@@ -660,18 +672,6 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 {
     QLKCue *cue = [self cueWithId:cueID];
     [cue updatePropertiesWithDictionary:properties];
-}
-
-- (void) playbackPositionUpdated:(NSString *)cueID
-{
-    QLKCue *cue = nil;
-
-    if ( cueID )
-        cue = [self cueWithId:cueID];
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceDidChangePlaybackPositionNotification object:cue];
-    });
 }
 
 - (void) clientConnectionErrorOccurred

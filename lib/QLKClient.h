@@ -34,24 +34,25 @@
 
 @protocol QLKClientDelegate <NSObject>
 
-- (void) cueUpdated:(NSString *)cueID;
-- (void) cueUpdated:(NSString *)cueID withProperties:(NSDictionary *)properties;
+- (NSString *) workspaceID;
 - (void) workspaceUpdated;
 - (void) playbackPositionUpdated:(NSString *)cueID;
-- (NSString *) workspaceID;
+- (void) cueUpdated:(NSString *)cueID;
+- (void) cueUpdated:(NSString *)cueID withProperties:(NSDictionary *)properties;
 - (void) clientConnectionErrorOccurred;
 
 @end
 
-@interface QLKClient : NSObject <F53OSCClientDelegate, F53OSCPacketDestination>
+@interface QLKClient : NSObject <F53OSCPacketDestination, F53OSCClientDelegate>
+
+- (id) initWithHost:(NSString *)host port:(NSInteger)port;
 
 @property (unsafe_unretained) id<QLKClientDelegate> delegate;
 @property (assign, nonatomic) BOOL useTCP;
-@property (assign) BOOL connected;
+@property (readonly) BOOL isConnected;
 
-- (id) initWithHost:(NSString *)host port:(NSInteger)port;
-- (void) disconnect;
 - (BOOL) connect;
+- (void) disconnect;
 
 - (void) sendMessage:(F53OSCMessage *)message;
 - (void) sendMessage:(NSObject *)message toAddress:(NSString *)address;
