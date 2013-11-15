@@ -31,32 +31,31 @@
 
 @interface QLKServer : NSObject
 
-// Name of the machine running QLab
-@property (strong, nonatomic) NSString *name;
-
-// Host should almost always be IP address, i.e. @"10.0.1.1"
-@property (strong, nonatomic, readonly) NSString *host;
-
-// Port to connect to on the server, 53000 by default
-@property (assign, nonatomic, readonly) NSInteger port;
-
-// The netservice used to discover this server (you don't have to worry about this)
-@property (strong, nonatomic) NSNetService *netService;
-
-// Array of QLKWorkspace objects that belong to this server
-@property (strong, nonatomic, readonly) NSMutableArray *workspaces;
-
-// Create a server with the host and port to connect
+// Create a server with the host and port to connect.
+// Host should almost always be either @"localhost" or IP address, e.g. @"10.0.1.1".
+// Pass in port 0 to use default port (53000).
 - (id) initWithHost:(NSString *)host port:(NSInteger)port;
 
-// Send a message to this server to update the list of workspaces
+// Host address of the server.
+@property (strong, nonatomic, readonly) NSString *host;
+
+// Port to connect to on the server, 53000 by default.
+@property (assign, nonatomic, readonly) NSInteger port;
+
+// Name of the machine running QLab.
+@property (strong, nonatomic) NSString *name;
+
+// The netservice used to discover this server (you don't have to worry about this).
+@property (strong, nonatomic) NSNetService *netService;
+
+// Array of QLKWorkspace objects that belong to this server.
+@property (strong, nonatomic, readonly) NSMutableArray *workspaces;
+
+// Send a message to this server to update the list of workspaces.
 - (void) refreshWorkspaces;
 - (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
 
-// Update the server
-- (void) updateWorkspaces:(NSArray *)workspaces;
-
-// Add a workspace to the server
+// Add a workspace to the server.
 - (void) addWorkspace:(QLKWorkspace *)workspace;
 - (void) removeWorkspace:(QLKWorkspace *)workspace;
 - (void) removeAllWorkspaces;

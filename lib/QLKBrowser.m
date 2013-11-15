@@ -37,6 +37,12 @@
 #define DEBUG_BROWSER 0
 #define UDP_SERVER_PORT 53001
 
+@interface QLKServer (QLKBrowserAccess)
+
+- (void) updateWorkspaces:(NSArray *)workspaces;
+
+@end
+
 @interface QLKBrowser ()
 
 @property (strong) NSMutableArray *services;

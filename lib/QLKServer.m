@@ -43,12 +43,14 @@
     self = [super init];
     if ( !self )
         return nil;
+    
+    if ( port == 0 )
+        port = 53000;
 
-    _name = host;
     _host = host;
     _port = port;
+    _name = host;
     _workspaces = [[NSMutableArray alloc] init];
-
     _client = [[QLKClient alloc] initWithHost:host port:port];
 
     return self;
