@@ -57,25 +57,25 @@
 
 @implementation QLKBrowser
 
+- (id) init
+{
+    self = [super init];
+    if ( !self )
+        return nil;
+    
+    _running = NO;
+    _servers = [[NSMutableArray alloc] init];
+    _services = [[NSMutableArray alloc] init];
+    
+    return self;
+}
+
 - (void) dealloc
 {
     [self disableAutoRefresh];
     self.server.delegate = nil;
     [self.server stopListening];
     [self.browser stop];
-}
-
-- (id) init
-{
-    self = [super init];
-    if ( !self )
-        return nil;
-
-    _running = NO;
-    _servers = [[NSMutableArray alloc] init];
-    _services = [[NSMutableArray alloc] init];
-
-    return self;
 }
 
 - (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval
