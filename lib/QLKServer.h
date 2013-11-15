@@ -55,9 +55,4 @@
 - (void) refreshWorkspaces;
 - (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
 
-// Add a workspace to the server.
-- (void) addWorkspace:(QLKWorkspace *)workspace;
-- (void) removeWorkspace:(QLKWorkspace *)workspace;
-- (void) removeAllWorkspaces;
-
 @end

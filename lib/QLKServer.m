@@ -34,6 +34,10 @@
 
 @property (strong, nonatomic) QLKClient *client;
 
+- (void) addWorkspace:(QLKWorkspace *)workspace;
+- (void) removeWorkspace:(QLKWorkspace *)workspace;
+- (void) removeAllWorkspaces;
+
 @end
 
 @implementation QLKServer
