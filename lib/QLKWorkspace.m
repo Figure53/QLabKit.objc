@@ -105,7 +105,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (NSString *) description
 {
-    return [NSString stringWithFormat:@"%@ - %@", [super description], self.name];
+    return [NSString stringWithFormat:@"%@ - %@ : %@", [super description], self.name, self.uniqueId];
 }
 
 - (NSString *) fullName
