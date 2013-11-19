@@ -28,7 +28,16 @@
 #import <Foundation/Foundation.h>
 #import "F53OSC.h"
 
-@class F53OSCClient, QLKBrowser, QLKWorkspace;
+@class F53OSCClient, QLKBrowser, QLKServer, QLKWorkspace;
+
+
+@protocol QLKServerDelegate <NSObject>
+
+// A server updated its workspaces.
+- (void) serverDidUpdateWorkspaces:(QLKServer *)server;
+
+@end
+
 
 @interface QLKServer : NSObject
 
@@ -36,6 +45,9 @@
 // Host should almost always be either @"localhost" or IP address, e.g. @"10.0.1.1".
 // Pass in port 0 to use default port (53000).
 - (id) initWithHost:(NSString *)host port:(NSInteger)port;
+
+// delegate object implementing QLKServerDelegate protocol
+@property (unsafe_unretained, nonatomic) id<QLKServerDelegate> delegate;
 
 // Host address of the server.
 @property (strong, nonatomic, readonly) NSString *host;
@@ -55,8 +67,9 @@
 // Array of QLKWorkspace objects that belong to this server.
 @property (strong, nonatomic, readonly) NSMutableArray *workspaces;
 
-// Send a message to this server to update the list of workspaces.
 - (void) refreshWorkspaces;
 - (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
+- (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval;
+- (void) disableAutoRefresh;
 
 @end

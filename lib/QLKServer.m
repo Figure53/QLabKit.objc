@@ -43,6 +43,7 @@
 @interface QLKServer ()
 
 @property (strong, nonatomic) QLKClient *client;
+@property (strong) NSTimer *refreshTimer;
 
 - (void) updateWorkspaces:(NSArray *)workspaces;
 
@@ -76,6 +77,7 @@
 
 - (void) dealloc
 {
+    [self disableAutoRefresh];
     [self.client disconnect];
     [self.workspaces removeAllObjects];
 }
@@ -86,6 +88,20 @@
 }
 
 #pragma mark - Workspaces
+
+- (void) updateWorkspaces:(NSArray *)workspaces
+{
+    [self.workspaces removeAllObjects];
+    
+    for ( NSDictionary *dict in workspaces )
+    {
+        QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:self];
+        [self.workspaces addObject:workspace];
+    }
+    
+    [self.browser serverDidUpdateWorkspaces:self];
+    [self.delegate serverDidUpdateWorkspaces:self];
+}
 
 - (void) refreshWorkspaces
 {
@@ -124,17 +140,22 @@
     }];
 }
 
-- (void) updateWorkspaces:(NSArray *)workspaces
+- (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval
 {
-    [self.workspaces removeAllObjects];
-  
-    for ( NSDictionary *dict in workspaces )
+    if ( !self.refreshTimer )
     {
-        QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:self];
-        [self.workspaces addObject:workspace];
+        self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:interval
+                                                             target:self
+                                                           selector:@selector( refreshWorkspaces )
+                                                           userInfo:nil
+                                                            repeats:YES];
     }
-    
-    [self.browser serverDidUpdateWorkspaces:self];
+}
+
+- (void) disableAutoRefresh
+{
+    [self.refreshTimer invalidate];
+    self.refreshTimer = nil;
 }
 
 @end
