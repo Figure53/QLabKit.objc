@@ -25,35 +25,28 @@
 //  THE SOFTWARE.
 //
 
-
 #import "QLKBrowser.h"
-#import "QLKWorkspace.h"
 #import "QLKServer.h"
-#import "QLKMessage.h"
+#import "QLKWorkspace.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define DEBUG_OSC 0
 #define DEBUG_BROWSER 0
-#define UDP_SERVER_PORT 53001
 
-@interface QLKServer (QLKBrowserAccess)
-
-- (void) updateWorkspaces:(NSArray *)workspaces;
-
-@end
 
 @interface QLKBrowser ()
 
-@property (strong) NSMutableArray *services;
-@property (strong) NSNetServiceBrowser *browser;
-@property (strong) F53OSCServer *server;
-@property (strong) NSTimer *refreshTimer;
 @property (assign) BOOL running;
+@property (strong) NSNetServiceBrowser *browser;
+@property (strong) NSMutableArray *services;
+@property (strong) NSTimer *refreshTimer;
 
 - (QLKServer *) serverForHost:(NSString *)host;
+- (QLKServer *) serverForNetService:(NSNetService *)netService;
+- (void) serverDidUpdateWorkspaces:(QLKServer *)server;
 
 @end
+
 
 @implementation QLKBrowser
 
@@ -64,8 +57,10 @@
         return nil;
     
     _running = NO;
-    _servers = [[NSMutableArray alloc] init];
+    _browser = nil;
     _services = [[NSMutableArray alloc] init];
+    _refreshTimer = nil;
+    _servers = [[NSMutableArray alloc] init];
     
     return self;
 }
@@ -73,18 +68,57 @@
 - (void) dealloc
 {
     [self disableAutoRefresh];
-    self.server.delegate = nil;
-    [self.server stopListening];
     [self.browser stop];
+}
+
+- (void) start
+{
+    if ( self.running )
+        return;
+    
+    self.running = YES;
+    
+#if DEBUG_BROWSER
+    NSLog( @"[browser] starting bonjour" );
+#endif
+    
+    // Create Bonjour browser to find QLab instances.
+    self.browser = [[NSNetServiceBrowser alloc] init];
+    [self.browser setDelegate:self];
+    [self.browser searchForServicesOfType:QLKBonjourTCPServiceType inDomain:QLKBonjourServiceDomain];
+}
+
+- (void) stop
+{
+#if DEBUG_BROWSER
+    NSLog( @"[browser] stopping bonjour" );
+#endif
+    
+    // Stop bonjour
+    [self.browser stop];
+    self.browser = nil;
+    
+    // Remove all servers.
+    [self.servers removeAllObjects];
+    
+    self.running = NO;
+}
+
+- (void) refreshAllWorkspaces
+{
+    for ( QLKServer *server in self.servers )
+    {
+        [server refreshWorkspaces];
+    }
 }
 
 - (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval
 {
-    if ( !self.refreshTimer && self.running )
+    if ( !self.refreshTimer )
     {
         self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:interval
                                                              target:self
-                                                           selector:@selector( refreshWorkspaces )
+                                                           selector:@selector( refreshAllWorkspaces )
                                                            userInfo:nil
                                                             repeats:YES];
     }
@@ -96,52 +130,7 @@
     self.refreshTimer = nil;
 }
 
-- (void) refreshWorkspaces
-{
-    for ( QLKServer *server in self.servers )
-    {
-        [server refreshWorkspaces];
-    }
-}
-
-- (void) start
-{
-    if ( self.running )
-        return;
-
-    self.running = YES;
-
-    // OSC server to receive workspaces from QLab instances
-    if ( !self.server )
-    {
-        self.server = [[F53OSCServer alloc] init];
-        self.server.port = UDP_SERVER_PORT;
-        self.server.delegate = self;
-    }
-
-    [self.server startListening];
-
-    // Bonjour browser to find QLab instances
-    self.browser = [[NSNetServiceBrowser alloc] init];
-    [self.browser setDelegate:self];
-    [self.browser searchForServicesOfType:QLKBonjourUDPServiceType inDomain:QLKBonjourServiceDomain];
-}
-
-- (void) stop
-{
-    NSLog( @"[browser] stopping OSC server and bonjour" );
-    
-    self.running = NO;
-
-    // Remove all servers and stop OSC server
-    [self.servers removeAllObjects];
-    [self.server stopListening];
-    self.server = nil;
-
-    // Stop bonjour
-    [self.browser stop];
-    self.browser = nil;
-}
+#pragma mark -
 
 - (QLKServer *) serverForHost:(NSString *)host
 {
@@ -169,132 +158,96 @@
     return nil;
 }
 
-#pragma mark - OSC server delegate
-
-- (void) takeMessage:(F53OSCMessage *)OSCMessage
+- (void) serverDidUpdateWorkspaces:(QLKServer *)server
 {
-    QLKMessage *message = [QLKMessage messageWithOSCMessage:OSCMessage];
-    NSString *host = message.host;
-
-#if DEBUG_OSC
-    NSLog(@"[OSC:server <-] %@", message);
-#endif
-  
-    // We only care about replies for the /workspaces request
-    if ( [message isReply] && [message.replyAddress isEqualToString:@"/workspaces"] )
+    dispatch_async( dispatch_get_main_queue(), ^
     {
-        NSArray *workspaces = (NSArray *)message.response;
-
-        QLKServer *server = [self serverForHost:host];
-        [server updateWorkspaces:workspaces];
-
-        // Make sure this is dispatched on main thread
-        dispatch_async( dispatch_get_main_queue(), ^{
-            if ( self.delegate )
-            {
-                [self.delegate browserDidUpdateServers:self];
-            }
-        });
-
-        return;
-    }
-
-// Some other message we don't care about
-#if DEBUG_OSC
-    NSLog( @"[OSC:server] unhandled reply: %@ from %@", message, host );
-#endif
+        [self.delegate serverDidUpdateWorkspaces:server];
+    });
 }
 
-- (void) takeBundle:(F53OSCBundle *)bundle
-{
-#if DEBUG_OSC
-    NSLog( @"[OSC:server] bundle received: %@", bundle );
-#endif
-}
-
-#pragma mark - NSNetServiceBrowser delegate
+#pragma mark - NSNetServiceBrowserDelegate
 
 - (void) netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
 {
 #if DEBUG_BROWSER
     NSLog( @"netServiceBrowser:didFindService: %@", netService );
 #endif
-  
+    
     [self.services addObject:netService];
     [netService setDelegate:self];
     [netService resolveWithTimeout:5.0f];
 }
 
-// When a service is removed, assume the server is gone
-// Remove the server and all workspaces
 - (void) netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)netService moreComing:(BOOL)moreComing
 {
 #if DEBUG_BROWSER
     NSLog( @"netServiceBrowser:didRemoveService: %@", netService );
 #endif
-  
+    
     QLKServer *server = [self serverForNetService:netService];
     [self.servers removeObject:server];
-  
-    // Make sure this is dispatched on main thread
-    dispatch_async( dispatch_get_main_queue(), ^{
-        if ( self.delegate )
-        {
-            [self.delegate browserDidUpdateServers:self];
-        }
+    
+    dispatch_async( dispatch_get_main_queue(), ^
+    {
+        [self.delegate browserDidUpdateServers:self];
     });
 }
 
 #pragma mark - NSNetServiceDelegate
 
-// Resolved address for net service, now get workspaces
 - (void) netServiceDidResolveAddress:(NSNetService *)netService
 {
 #if DEBUG_BROWSER
     NSLog( @"netServiceDidResolveAddress: %@", netService );
 #endif
-
+    
     NSString *ip = [self IPAddressFromData:netService.addresses[0]];
     NSInteger port = netService.port;
-
-    // We resolved a QLab instance, create a server for it
     QLKServer *server = [[QLKServer alloc] initWithHost:ip port:port];
-    server.netService = netService;
     server.name = netService.name;
-
-    NSLog( @"added server: %@", server );
-
+    server.browser = self;
+    server.netService = netService;
+    
+    // Once resolved, we can remove the net service from our local records.
+    // (The QLKServer will still hold on to it, though.)
+    [self.services removeObject:netService];
+    
+#if DEBUG_BROWSER
+    NSLog( @"[browser] adding server: %@", server );
+#endif
+    
     [self.servers addObject:server];
-    [server refreshWorkspaces];
-
-    if ( self.delegate )
+    
+    dispatch_async( dispatch_get_main_queue(), ^
     {
         [self.delegate browserDidUpdateServers:self];
-    }
-
-    // Once resolved, we can remove the net service
-    [self.services removeObject:netService];
+    });
+    
+    [server refreshWorkspaces];
 }
 
-// Sent if resolution fails
 - (void) netService:(NSNetService *)netService didNotResolve:(NSDictionary *)error
 {
-  NSLog( @"error resolving service: %@ - %@", netService, error );
+    NSLog( @"Error: Failed to resolve service: %@ - %@", netService, error );
 }
+
+#pragma mark -
 
 - (NSString *) IPAddressFromData:(NSData *)data
 {
-    // Taken from Apple sample project - CocoaSoap
+    // Taken from Apple sample project - CocoaSoap.
+    
     NSString *ip = @"0.0.0.0";
     struct sockaddr_in *address_sin = (struct sockaddr_in *)data.bytes;
     const char *formatted;
     char buffer[1024];
     if ( AF_INET == address_sin->sin_family )
     {
-        formatted = inet_ntop(AF_INET, &(address_sin->sin_addr), buffer, sizeof(buffer));
+        formatted = inet_ntop( AF_INET, &(address_sin->sin_addr), buffer, sizeof( buffer ) );
         ip = [NSString stringWithFormat:@"%s", formatted];
     }
-
+    
     return ip;
 }
 

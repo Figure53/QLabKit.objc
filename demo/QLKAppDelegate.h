@@ -27,6 +27,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "QLKBrowser.h"
+#import "QLKWorkspace.h"
 
 @interface QLKAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSplitViewDelegate, QLKBrowserDelegate>
 

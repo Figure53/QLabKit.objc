@@ -31,10 +31,11 @@
 
 @interface QLKMessage : NSObject
 
-- (id) initWithOSCMessage:(F53OSCMessage *)message;
 + (QLKMessage *) messageWithOSCMessage:(F53OSCMessage *)message;
 
-// Identifying the different types of messages we're dealing with
+- (id) initWithOSCMessage:(F53OSCMessage *)message;
+
+// Identifying the different types of messages.
 - (BOOL) isReply;
 - (BOOL) isReplyCueUpdate;
 - (BOOL) isUpdate;
@@ -43,28 +44,28 @@
 - (BOOL) isPlaybackPositionUpdate;
 - (BOOL) isDisconnect;
 
-// Host the message came from, almost always will be the IP address
+// Host the message came from, almost always will be the IP address.
 - (NSString *) host;
 
-// Full address path of this message: /update/workspace/12345/cue_id/4
+// Full address path of this message, e.g. /update/workspace/12345/cue_id/4
 - (NSString *) address;
 
-// Individual address parts separated by "/": ("update", "workspace", "12345", "cue_id", "4")
+// Individual address parts separated by "/", e.g. ("update", "workspace", "12345", "cue_id", "4")
 - (NSArray *) addressParts;
 
-// Address without reply: "/reply/workspace/12345/connect" -> "/workspace/12345/connect"
+// Address without reply, e.g. "/reply/workspace/12345/connect" -> "/workspace/12345/connect"
 - (NSString *) replyAddress;
 
 // Address with workspace prefix removed, will also remove /reply: "/workspace/12345/connect" -> "/connect"
 - (NSString *) addressWithoutWorkspace:(NSString *)workspaceID;
 
-// Deserialized JSON from the "data" key of the response
+// Deserialized objects from the "data" key of QLab's reply.
 - (id) response;
 
-// Direct arguments from OSC message
+// Direct arguments from OSC message.
 - (NSArray *) arguments;
 
-// Cue ID for this message, parsed out depending on what kind of message it is
+// Cue ID for this message, parsed out depending on what kind of message it is.
 - (NSString *) cueID;
 
 @end

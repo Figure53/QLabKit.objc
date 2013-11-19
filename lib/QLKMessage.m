@@ -168,8 +168,8 @@
 
 - (id) response
 {
-    NSString *body = self.OSCMessage.arguments[0];
     NSError *error = nil;
+    NSString *body = self.OSCMessage.arguments[0]; // QLab replies have one argument, which is a JSON string.
     NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
 
     if ( error )
@@ -177,7 +177,7 @@
         NSLog( @"error decoding JSON: %@, %@", error, self.OSCMessage.arguments );
     }
 
-    return dict[@"data"];
+    return dict[@"data"]; // The answer to a reply is stored as "data" in the JSON-encoded dictionary sent by QLab.
 }
 
 @end

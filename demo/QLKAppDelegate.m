@@ -64,7 +64,8 @@
         // Manual connect to server and get workspaces
         QLKServer *server = [[QLKServer alloc] initWithHost:QLAB_IP port:QLAB_PORT];
         server.name = @"QLab";
-        [server refreshWorkspacesWithCompletion:^(NSArray *workspaces) {
+        [server refreshWorkspacesWithCompletion:^(NSArray *workspaces)
+        {
             [self.rows addObject:server];
             [self.rows addObjectsFromArray:server.workspaces];
             [self.serversTableView reloadData];
@@ -106,7 +107,8 @@
         return;
 
     self.workspace = self.rows[selectedRow];
-    [self.workspace connectWithPasscode:nil completion:^(id data) {
+    [self.workspace connectWithPasscode:nil completion:^(id data)
+    {
         NSLog(@"[app delegate] workspace did connect");
         self.connectionLabel.stringValue = [NSString stringWithFormat:@"Connected: %@", self.workspace.fullName];
     }];
@@ -117,19 +119,29 @@
     [self.cuesTableView reloadData];
 }
 
-#pragma mark - QLKBrowserDelegate
-
-- (void) browserDidUpdateServers:(QLKBrowser *)browser
+- (void) updateView
 {
     [self.rows removeAllObjects];
-
-    for ( QLKServer *server in browser.servers )
+    
+    for ( QLKServer *server in self.browser.servers )
     {
         [self.rows addObject:server];
         [self.rows addObjectsFromArray:server.workspaces];
     }
-
+    
     [self.serversTableView reloadData];
+}
+
+#pragma mark - QLKBrowserDelegate
+
+- (void) browserDidUpdateServers:(QLKBrowser *)browser
+{
+    [self updateView];
+}
+
+- (void) serverDidUpdateWorkspaces:(QLKServer *)server
+{
+    [self updateView];
 }
 
 #pragma mark - NSTableViewDelegate

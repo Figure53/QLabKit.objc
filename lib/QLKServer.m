@@ -27,16 +27,24 @@
 
 
 #import "QLKServer.h"
-#import "QLKWorkspace.h"
+#import "QLKBrowser.h"
 #import "QLKClient.h"
+#import "QLKMessage.h"
+#import "QLKWorkspace.h"
+
+
+@interface QLKBrowser (QLKServerAccess)
+
+- (void) serverDidUpdateWorkspaces:(QLKServer *)server;
+
+@end
+
 
 @interface QLKServer ()
 
 @property (strong, nonatomic) QLKClient *client;
 
-- (void) addWorkspace:(QLKWorkspace *)workspace;
-- (void) removeWorkspace:(QLKWorkspace *)workspace;
-- (void) removeAllWorkspaces;
+- (void) updateWorkspaces:(NSArray *)workspaces;
 
 @end
 
@@ -54,10 +62,22 @@
     _host = host;
     _port = port;
     _name = host;
+    _browser = nil;
+    _netService = nil;
     _workspaces = [[NSMutableArray alloc] init];
-    _client = [[QLKClient alloc] initWithHost:host port:port];
+    
+    // Create a private client that we'll use for querying the list of workspaces on the QLab server.
+    // (Usually these clients are associated with a specific workspace, but not in this case.)
+    self.client = [[QLKClient alloc] initWithHost:host port:port];
+    self.client.useTCP = YES;
 
     return self;
+}
+
+- (void) dealloc
+{
+    [self.client disconnect];
+    [self.workspaces removeAllObjects];
 }
 
 - (NSString *) description
@@ -69,23 +89,34 @@
 
 - (void) refreshWorkspaces
 {
-    [self.client sendMessage:[F53OSCMessage messageWithAddressPattern:@"/workspaces" arguments:nil]];
+    if ( !self.client.isConnected )
+    {
+        if ( ![self.client connect] )
+        {
+            NSLog( @"Error: QLKServer unable to connect to QLab server: %@:%ld", self.host, (long)self.port );
+            return;
+        }
+    }
+    
+    [self.client sendMessages:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
+    {
+        [self updateWorkspaces:data];
+    }];
 }
 
 - (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block
 {
-    // Create TCP connection so we can receive the response
-    self.client.useTCP = YES;
-    if ( ![self.client connect] )
+    if ( !self.client.isConnected )
     {
-        NSLog(@"[server] error connecting to server: %@:%ld", self.host, (long)self.port);
+        if ( ![self.client connect] )
+        {
+            NSLog( @"Error: QLKServer unable to connect to QLab server: %@:%ld", self.host, (long)self.port );
+            return;
+        }
     }
 
-    [self.client sendMessages:@[] toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
+    [self.client sendMessages:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
     {
-        [self.client disconnect];
-        self.client.useTCP = NO;
-
         [self updateWorkspaces:data];
         
         if ( block )
@@ -95,28 +126,15 @@
 
 - (void) updateWorkspaces:(NSArray *)workspaces
 {
-    [self removeAllWorkspaces];
+    [self.workspaces removeAllObjects];
   
     for ( NSDictionary *dict in workspaces )
     {
         QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:self];
-        [self addWorkspace:workspace];
+        [self.workspaces addObject:workspace];
     }
-}
-
-- (void) addWorkspace:(QLKWorkspace *)workspace
-{
-    [self.workspaces addObject:workspace];
-}
-
-- (void) removeWorkspace:(QLKWorkspace *)workspace
-{
-    [self.workspaces removeObject:workspace];
-}
-
-- (void) removeAllWorkspaces
-{
-    [self.workspaces removeAllObjects];
+    
+    [self.browser serverDidUpdateWorkspaces:self];
 }
 
 @end

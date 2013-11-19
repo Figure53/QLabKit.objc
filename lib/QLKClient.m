@@ -51,9 +51,9 @@
     _OSCClient = [[F53OSCClient alloc] init];
     _OSCClient.host = host;
     _OSCClient.port = port;
-    _OSCClient.useTcp = NO;
+    _OSCClient.useTcp = YES;
     _OSCClient.delegate = self;
-    _callbacks = [[NSMutableDictionary alloc] init];
+    _callbacks = [[NSMutableDictionary alloc] init]; // key: OSC address, value: code block
     _delegate = nil;
     
     return self;
@@ -61,7 +61,8 @@
 
 - (void) dealloc
 {
-    _OSCClient.delegate = nil;
+    [self.OSCClient disconnect];
+    self.OSCClient.delegate = nil;
 }
 
 - (BOOL) useTCP
@@ -87,15 +88,6 @@
 - (void) disconnect
 {
     [self.OSCClient disconnect];
-}
-
-- (void) sendMessage:(F53OSCMessage *)message
-{
-#if DEBUG_OSC
-    NSLog( @"[OSC:client ->] %@ (%@:%d)", message.addressPattern, self.OSCClient.host, self.OSCClient.port );
-#endif
-  
-    [self.OSCClient sendPacket:message];
 }
 
 - (void) sendMessage:(NSObject *)message toAddress:(NSString *)address
@@ -129,7 +121,7 @@
     NSString *fullAddress = (toWorkspace && self.delegate) ? [NSString stringWithFormat:@"%@%@", [self workspacePrefix], address] : address;
   
 #if DEBUG_OSC
-    NSLog( @"[OSC:client ->] %@, data: %@ (%@:%d)", fullAddress, messages, self.OSCClient.host, self.OSCClient.port );
+    NSLog( @"QLKClient sending OSC message to (%@:%d): %@ data: %@", self.OSCClient.host, self.OSCClient.port, fullAddress, messages );
 #endif
 
     F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:fullAddress arguments:messages];
@@ -169,9 +161,9 @@
   
     if ( [message isReply] )
     {
-        id data = message.response;
+        id data = message.response; // Get the deserialized value sent back in this reply.
     
-        // Special case, want to update cue properties
+        // Special case, want to update cue properties.
         if ( [message isReplyCueUpdate] )
         {
             if ( [data isKindOfClass:[NSDictionary class]] )
@@ -180,23 +172,21 @@
             }
         }
     
-        // Reply to a message we sent
         NSString *relativeAddress = [message addressWithoutWorkspace:[self.delegate workspaceID]];
         QLKMessageHandlerBlock block = self.callbacks[relativeAddress];
-        
         if ( block )
         {
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async( dispatch_get_main_queue(), ^
+            {
                 block( data );
             
-                // Remove handler for address
+                // Remove handler for address.
                 [self.callbacks removeObjectForKey:relativeAddress];
             });
         }
     }
     else if ( [message isUpdate] )
     {
-        // QLab has informed us of an update
         if ( [message isWorkspaceUpdate] )
         {
             [self.delegate workspaceUpdated];

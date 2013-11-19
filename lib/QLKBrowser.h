@@ -26,38 +26,43 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "F53OSC.h"
 #import "QLKDefines.h"
 
-@class QLKWorkspace, QLKBrowser;
+@class QLKBrowser, QLKServer;
+
 
 @protocol QLKBrowserDelegate <NSObject>
 
-// Servers were updated, a server may have been added or removed, or may have updated its workspaces
+// A server was added or removed.
 - (void) browserDidUpdateServers:(QLKBrowser *)browser;
+
+// A server updated its workspaces.
+- (void) serverDidUpdateWorkspaces:(QLKServer *)server;
 
 @end
 
-@interface QLKBrowser : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, F53OSCPacketDestination>
 
-// array of QLKServer objects
-@property (strong, nonatomic) NSMutableArray *servers;
+@interface QLKBrowser : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate>
 
 // delegate object implementing QLKBrowserDelegate protocol
 @property (unsafe_unretained, nonatomic) id<QLKBrowserDelegate> delegate;
 
-- (void) refreshWorkspaces;
+// array of QLKServer objects
+@property (strong, nonatomic) NSMutableArray *servers;
 
-// Start discovery
+// Start server discovery.
 - (void) start;
 
-// Stop discovery
+// Stop server discovery.
 - (void) stop;
 
-// Continuously poll workspaces of all servers with given interval (in seconds)
+// Refresh list of workspaces on all servers.
+- (void) refreshAllWorkspaces;
+
+// Continuously poll workspaces of all servers with given interval (in seconds).
 - (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval;
 
-// Stop auto refresh
+// Stop auto refresh of workspaces.
 - (void) disableAutoRefresh;
 
 @end

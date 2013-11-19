@@ -26,8 +26,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "F53OSC.h"
 
-@class F53OSCClient, QLKWorkspace;
+@class F53OSCClient, QLKBrowser, QLKWorkspace;
 
 @interface QLKServer : NSObject
 
@@ -44,6 +45,9 @@
 
 // Name of the machine running QLab.
 @property (strong, nonatomic) NSString *name;
+
+// The browser that owns this server (if any). You probably don't need this.
+@property (weak, nonatomic) QLKBrowser *browser;
 
 // The netservice used to discover this server (if any). You probably don't need this.
 @property (strong, nonatomic) NSNetService *netService;
