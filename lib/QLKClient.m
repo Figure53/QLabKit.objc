@@ -90,6 +90,23 @@
     [self.OSCClient disconnect];
 }
 
+- (void) sendOscMessage:(F53OSCMessage *)message
+{
+    [self sendOscMessage:message block:nil];
+}
+
+- (void) sendOscMessage:(F53OSCMessage *)message block:(QLKMessageHandlerBlock)block
+{
+    if ( block )
+        self.callbacks[message.addressPattern] = block;
+    
+#if DEBUG_OSC
+    NSLog( @"QLKClient sending raw OSC message to (%@:%d): %@", self.OSCClient.host, self.OSCClient.port, messages );
+#endif
+    
+    [self.OSCClient sendPacket:message];
+}
+
 - (void) sendMessage:(NSObject *)message toAddress:(NSString *)address
 {
     [self sendMessage:message toAddress:address block:nil];
@@ -114,9 +131,7 @@
 - (void) sendMessages:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block
 {
     if ( block )
-    {
         self.callbacks[address] = block;
-    }
   
     NSString *fullAddress = (toWorkspace && self.delegate) ? [NSString stringWithFormat:@"%@%@", [self workspacePrefix], address] : address;
   

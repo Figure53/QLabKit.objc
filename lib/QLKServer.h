@@ -26,6 +26,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "QLKDefines.h"
 #import "F53OSC.h"
 
 @class F53OSCClient, QLKBrowser, QLKServer, QLKWorkspace;
@@ -71,5 +72,8 @@
 - (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
 - (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval;
 - (void) disableAutoRefresh;
+
+- (void) sendOscMessage:(F53OSCMessage *)message;
+- (void) sendOscMessage:(F53OSCMessage *)message block:(QLKMessageHandlerBlock)block;
 
 @end

@@ -54,6 +54,9 @@
 - (BOOL) connect;
 - (void) disconnect;
 
+- (void) sendOscMessage:(F53OSCMessage *)message;
+- (void) sendOscMessage:(F53OSCMessage *)message block:(QLKMessageHandlerBlock)block;
+
 - (void) sendMessage:(NSObject *)message toAddress:(NSString *)address;
 - (void) sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
 - (void) sendMessages:(NSArray *)messages toAddress:(NSString *)address;

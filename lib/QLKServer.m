@@ -158,4 +158,14 @@
     self.refreshTimer = nil;
 }
 
+- (void) sendOscMessage:(F53OSCMessage *)message
+{
+    [self sendOscMessage:message block:nil];
+}
+
+- (void) sendOscMessage:(F53OSCMessage *)message block:(QLKMessageHandlerBlock)block
+{
+    [self.client sendOscMessage:message block:block];
+}
+
 @end
