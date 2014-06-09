@@ -118,6 +118,14 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     return [NSString stringWithFormat:@"%@ - %@ (%@)", self.name, cueList.name, self.serverName];
 }
 
+- (NSString *) nameWithoutExtension
+{
+    if([self.name.pathExtension isEqualToString:@"cues"])
+        return [self.name stringByDeletingPathExtension];
+    else
+        return self.name;
+}
+
 #pragma mark - Connection/reconnection
 
 - (void) connect
