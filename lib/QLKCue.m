@@ -239,7 +239,7 @@ NSString * const QLKRootCueIdentifier = @"__root__";
 
     if ( dict[@"continueMode"] )
     {
-        self.continueMode = [dict[@"continueMode"] integerValue];
+        self.continueMode = (QLKCueContinueMode)[dict[@"continueMode"] integerValue];
     }
 
     // Audio cue
