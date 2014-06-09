@@ -25,10 +25,14 @@
 //  THE SOFTWARE.
 //
 
+#import <TargetConditionals.h>
+
 #if TARGET_OS_IPHONE
+#import <UIKit/UIKit.h>
 #define QLKImage UIImage
 #define QLKColorClass UIColor
 #else
+#import <AppKit/AppKit.h>
 #define QLKImage NSImage
 #define QLKColorClass NSColor
 #endif
