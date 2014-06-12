@@ -39,7 +39,7 @@ extern NSString * const QLKWorkspaceDidDisconnectNotification;
 extern NSString * const QLKWorkspaceConnectionErrorNotification;
 extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 
-@class QLKServer;
+@class QLKServer, QLKCue;
 
 @interface QLKWorkspace : NSObject <QLKClientDelegate>
 
@@ -91,40 +91,44 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void) fetchCueLists;
 - (void) fetchCueListsWithCompletion:(QLKMessageHandlerBlock)block;
 - (void) fetchPlaybackPositionForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
+- (void) cue:(QLKCue *)cue valuesForKeys:(NSArray *)keys;
 - (void) startCue:(QLKCue *)cue;
 - (void) stopCue:(QLKCue *)cue;
 - (void) pauseCue:(QLKCue *)cue;
 - (void) loadCue:(QLKCue *)cue;
 - (void) resetCue:(QLKCue *)cue;
 - (void) deleteCue:(QLKCue *)cue;
-- (void) cue:(QLKCue *)cue valuesForKeys:(NSArray *)keys;
-- (void) cue:(QLKCue *)cue updateName:(NSString *)name;
-- (void) cue:(QLKCue *)cue updateNumber:(NSString *)number;
-- (void) cue:(QLKCue *)cue updatePreWait:(float)preWait;
-- (void) cue:(QLKCue *)cue updatePostWait:(float)postWait;
-- (void) cue:(QLKCue *)cue updateDuration:(float)duration;
-- (void) cue:(QLKCue *)cue updateArmed:(BOOL)armed;
-- (void) cue:(QLKCue *)cue updateFlagged:(BOOL)flagged;
-- (void) cue:(QLKCue *)cue updateNotes:(NSString *)notes;
-- (void) cue:(QLKCue *)cue updateContinueMode:(QLKCueContinueMode)continueMode;
-- (void) cue:(QLKCue *)cue updateChannel:(NSInteger)channel level:(double)level;
-- (void) cue:(QLKCue *)cue updatePatch:(NSInteger)patch;
-- (void) cue:(QLKCue *)cue updateColor:(NSString *)color;
-- (void) cue:(QLKCue *)cue updateSurfaceID:(NSInteger)surfaceID;
-- (void) cue:(QLKCue *)cue updateFullScreen:(BOOL)fullScreen;
-- (void) cue:(QLKCue *)cue updateTranslationX:(CGFloat)originX;
-- (void) cue:(QLKCue *)cue updateTranslationY:(CGFloat)originY;
-- (void) cue:(QLKCue *)cue updateScaleX:(CGFloat)scaleX;
-- (void) cue:(QLKCue *)cue updateScaleY:(CGFloat)scaleY;
-- (void) cue:(QLKCue *)cue updateRotationX:(CGFloat)rotationX;
-- (void) cue:(QLKCue *)cue updateRotationY:(CGFloat)rotationY;
-- (void) cue:(QLKCue *)cue updateRotationZ:(CGFloat)rotationZ;
-- (void) cue:(QLKCue *)cue updatePreserveAspectRatio:(BOOL)preserve;
-- (void) cue:(QLKCue *)cue updatePlaybackPosition:(QLKCue *)playbackCue;
-- (void) cue:(QLKCue *)cue updateLayer:(NSInteger)layer;
-- (void) cue:(QLKCue *)cue updateOpacity:(CGFloat)opacity;
-- (void) cue:(QLKCue *)cue updateStartNextCueWhenSliceEnds:(BOOL)start;
-- (void) cue:(QLKCue *)cue updateStopTargetWhenSliceEnds:(BOOL)stop;
+
+- (void)cue:(QLKCue *)cue updatePropertySend:(id)value forKey:(NSString *)key;
+//deprecated by above-->
+- (void) cue:(QLKCue *)cue updateName:(NSString *)name DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateNumber:(NSString *)number DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updatePreWait:(float)preWait DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updatePostWait:(float)postWait DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateDuration:(float)duration DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateArmed:(BOOL)armed DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateFlagged:(BOOL)flagged DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateNotes:(NSString *)notes DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateContinueMode:(QLKCueContinueMode)continueMode DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateChannel:(NSInteger)channel level:(double)level DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updatePatch:(NSInteger)patch DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateColor:(NSString *)color DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateSurfaceID:(NSInteger)surfaceID DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateFullScreen:(BOOL)fullScreen DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateTranslationX:(CGFloat)originX DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateTranslationY:(CGFloat)originY DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateScaleX:(CGFloat)scaleX DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateScaleY:(CGFloat)scaleY DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateRotationX:(CGFloat)rotationX DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateRotationY:(CGFloat)rotationY DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateRotationZ:(CGFloat)rotationZ DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updatePreserveAspectRatio:(BOOL)preserve DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updatePlaybackPosition:(QLKCue *)playbackCue DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateLayer:(NSInteger)layer DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateOpacity:(CGFloat)opacity DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateStartNextCueWhenSliceEnds:(BOOL)start DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateStopTargetWhenSliceEnds:(BOOL)stop DEPRECATED_ATTRIBUTE;
+//^
 
 - (void) fetchMainPropertiesForCue:(QLKCue *)cue;
 - (void) fetchBasicPropertiesForCue:(QLKCue *)cue;
