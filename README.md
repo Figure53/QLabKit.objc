@@ -92,6 +92,6 @@ There is also working demo project that shows how you might hook all of this tog
 
 ## License
 
-QLab is © copyright Figure 53
+QLab is © copyright 2014 Figure 53
 
 QLabKit is Licensed under the MIT license
