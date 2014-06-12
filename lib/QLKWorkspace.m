@@ -272,7 +272,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
         for ( NSDictionary *cueList in cueLists )
         {
-            QLKCue *cue = [QLKCue cueWithDictionary:cueList];
+            QLKCue *cue = [[QLKCue alloc] initWithDictionary:cueList workspace:self];
             [children addObject:cue];
         }
 
@@ -669,7 +669,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
       
             for ( NSDictionary *dict in data )
             {
-                QLKCue *cue = [QLKCue cueWithDictionary:dict];
+                QLKCue *cue = [[QLKCue alloc] initWithDictionary:dict workspace:self];
                 [children addObject:cue];
             }
       
