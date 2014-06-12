@@ -40,3 +40,61 @@ typedef void (^QLKMessageHandlerBlock)(id data);
 extern NSString * const QLKBonjourTCPServiceType;
 extern NSString * const QLKBonjourUDPServiceType;
 extern NSString * const QLKBonjourServiceDomain;
+
+// Notifications (moved from QLKCue.h)
+extern NSString * const QLKCueUpdatedNotification;
+extern NSString * const QLKCueNeedsUpdateNotification;
+extern NSString * const QLKCueEditCueNotification;
+
+// Cue types (moved from QLKCue.h)
+extern NSString * const QLKCueTypeCue;
+extern NSString * const QLKCueTypeGroup;
+extern NSString * const QLKCueTypeAudio;
+extern NSString * const QLKCueTypeFade;
+extern NSString * const QLKCueTypeMicrophone;
+extern NSString * const QLKCueTypeVideo;
+extern NSString * const QLKCueTypeAnimation;
+extern NSString * const QLKCueTypeCamera;
+extern NSString * const QLKCueTypeMIDI;
+extern NSString * const QLKCueTypeMIDISysEx;
+extern NSString * const QLKCueTypeTimecode;
+extern NSString * const QLKCueTypeMTC;
+extern NSString * const QLKCueTypeMSC;
+extern NSString * const QLKCueTypeStop;
+extern NSString * const QLKCueTypeMIDIFile;
+extern NSString * const QLKCueTypePause;
+extern NSString * const QLKCueTypeReset;
+extern NSString * const QLKCueTypeStart;
+extern NSString * const QLKCueTypeDevamp;
+extern NSString * const QLKCueTypeLoad;
+extern NSString * const QLKCueTypeScript;
+extern NSString * const QLKCueTypeGoto;
+extern NSString * const QLKCueTypeTarget;
+extern NSString * const QLKCueTypeWait;
+extern NSString * const QLKCueTypeMemo;
+extern NSString * const QLKCueTypeArm;
+extern NSString * const QLKCueTypeDisarm;
+extern NSString * const QLKCueTypeStagetracker;
+
+// Special cue identifiers (moved from QLKCue.h)
+extern NSString * const QLKActiveCueListIdentifier;
+extern NSString * const QLKRootCueIdentifier;
+
+// Continue mode type (moved from QLKCue.h)
+typedef enum {
+    QLKCueContinueModeNoContinue,
+    QLKCueContinueModeAutoContinue,
+    QLKCueContinueModeAutoFollow
+} QLKCueContinueMode;
+
+// OSC key constants (moved from QLKCue.h)
+extern NSString * const QLKOSCNameKey;
+extern NSString * const QLKOSCNumberKey;
+extern NSString * const QLKOSCNotesKey;
+extern NSString * const QLKOSCColorNameKey;
+extern NSString * const QLKOSCFlaggedKey;
+extern NSString * const QLKOSCArmedKey;
+
+// Identifiers for "fake" cues (moved from QLKCue.h)
+extern NSString * const QLKActiveCueListIdentifier;
+extern NSString * const QLKRootCueIdentifier;
