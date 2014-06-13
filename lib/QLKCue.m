@@ -88,41 +88,66 @@
     return self;
 }
 
-- (id) initWithDictionary:(NSDictionary *)dict workspace:(QLKWorkspace *)workspace {
-    self = [self initWithDictionary:dict];
+- (id)initWithWorkspace:(QLKWorkspace *)workspace {
+    self = [self init];
     self.workspace = workspace;
     return self;
 }
 
-- (id) initWithDictionary:(NSDictionary *)dict
-{
+- (id) initWithDictionary:(NSDictionary *)dict workspace:(QLKWorkspace *)workspace {
     self = [self init];
     if ( !self )
         return nil;
-    
+    self.workspace = workspace;
     NSMutableDictionary *tempDict = [NSMutableDictionary dictionary];
     [tempDict addEntriesFromDictionary:self.cueData];
     [tempDict addEntriesFromDictionary:dict]; //adding will overwrite
     self.cueData = [NSMutableDictionary dictionaryWithDictionary:tempDict];
     NSMutableArray *children = [NSMutableArray array];
     for (NSDictionary *subdict in [self propertyForKey:@"cues"]) {
-        [children addObject:[QLKCue cueWithDictionary:subdict]];
+        [children addObject:[[QLKCue alloc]  initWithDictionary:subdict workspace:self.workspace]];
     }
     [self setProperty:children
                forKey:@"cues"
           doUpdateOSC:NO];
-
+    
     _icon = [QLKImage imageNamed:[self iconFile]];
     
-//    [self updateDisplayName];
-
+    //    [self updateDisplayName];
+    
     return self;
+
 }
 
-+ (QLKCue *) cueWithDictionary:(NSDictionary *)dict
-{
-    return [[QLKCue alloc] initWithDictionary:dict];
-}
+//- (id) initWithDictionary:(NSDictionary *)dict
+//{
+//    self = [self init];
+//    if ( !self )
+//        return nil;
+//    
+//    NSMutableDictionary *tempDict = [NSMutableDictionary dictionary];
+//    [tempDict addEntriesFromDictionary:self.cueData];
+//    [tempDict addEntriesFromDictionary:dict]; //adding will overwrite
+//    self.cueData = [NSMutableDictionary dictionaryWithDictionary:tempDict];
+//    NSMutableArray *children = [NSMutableArray array];
+//    for (NSDictionary *subdict in [self propertyForKey:@"cues"]) {
+//        [children addObject:[[QLKCue alloc]  initWithDictionary:subdict workspace:self.workspace]];
+//    }
+//    [self setProperty:children
+//               forKey:@"cues"
+//          doUpdateOSC:NO];
+//
+//    _icon = [QLKImage imageNamed:[self iconFile]];
+//    
+////    [self updateDisplayName];
+//
+//    return self;
+//}
+
+//+ (QLKCue *) cueWithDictionary:(NSDictionary *)dict
+//{
+//    return [[QLKCue alloc] initWithDictionary:dict];
+//}
 
 - (id)valueForKey:(NSString *)key {
     return [self propertyForKey:key];
