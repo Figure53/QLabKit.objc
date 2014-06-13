@@ -42,8 +42,9 @@
 
 @property (strong, nonatomic) QLKImage *icon;
 
-+ (QLKCue *) cueWithDictionary:(NSDictionary *)dict;
+//+ (QLKCue *) cueWithDictionary:(NSDictionary *)dict;
 - (id) initWithDictionary:(NSDictionary *)dict workspace:(QLKWorkspace *)workspace;
+- (id) initWithWorkspace:(QLKWorkspace *)workspace;
 - (BOOL) isEqualToCue:(QLKCue *)cue;
 - (NSString *) iconFile;
 - (NSString *) nonEmptyName;

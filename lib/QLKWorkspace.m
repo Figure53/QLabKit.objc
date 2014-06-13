@@ -71,7 +71,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     _attempts = 0;
 
     // Setup root cue - parent of cue lists
-    _root = [[QLKCue alloc] init];
+    _root = [[QLKCue alloc] initWithWorkspace:self];
     [self.root setProperty:QLKRootCueIdentifier
                     forKey:@"uniqueID"
                doUpdateOSC:NO];
@@ -277,7 +277,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
         }
 
         // Manually add active cues to end of list
-        QLKCue *activeCues = [[QLKCue alloc] init];
+        QLKCue *activeCues = [[QLKCue alloc] initWithWorkspace:self];
         [activeCues setProperty:QLKActiveCueListIdentifier
                          forKey:@"uniqueID"
                     doUpdateOSC:NO];
