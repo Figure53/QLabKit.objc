@@ -75,6 +75,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 
 - (NSString *) fullName;
 - (NSString *) fullNameWithCueList:(QLKCue *)cueList;
+- (NSString *) nameWithoutExtension;
 
 - (QLKCue *) firstCue;
 - (QLKCue *) firstCueList;
