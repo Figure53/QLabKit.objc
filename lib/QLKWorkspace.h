@@ -64,6 +64,8 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 // Whether we currently have a conection
 @property (assign, nonatomic) BOOL connected;
 
+@property (assign, nonatomic) BOOL defaultSendUpdatesOSC;
+
 - (id) initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
 
 - (void) connect;
@@ -99,6 +101,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void) resetCue:(QLKCue *)cue;
 - (void) deleteCue:(QLKCue *)cue;
 
+- (void)updateAllCuePropertiesSendOSC;
 - (void)cue:(QLKCue *)cue updatePropertySend:(id)value forKey:(NSString *)key;
 //deprecated by above-->
 - (void) cue:(QLKCue *)cue updateName:(NSString *)name DEPRECATED_ATTRIBUTE;

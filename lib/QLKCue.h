@@ -38,8 +38,6 @@
 
 
 
-@property (strong, nonatomic) NSMutableDictionary *cueData;
-
 @property (strong, nonatomic) QLKImage *icon;
 
 //+ (QLKCue *) cueWithDictionary:(NSDictionary *)dict;
@@ -63,6 +61,7 @@
 + (NSString *) iconForType:(NSString *)type;
 
 - (void)setProperty:(id)value forKey:(NSString *)propertyKey doUpdateOSC:(BOOL)osc;
+- (void)updateAllPropertiesSendOSC;
 - (id)propertyForKey:(NSString *)key;
 - (GLKQuaternion)quaternion;
 - (CGSize)surfaceSize;
@@ -105,21 +104,21 @@
 //@"surfaceList": @property (strong, nonatomic) NSArray *surfaces;
 
 //deprecated accessors
-- (NSString *)uid DEPRECATED_ATTRIBUTE;
-- (NSString *)name DEPRECATED_ATTRIBUTE;
-- (NSString *)listName DEPRECATED_ATTRIBUTE;
-- (NSString *)number DEPRECATED_ATTRIBUTE;
-- (BOOL)flagged DEPRECATED_ATTRIBUTE;
-- (NSString *)type DEPRECATED_ATTRIBUTE;
-- (NSString *)notes DEPRECATED_ATTRIBUTE;
+- (NSString *)uid;
+- (NSString *)name;
+- (NSString *)listName;
+- (NSString *)number;
+- (BOOL)flagged;
+- (NSString *)type;
+- (NSString *)notes;
 
 //deprecated mutators
-- (void)setUid:(NSString *)uid DEPRECATED_ATTRIBUTE;
-- (void)setName:(NSString *)name DEPRECATED_ATTRIBUTE;
-- (void)setListName:(NSString *)listName DEPRECATED_ATTRIBUTE;
-- (void)setNumber:(NSString *)number DEPRECATED_ATTRIBUTE;
-- (void)setFlagged:(BOOL)flagged DEPRECATED_ATTRIBUTE;
-- (void)setType:(NSString *)type DEPRECATED_ATTRIBUTE;
-- (void)setNotes:(NSString *)notes DEPRECATED_ATTRIBUTE;
+- (void)setUid:(NSString *)uid;
+- (void)setName:(NSString *)name;
+- (void)setListName:(NSString *)listName;
+- (void)setNumber:(NSString *)number;
+- (void)setFlagged:(BOOL)flagged;
+- (void)setType:(NSString *)type;
+- (void)setNotes:(NSString *)notes;
 
 @end
