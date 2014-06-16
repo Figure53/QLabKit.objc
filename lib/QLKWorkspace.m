@@ -83,6 +83,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
                doUpdateOSC:NO];
 
     _hasPasscode = NO;
+    _defaultSendUpdatesOSC = NO;
 
     return self;
 }
@@ -464,6 +465,10 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 - (void) runningOrPausedCuesWithBlock:(QLKMessageHandlerBlock)block
 {
     [self.client sendMessages:nil toAddress:@"/runningOrPausedCues" block:block];
+}
+
+- (void)updateAllCuePropertiesSendOSC {
+    [self.root updateAllPropertiesSendOSC];
 }
 
 #pragma mark - Cue Setters
