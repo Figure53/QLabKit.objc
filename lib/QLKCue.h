@@ -39,6 +39,8 @@
 
 
 @property (strong, nonatomic) QLKImage *icon;
+@property (strong, nonatomic) NSString *name, *number, *uid, *listName, *type, *notes;
+@property (assign, nonatomic) BOOL flagged;
 
 //+ (QLKCue *) cueWithDictionary:(NSDictionary *)dict;
 - (id) initWithDictionary:(NSDictionary *)dict workspace:(QLKWorkspace *)workspace;
@@ -102,23 +104,5 @@
 //@"opacity": @property (assign, nonatomic) NSInteger videoOpacity;
 //@"surfaceID": @property (assign, nonatomic) NSInteger surfaceID;
 //@"surfaceList": @property (strong, nonatomic) NSArray *surfaces;
-
-//deprecated accessors
-- (NSString *)uid;
-- (NSString *)name;
-- (NSString *)listName;
-- (NSString *)number;
-- (BOOL)flagged;
-- (NSString *)type;
-- (NSString *)notes;
-
-//deprecated mutators
-- (void)setUid:(NSString *)uid;
-- (void)setName:(NSString *)name;
-- (void)setListName:(NSString *)listName;
-- (void)setNumber:(NSString *)number;
-- (void)setFlagged:(BOOL)flagged;
-- (void)setType:(NSString *)type;
-- (void)setNotes:(NSString *)notes;
 
 @end
