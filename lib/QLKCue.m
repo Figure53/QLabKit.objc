@@ -360,14 +360,14 @@
 
 - (NSString *) surfaceName
 {
-    NSArray *surfaces = [self.cueData valueForKey:@"surfaces"] ? [[self.cueData valueForKey:@"surfaces"] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"surfaceID == %@", @([[self propertyForKey:@"surfaceID"] integerValue])]] : @[];
+    NSArray *surfaces = [self.cueData valueForKey:@"surfaceList"] ? [[self.cueData valueForKey:@"surfaceList"] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"surfaceID == %@", @([[self propertyForKey:@"surfaceID"] integerValue])]] : @[];
 
     return (surfaces.count > 0) ? surfaces[0][@"surfaceName"] : nil;
 }
 
 - (NSString *) patchName
 {
-    NSArray *patches = ([self.cueData valueForKey:@"patches"]) ? [[self.cueData valueForKey:@"patches"] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"patchNumber == %@", @([[self propertyForKey:@"patch"] integerValue])]] : @[];
+    NSArray *patches = ([self.cueData valueForKey:@"patchList"]) ? [[self.cueData valueForKey:@"patchList"] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"patchNumber == %@", @([[self propertyForKey:@"patch"] integerValue])]] : @[];
 
     return (patches.count > 0) ? patches[0][@"patchName"] : nil;
 }
