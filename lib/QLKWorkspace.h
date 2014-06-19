@@ -81,6 +81,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (QLKCue *) firstCue;
 - (QLKCue *) firstCueList;
 - (QLKCue *) cueWithId:(NSString *)uid;
+- (QLKCue *)cueWithNumber:(NSString *)number;
 
 // QLab Server API
 - (void) startReceivingUpdates;

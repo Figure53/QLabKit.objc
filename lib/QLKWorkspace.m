@@ -239,6 +239,10 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     return [self.root cueWithId:uid];
 }
 
+- (QLKCue *)cueWithNumber:(NSString *)number {
+    return [self.root cueWithNumber:number];
+}
+
 #pragma mark - Workspace Methods
 
 - (void) disconnectFromWorkspace

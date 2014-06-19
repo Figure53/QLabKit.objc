@@ -57,6 +57,7 @@
 - (QLKCue *) lastCue;
 - (QLKCue *) cueAtIndex:(NSInteger)index;
 - (QLKCue *) cueWithId:(NSString *)cueId;
+- (QLKCue *) cueWithNumber:(NSString *)number;
 - (NSArray *) flattenedCues;
 - (NSString *) surfaceName;
 - (NSString *) patchName;

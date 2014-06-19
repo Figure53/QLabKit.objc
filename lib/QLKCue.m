@@ -331,6 +331,25 @@
     return nil;
 }
 
+- (QLKCue *)cueWithNumber:(NSString *)number {
+    for ( QLKCue *cue in [self propertyForKey:@"cues"] )
+    {
+        if ( [cue.number isEqualToString:number] )
+        {
+            return cue;
+        }
+        
+        if ( [cue isGroup] )
+        {
+            QLKCue *childCue = [cue cueWithNumber:number];
+            if ( childCue )
+                return childCue;
+        }
+    }
+    
+    return nil;
+}
+
 - (NSArray *) flattenedCues
 {
     return [self flattenCuesWithDepth:0];
