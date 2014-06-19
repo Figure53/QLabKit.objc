@@ -35,6 +35,7 @@ NSString * const QLKBonjourServiceDomain = @"local.";
 NSString * const QLKCueUpdatedNotification = @"QLKCueUpdatedNotification";
 NSString * const QLKCueNeedsUpdateNotification = @"QLKCueNeedsUpdateNotification";
 NSString * const QLKCueEditCueNotification = @"QLKCueEditCueNotification";
+NSString * const QLKCueHasNewDataNotification = @"QLKCueHasNewDataNotification";
 
 // Cue Types (moved from QLKCue.m)
 NSString * const QLKCueTypeCue = @"Cue";

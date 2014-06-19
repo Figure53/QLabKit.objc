@@ -45,6 +45,7 @@ extern NSString * const QLKBonjourServiceDomain;
 extern NSString * const QLKCueUpdatedNotification;
 extern NSString * const QLKCueNeedsUpdateNotification;
 extern NSString * const QLKCueEditCueNotification;
+extern NSString * const QLKCueHasNewDataNotification;
 
 // Cue types (moved from QLKCue.h)
 extern NSString * const QLKCueTypeCue;
