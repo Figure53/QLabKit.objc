@@ -395,11 +395,9 @@
     //change the value
     [self.cueData setValue:value
                     forKey:propertyKey];
-    [[NSNotificationCenter defaultCenter] postNotificationName:QLKCueHasNewDataNotification
-                                                        object:self.workspace
-                                                      userInfo:@{@"cueNumber": self.number,
-                                                                 @"propertyKey": propertyKey,
-                                                                 @"value" : value}];
+    NSString *notifName = [[self.workspace.name stringByAppendingString:self.number] stringByAppendingString:propertyKey];
+    [[NSNotificationCenter defaultCenter] postNotificationName:notifName
+                                                        object:value];
     //send network update
     if (osc) {
         [self.workspace cue:self updatePropertySend:value forKey:propertyKey];
