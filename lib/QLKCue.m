@@ -414,7 +414,7 @@
     //change the value
     [self.cueData setValue:value
                     forKey:propertyKey];
-    NSString *notifName = [[self.workspace.name stringByAppendingString:self.number] stringByAppendingString:propertyKey];
+    NSString *notifName = [NSString stringWithFormat:@"%@.%@.%@", self.workspace.name, self.number, propertyKey];
     [[NSNotificationCenter defaultCenter] postNotificationName:notifName
                                                         object:value];
     //send network update
