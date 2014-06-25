@@ -413,20 +413,15 @@
 - (void)setProperty:(id)value forKey:(NSString *)propertyKey doUpdateOSC:(BOOL)osc {
     //change the value
     id old_data = [self propertyForKey:propertyKey];
+    id null = [NSNull null];
     [self.cueData setValue:value
                     forKey:propertyKey];
-<<<<<<< HEAD
-    NSString *notifName = [NSString stringWithFormat:@"%@.%@.%@", self.workspace.name, self.number, propertyKey];
-    [[NSNotificationCenter defaultCenter] postNotificationName:notifName
-                                                        object:value];
-=======
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKCueHasNewDataNotification
-                                                        object:@{@"workspaceName": self.workspace.name,
-                                                                 @"cueNumber": self.number,
-                                                                 @"propertyKey": propertyKey,
-                                                                 @"oldData": old_data,
-                                                                 @"newData": value}];
->>>>>>> 257e9520057eb3129df341f11fa2a40491b7309b
+                                                        object:@{@"workspaceName": self.workspace.name?self.workspace.name:null,
+                                                                 @"cueNumber": self.number?self.number:null,
+                                                                 @"propertyKey": propertyKey?propertyKey:null,
+                                                                 @"oldData": old_data?old_data:null,
+                                                                 @"newData": value?value:null}];
     //send network update
     if (osc) {
         [self.workspace cue:self updatePropertySend:value forKey:propertyKey];
