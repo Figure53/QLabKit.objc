@@ -66,6 +66,7 @@
 - (void)setProperty:(id)value forKey:(NSString *)propertyKey doUpdateOSC:(BOOL)osc;
 - (void)updateAllPropertiesSendOSC;
 - (id)propertyForKey:(NSString *)key;
+- (NSArray *)propertyKeys;
 - (GLKQuaternion)quaternion;
 - (CGSize)surfaceSize;
 - (CGSize)cueSize;

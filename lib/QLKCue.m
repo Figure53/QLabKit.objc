@@ -440,6 +440,10 @@
         return ([self.cueData valueForKey:key]);
 }
 
+- (NSArray *)propertyKeys {
+    return [self.cueData allKeys];
+}
+
 #pragma mark - Deprecated Accessors
 //accessors
 - (NSString *)uid {
