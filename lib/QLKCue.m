@@ -448,6 +448,27 @@
     return [self.cueData allKeys];
 }
 
+#pragma mark - Actions
+- (void)reset {
+    [self.workspace resetCue:self];
+}
+
+- (void)start {
+    [self.workspace startCue:self];
+}
+
+- (void)stop {
+    [self.workspace stopCue:self];
+}
+
+- (void)load {
+    [self.workspace loadCue:self];
+}
+
+- (void)pause {
+    [self.workspace pauseCue:self];
+}
+
 #pragma mark - Deprecated Accessors
 //accessors
 - (NSString *)uid {
