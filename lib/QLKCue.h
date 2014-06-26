@@ -74,6 +74,12 @@
 - (QLKColor *)color;
 - (NSString *)displayName;
 
+- (void)start;
+- (void)stop;
+- (void)pause;
+- (void)reset;
+- (void)load;
+
 //   Deprecated Cue Properties (guide to the dictionary)
 //      Necessities
 //@"uniqueID": @property (strong, nonatomic) NSString *uid;
