@@ -272,6 +272,10 @@
     }
 }
 
+- (NSString *)workspaceName {
+    return self.workspace.name;
+}
+
 - (BOOL) isAudio
 {
 	return ([self.type isEqualToString:QLKCueTypeAudio] || [self.type isEqualToString:QLKCueTypeMicrophone] || [self.type isEqualToString:QLKCueTypeFade] || [self isVideo]);

@@ -62,6 +62,7 @@
 - (NSString *) surfaceName;
 - (NSString *) patchName;
 + (NSString *) iconForType:(NSString *)type;
+- (NSString *)workspaceName;
 
 - (void)setProperty:(id)value forKey:(NSString *)propertyKey doUpdateOSC:(BOOL)osc;
 - (void)updateAllPropertiesSendOSC;
