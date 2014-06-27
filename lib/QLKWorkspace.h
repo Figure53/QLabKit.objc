@@ -114,7 +114,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void) cue:(QLKCue *)cue updateFlagged:(BOOL)flagged DEPRECATED_ATTRIBUTE;
 - (void) cue:(QLKCue *)cue updateNotes:(NSString *)notes DEPRECATED_ATTRIBUTE;
 - (void) cue:(QLKCue *)cue updateContinueMode:(QLKCueContinueMode)continueMode DEPRECATED_ATTRIBUTE;
-- (void) cue:(QLKCue *)cue updateChannel:(NSInteger)channel level:(double)level DEPRECATED_ATTRIBUTE;
+- (void) cue:(QLKCue *)cue updateChannel:(NSInteger)channel level:(double)level;
 - (void) cue:(QLKCue *)cue updatePatch:(NSInteger)patch DEPRECATED_ATTRIBUTE;
 - (void) cue:(QLKCue *)cue updateColor:(NSString *)color DEPRECATED_ATTRIBUTE;
 - (void) cue:(QLKCue *)cue updateSurfaceID:(NSInteger)surfaceID DEPRECATED_ATTRIBUTE;
