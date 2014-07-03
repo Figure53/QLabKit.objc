@@ -139,6 +139,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void) fetchChildrenForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
 - (void) fetchNotesForCue:(QLKCue *)cue;
 - (void) fetchAudioLevelsForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
+- (void)fetchAndStoreAudioLevelsForCue:(QLKCue *)cue;
 - (void) fetchDisplayAndGeometryForCue:(QLKCue *)cue;
 - (void) runningOrPausedCuesWithBlock:(QLKMessageHandlerBlock)block;
 

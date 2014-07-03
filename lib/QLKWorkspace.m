@@ -436,6 +436,15 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self.client sendMessage:nil toAddress:address block:block];
 }
 
+- (void)fetchAndStoreAudioLevelsForCue:(QLKCue *)cue {
+    [self fetchAudioLevelsForCue:cue
+                      completion:^(NSArray *levels) {
+                          for (NSNumber *level in levels) {
+                              NSLog(@"%f",[level floatValue]);
+                          }
+                      }];
+}
+
 - (void) fetchMainPropertiesForCue:(QLKCue *)cue
 {
     NSArray *keys = @[@"name", @"number", @"colorName", @"flagged", @"notes"];
