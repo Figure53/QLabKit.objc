@@ -95,6 +95,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void) fetchCueListsWithCompletion:(QLKMessageHandlerBlock)block;
 - (void) fetchPlaybackPositionForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
 - (void) cue:(QLKCue *)cue valuesForKeys:(NSArray *)keys;
+- (void) cue:(QLKCue *)cue valueForKey:(NSString *)key completion:(QLKMessageHandlerBlock)block;
 - (void) startCue:(QLKCue *)cue;
 - (void) stopCue:(QLKCue *)cue;
 - (void) pauseCue:(QLKCue *)cue;
@@ -139,7 +140,6 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void) fetchChildrenForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
 - (void) fetchNotesForCue:(QLKCue *)cue;
 - (void) fetchAudioLevelsForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block;
-- (void)fetchAndStoreAudioLevelsForCue:(QLKCue *)cue;
 - (void) fetchDisplayAndGeometryForCue:(QLKCue *)cue;
 - (void) runningOrPausedCuesWithBlock:(QLKMessageHandlerBlock)block;
 

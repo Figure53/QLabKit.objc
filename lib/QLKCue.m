@@ -50,42 +50,6 @@
         return nil;
     
     self.cueData = [NSMutableDictionary dictionary];
-    //    [self setProperty:[NSNull null]
-    //               forKey:@"uniqueID"
-    //          doUpdateOSC:NO];
-    //    [self setProperty:@""
-    //               forKey:QLKOSCNumberKey
-    //          doUpdateOSC:NO];
-    //    [self setProperty:@"(Untitled Cue)"
-    //               forKey:QLKOSCNameKey
-    //          doUpdateOSC:NO];
-    //    [self setProperty:@""
-    //               forKey:QLKOSCNotesKey
-    //          doUpdateOSC:NO];
-    //    [self setProperty:@""
-    //               forKey:@"listName"
-    //          doUpdateOSC:NO];
-    //    [self setProperty:@(NO)
-    //               forKey:QLKOSCFlaggedKey
-    //          doUpdateOSC:NO];
-    //    [self setProperty:@"none"
-    //               forKey:@"colorName"
-    //          doUpdateOSC:NO];
-    //    [self setProperty:QLKCueTypeCue
-    //               forKey:@"type"
-    //          doUpdateOSC:NO];
-    //    [self setProperty:[NSMutableArray array]
-    //               forKey:@"cues"
-    //          doUpdateOSC:NO];
-    //    [self setProperty:@(0)
-    //               forKey:@"depth"
-    //          doUpdateOSC:NO];
-    //    [self setProperty:@(NO)
-    //               forKey:@"expanded"
-    //          doUpdateOSC:NO];
-    //    [self setProperty:@[]
-    //               forKey:@"patches"
-    //          doUpdateOSC:NO];
     
     return self;
 }
@@ -101,59 +65,11 @@
     if ( !self )
         return nil;
     self.workspace = workspace;
-    NSMutableDictionary *tempDict = [NSMutableDictionary dictionary];
-    [tempDict addEntriesFromDictionary:self.cueData];
-    [tempDict addEntriesFromDictionary:dict]; //adding will overwrite
-    self.cueData = [NSMutableDictionary dictionaryWithDictionary:tempDict];
-    NSMutableArray *children = [NSMutableArray array];
-    for (NSDictionary *subdict in [self propertyForKey:@"cues"]) {
-        [children addObject:[[QLKCue alloc]  initWithDictionary:subdict workspace:self.workspace]];
-    }
-    [self setProperty:children
-               forKey:@"cues"
-          doUpdateOSC:NO];
-    
-    _icon = [QLKImage imageNamed:[self iconFile]];
-    
-    //    [self updateDisplayName];
+    [self updatePropertiesWithDictionary:dict];
     
     return self;
     
 }
-
-//- (id) initWithDictionary:(NSDictionary *)dict
-//{
-//    self = [self init];
-//    if ( !self )
-//        return nil;
-//
-//    NSMutableDictionary *tempDict = [NSMutableDictionary dictionary];
-//    [tempDict addEntriesFromDictionary:self.cueData];
-//    [tempDict addEntriesFromDictionary:dict]; //adding will overwrite
-//    self.cueData = [NSMutableDictionary dictionaryWithDictionary:tempDict];
-//    NSMutableArray *children = [NSMutableArray array];
-//    for (NSDictionary *subdict in [self propertyForKey:@"cues"]) {
-//        [children addObject:[[QLKCue alloc]  initWithDictionary:subdict workspace:self.workspace]];
-//    }
-//    [self setProperty:children
-//               forKey:@"cues"
-//          doUpdateOSC:NO];
-//
-//    _icon = [QLKImage imageNamed:[self iconFile]];
-//
-////    [self updateDisplayName];
-//
-//    return self;
-//}
-
-//+ (QLKCue *) cueWithDictionary:(NSDictionary *)dict
-//{
-//    return [[QLKCue alloc] initWithDictionary:dict];
-//}
-
-//- (id)valueForKey:(NSString *)key {
-//    return [self propertyForKey:key];
-//}
 
 - (NSString *) description
 {
@@ -199,14 +115,32 @@
 #endif
     
     //Merge existing properties with new properties dict (conflicts default overwrite)
+    //If incoming dictionary is lacking a key that is stored locally, preserve the entry
     //Complex properties now gathered with instance methods:
     //- (QLKColor *)color;
     //- (GLKQuaternion)quaternion
     
     NSMutableDictionary *tempDict = [NSMutableDictionary dictionary];
     [tempDict addEntriesFromDictionary:self.cueData];
-    [tempDict addEntriesFromDictionary:dict];
+    NSMutableArray *children = [NSMutableArray array];
+    for (NSDictionary *subdict in dict[@"cues"]) {
+        //if we have a child matching this UID, then update; otherwise, insert. If the cue is no longer there, then it is lost locally too.
+        QLKCue *subcue = [self cueWithId:subdict[@"uniqueID"]];
+        if (subcue) {
+            [subcue updatePropertiesWithDictionary:subdict];
+            [children addObject:subcue];
+        } else {
+            [children addObject:[[QLKCue alloc]  initWithDictionary:subdict workspace:self.workspace]];
+        }
+    }
+    [tempDict addEntriesFromDictionary:dict]; //adding will overwrite
     self.cueData = [NSMutableDictionary dictionaryWithDictionary:tempDict];
+    
+    [self setProperty:children
+               forKey:@"cues"
+          doUpdateOSC:NO];
+    
+    _icon = [QLKImage imageNamed:[self iconFile]];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKCueUpdatedNotification object:self];
 }
@@ -419,7 +353,8 @@
     id old_data = [self propertyForKey:propertyKey];
     id null = [NSNull null];
     [self.cueData setValue:value
-                    forKey:propertyKey];
+                        forKey:propertyKey];
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKCueHasNewDataNotification
                                                         object:@{@"workspaceName": self.workspace.name?self.workspace.name:null,
                                                                  @"cueNumber": self.number?self.number:null,
@@ -440,7 +375,8 @@
         return [self patchName];
     } else if ([key isEqualToString:@"color"]) {
         return [self color];
-    } else
+    }
+    else
         return ([self.cueData valueForKey:key]);
 }
 

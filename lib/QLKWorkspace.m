@@ -281,7 +281,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
             [children addObject:cue];
         }
 
-        // Manually add active cues to end of list
+        // Manually add active cues list to root
         QLKCue *activeCues = [[QLKCue alloc] initWithWorkspace:self];
         [activeCues setProperty:QLKActiveCueListIdentifier
                          forKey:@"uniqueID"
@@ -430,19 +430,16 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self.client sendMessage:JSONKeys toAddress:[self addressForCue:cue action:@"valuesForKeys"] block:nil];
 }
 
+- (void)cue:(QLKCue *)cue valueForKey:(NSString *)key completion:(QLKMessageHandlerBlock)block {
+    [self.client sendMessage:nil
+                   toAddress:[self addressForCue:cue
+                                          action:key] block:block];
+}
+
 - (void) fetchAudioLevelsForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block
 {
     NSString *address = [self addressForCue:cue action:@"sliderLevels"];
     [self.client sendMessage:nil toAddress:address block:block];
-}
-
-- (void)fetchAndStoreAudioLevelsForCue:(QLKCue *)cue {
-    [self fetchAudioLevelsForCue:cue
-                      completion:^(NSArray *levels) {
-                          for (NSNumber *level in levels) {
-                              NSLog(@"%f",[level floatValue]);
-                          }
-                      }];
 }
 
 - (void) fetchMainPropertiesForCue:(QLKCue *)cue
