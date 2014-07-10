@@ -72,6 +72,7 @@
 - (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
 - (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval;
 - (void) disableAutoRefresh;
+- (BOOL)isConnected;
 
 - (void) sendOscMessage:(F53OSCMessage *)message;
 - (void) sendOscMessage:(F53OSCMessage *)message block:(QLKMessageHandlerBlock)block;
