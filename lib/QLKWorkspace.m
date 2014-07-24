@@ -71,12 +71,19 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     _attempts = 0;
 
     // Setup root cue - parent of cue lists
-    _root = [[QLKCue alloc] init];
-    _root.uid = QLKRootCueIdentifier;
-    _root.name = @"Cue Lists";
-    _root.type = QLKCueTypeGroup;
+    _root = [[QLKCue alloc] initWithWorkspace:self];
+    [self.root setProperty:QLKRootCueIdentifier
+                    forKey:@"uniqueID"
+               doUpdateOSC:NO];
+    [self.root setProperty:@"Cue Lists"
+                    forKey:QLKOSCNameKey
+               doUpdateOSC:NO];
+    [self.root setProperty:QLKCueTypeGroup
+                    forKey:@"type"
+               doUpdateOSC:NO];
 
     _hasPasscode = NO;
+    _defaultSendUpdatesOSC = NO;
 
     return self;
 }
@@ -115,7 +122,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (NSString *) fullNameWithCueList:(QLKCue *)cueList
 {
-    return [NSString stringWithFormat:@"%@ - %@ (%@)", self.name, cueList.name, self.serverName];
+    return [NSString stringWithFormat:@"%@ - %@ (%@)", self.name, [cueList propertyForKey:@"name"], self.serverName];
 }
 
 #pragma mark - Connection/reconnection
@@ -171,7 +178,9 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self stopReceivingUpdates];
     self.connected = NO;
     [self.client disconnect];
-    self.root.cues = nil;
+    [self.root setProperty:[NSNull null]
+                    forKey:@"cues"
+               doUpdateOSC:NO];
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceDidDisconnectNotification object:self];
 }
 
@@ -230,6 +239,10 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     return [self.root cueWithId:uid];
 }
 
+- (QLKCue *)cueWithNumber:(NSString *)number {
+    return [self.root cueWithNumber:number];
+}
+
 #pragma mark - Workspace Methods
 
 - (void) disconnectFromWorkspace
@@ -264,18 +277,26 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
         for ( NSDictionary *cueList in cueLists )
         {
-            QLKCue *cue = [QLKCue cueWithDictionary:cueList];
+            QLKCue *cue = [[QLKCue alloc] initWithDictionary:cueList workspace:self];
             [children addObject:cue];
         }
 
-        // Manually add active cues to end of list
-        QLKCue *activeCues = [[QLKCue alloc] init];
-        activeCues.uid = QLKActiveCueListIdentifier;
-        activeCues.name = @"Active Cues";
-        activeCues.type = QLKCueTypeGroup;
+        // Manually add active cues list to root
+        QLKCue *activeCues = [[QLKCue alloc] initWithWorkspace:self];
+        [activeCues setProperty:QLKActiveCueListIdentifier
+                         forKey:@"uniqueID"
+                    doUpdateOSC:NO];
+        [activeCues setProperty:@"Active Cues"
+                         forKey:QLKOSCNameKey
+                    doUpdateOSC:NO];
+        [activeCues setProperty:QLKCueTypeGroup
+                         forKey:@"type"
+                    doUpdateOSC:NO];
         [children addObject:activeCues];
 
-        self.root.cues = children;
+        [self.root setProperty:children
+                        forKey:@"cues"
+                   doUpdateOSC:NO];
 
         dispatch_async(dispatch_get_main_queue(), ^{
             [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceDidUpdateCuesNotification object:self];
@@ -409,6 +430,12 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self.client sendMessage:JSONKeys toAddress:[self addressForCue:cue action:@"valuesForKeys"] block:nil];
 }
 
+- (void)cue:(QLKCue *)cue valueForKey:(NSString *)key completion:(QLKMessageHandlerBlock)block {
+    [self.client sendMessage:nil
+                   toAddress:[self addressForCue:cue
+                                          action:key] block:block];
+}
+
 - (void) fetchAudioLevelsForCue:(QLKCue *)cue completion:(QLKMessageHandlerBlock)block
 {
     NSString *address = [self addressForCue:cue action:@"sliderLevels"];
@@ -450,8 +477,17 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self.client sendMessages:nil toAddress:@"/runningOrPausedCues" block:block];
 }
 
+- (void)updateAllCuePropertiesSendOSC {
+    [self.root updateAllPropertiesSendOSC];
+}
+
 #pragma mark - Cue Setters
 
+- (void) cue:(QLKCue *)cue updatePropertySend:(id)value forKey:(NSString *)key {
+    [self.client sendMessage:value toAddress:[self addressForCue:cue action:key]];
+}
+
+//deprecated
 - (void) cue:(QLKCue *)cue updateName:(NSString *)name
 {
     [self.client sendMessage:name toAddress:[self addressForCue:cue action:@"name"]];
@@ -515,7 +551,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (void) cue:(QLKCue *)cue updatePlaybackPosition:(QLKCue *)playbackCue
 {
-    [self.client sendMessage:playbackCue.uid toAddress:[self addressForCue:cue action:@"playbackPositionId"]];
+    [self.client sendMessage:[playbackCue propertyForKey:@"uniqueID"] toAddress:[self addressForCue:cue action:@"playbackPositionId"]];
 }
 
 - (void) cue:(QLKCue *)cue updateStartNextCueWhenSliceEnds:(BOOL)start
@@ -605,7 +641,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (NSString *) addressForCue:(QLKCue *)cue action:(NSString *)action
 {
-    return [NSString stringWithFormat:@"/cue_id/%@/%@", cue.uid, action];
+    return [NSString stringWithFormat:@"/cue_id/%@/%@", [cue propertyForKey:@"uniqueID"], action];
 }
 
 - (NSString *) workspacePrefix
@@ -648,11 +684,13 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
       
             for ( NSDictionary *dict in data )
             {
-                QLKCue *cue = [QLKCue cueWithDictionary:dict];
+                QLKCue *cue = [[QLKCue alloc] initWithDictionary:dict workspace:self];
                 [children addObject:cue];
             }
       
-            cue.cues = children;
+            [cue setProperty:children
+                      forKey:@"cues"
+                 doUpdateOSC:NO];
       
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:QLKCueUpdatedNotification object:cue];
