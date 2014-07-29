@@ -64,6 +64,11 @@
 + (NSString *) iconForType:(NSString *)type;
 - (NSString *)workspaceName;
 
+- (void)pushDownProperty:(id)value forKey:(NSString *)propertyKey;
+- (void)pushUpProperty:(id)value forKey:(NSString *)propertyKey;
+- (void)pullDownPropertyForKey:(NSString *)propertyKey block:(void (^) (id))block;
+- (void)fetchAndPushDownPropertyForKey:(NSString *)propertyKey;
+
 - (void)setProperty:(id)value forKey:(NSString *)propertyKey doUpdateOSC:(BOOL)osc;
 - (void)updateAllPropertiesSendOSC;
 - (id)propertyForKey:(NSString *)key;

@@ -38,6 +38,7 @@
 
 //- (void) updateDisplayName; deprecated
 - (NSArray *) flattenCuesWithDepth:(NSInteger)depth;
+- (void)setProperty:(id)value forKey:(NSString *)propertyKey doUpdateOSC:(BOOL)osc;
 
 @end
 
@@ -350,17 +351,10 @@
 
 - (void)setProperty:(id)value forKey:(NSString *)propertyKey doUpdateOSC:(BOOL)osc {
     //change the value
-    id old_data = [self propertyForKey:propertyKey];
-    id null = [NSNull null];
     [self.cueData setValue:value
-                        forKey:propertyKey];
+                    forKey:propertyKey];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:QLKCueHasNewDataNotification
-                                                        object:@{@"workspaceName": self.workspace.name?self.workspace.name:null,
-                                                                 @"cueNumber": self.number?self.number:null,
-                                                                 @"propertyKey": propertyKey?propertyKey:null,
-                                                                 @"oldData": old_data?old_data:null,
-                                                                 @"newData": value?value:null}];
+    
     //send network update
     if (osc) {
         [self.workspace cue:self updatePropertySend:value forKey:propertyKey];
@@ -382,6 +376,54 @@
 
 - (NSArray *)propertyKeys {
     return [self.cueData allKeys];
+}
+
+- (void)pushDownProperty:(id)value forKey:(NSString *)propertyKey {
+    id old_data = [self propertyForKey:propertyKey];
+    
+    [self setProperty:value
+               forKey:propertyKey
+          doUpdateOSC:NO];
+    
+    id null = [NSNull null];
+    [[NSNotificationCenter defaultCenter] postNotificationName:QLKCueHasNewDataNotification
+                                                        object:@{@"workspaceName": self.workspace.name?self.workspace.name:null,
+                                                                 @"cueNumber": self.number?self.number:null,
+                                                                 @"propertyKey": propertyKey?propertyKey:null,
+                                                                 @"oldData": old_data?old_data:null,
+                                                                 @"newData": value?value:null}];
+}
+
+- (void)pushUpProperty:(id)value forKey:(NSString *)propertyKey {
+    [self setProperty:value
+               forKey:propertyKey
+          doUpdateOSC:YES];
+}
+
+- (void)fetchAndPushDownPropertyForKey:(NSString *)propertyKey {
+    [self.workspace cue:self
+            valueForKey:propertyKey
+             completion:^(id data) {
+//                 if (![data isEqual:[self propertyForKey:propertyKey]])
+                     [self pushDownProperty:data
+                                     forKey:propertyKey];
+             }];
+}
+
+- (void)pullDownPropertyForKey:(NSString *)propertyKey block:(void (^) (id value))block {
+    if ([self propertyForKey:propertyKey]) {
+        block([self propertyForKey:propertyKey]);
+    } else {
+        //don't have an entry for this one yet; make a fetch
+        [self.workspace cue:self
+                valueForKey:propertyKey
+                 completion:^(id data) {
+                     [self setProperty:data
+                                forKey:propertyKey
+                           doUpdateOSC:NO];
+                     block(data);
+                 }];
+    }
 }
 
 #pragma mark - Actions
