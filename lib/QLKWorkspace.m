@@ -701,7 +701,6 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
   
     if ( cue )
     {
-        [self fetchMainPropertiesForCue:cue];
         [[NSNotificationCenter defaultCenter] postNotificationName:QLKCueNeedsUpdateNotification object:cue];
     }
 }
