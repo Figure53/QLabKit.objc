@@ -639,6 +639,10 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self.client sendMessage:object toAddress:address block:block];
 }
 
+- (NSString *)addressForBatchedNumber:(NSString *)number action:(NSString *)action {
+    return [NSString stringWithFormat:@"/cue/%@/%@", number, action];
+}
+
 - (NSString *) addressForCue:(QLKCue *)cue action:(NSString *)action
 {
     return [NSString stringWithFormat:@"/cue_id/%@/%@", [cue propertyForKey:@"uniqueID"], action];
