@@ -102,6 +102,11 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void) loadCue:(QLKCue *)cue;
 - (void) resetCue:(QLKCue *)cue;
 - (void) deleteCue:(QLKCue *)cue;
+- (void)resumeCue:(QLKCue *)cue;
+- (void)hardStopCue:(QLKCue *)cue;
+- (void)togglePauseCue:(QLKCue *)cue;
+- (void)previewCue:(QLKCue *)cue;
+- (void)panicCue:(QLKCue *)cue;
 
 - (void)updateAllCuePropertiesSendOSC;
 - (void)cue:(QLKCue *)cue updatePropertySend:(id)value forKey:(NSString *)key;

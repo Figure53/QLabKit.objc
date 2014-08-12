@@ -422,6 +422,23 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self.client sendMessage:nil toAddress:@"/delete"];
 }
 
+- (void)resumeCue:(QLKCue *)cue {
+    [self.client sendMessage:nil toAddress:[self addressForCue:cue action:@"resume"]];
+}
+- (void)hardStopCue:(QLKCue *)cue {
+    [self.client sendMessage:nil toAddress:[self addressForCue:cue action:@"hardStop"]];
+}
+- (void)togglePauseCue:(QLKCue *)cue {
+    [self.client sendMessage:nil toAddress:[self addressForCue:cue action:@"togglePause"]];
+}
+- (void)previewCue:(QLKCue *)cue {
+    [self.client sendMessage:nil toAddress:[self addressForCue:cue action:@"preview"]];
+}
+- (void)panicCue:(QLKCue *)cue {
+    [self.client sendMessage:nil toAddress:[self addressForCue:cue action:@"panic"]];
+}
+
+
 #pragma mark - Cue Getters
 
 - (void) cue:(QLKCue *)cue valuesForKeys:(NSArray *)keys

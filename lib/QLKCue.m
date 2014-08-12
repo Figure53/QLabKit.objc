@@ -447,6 +447,22 @@
     [self.workspace pauseCue:self];
 }
 
+- (void)resume {
+    [self.workspace resumeCue:self];
+}
+- (void)hardStop {
+    [self.workspace hardStopCue:self];
+}
+- (void)togglePause {
+    [self.workspace togglePauseCue:self];
+}
+- (void)preview {
+    [self.workspace previewCue:self];
+}
+- (void)panic {
+    [self.workspace panicCue:self];
+}
+
 #pragma mark - Deprecated Accessors
 //accessors
 - (NSString *)uid {

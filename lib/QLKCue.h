@@ -84,6 +84,11 @@
 - (void)pause;
 - (void)reset;
 - (void)load;
+- (void)resume;
+- (void)hardStop;
+- (void)togglePause;
+- (void)preview;
+- (void)panic;
 
 //   Deprecated Cue Properties (guide to the dictionary)
 //      Necessities
