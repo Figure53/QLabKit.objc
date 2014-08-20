@@ -377,6 +377,9 @@
         return [self patchName];
     } else if ([key isEqualToString:@"color"]) {
         return [self color];
+    } else if ([key isEqualToString:@"quaternion"]) {
+        GLKQuaternion quaternion = [self quaternion];
+        return [NSValue valueWithBytes:&quaternion objCType:@encode(GLKQuaternion)];
     }
     else
         return ([self.cueData valueForKey:key]);
