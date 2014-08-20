@@ -118,7 +118,7 @@
         }
     }
     
-    [self.client sendMessages:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
+    [self.client sendMessagesWithArguments:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
     {
         [self updateWorkspaces:data];
     }];
@@ -135,7 +135,7 @@
         }
     }
 
-    [self.client sendMessages:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
+    [self.client sendMessagesWithArguments:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
     {
         [self updateWorkspaces:data];
         

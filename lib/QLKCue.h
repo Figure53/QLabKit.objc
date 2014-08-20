@@ -48,7 +48,7 @@
 @property (strong, nonatomic) NSString *notes;
 @property (assign, nonatomic) BOOL flagged;
 
-//+ (QLKCue *) cueWithDictionary:(NSDictionary *)dict;
+
 - (id) initWithDictionary:(NSDictionary *)dict workspace:(QLKWorkspace *)workspace;
 - (id) initWithWorkspace:(QLKWorkspace *)workspace;
 - (BOOL) isEqualToCue:(QLKCue *)cue;

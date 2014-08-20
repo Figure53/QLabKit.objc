@@ -57,10 +57,10 @@
 - (void) sendOscMessage:(F53OSCMessage *)message;
 - (void) sendOscMessage:(F53OSCMessage *)message block:(QLKMessageHandlerBlock)block;
 
-- (void) sendMessage:(NSObject *)message toAddress:(NSString *)address;
-- (void) sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
-- (void) sendMessages:(NSArray *)messages toAddress:(NSString *)address;
-- (void) sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
-- (void) sendMessages:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block;
+- (void) sendMessageWithArgument:(NSObject *)message toAddress:(NSString *)address;
+- (void) sendMessageWithArgument:(NSObject *)message toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
+- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address;
+- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
+- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block;
 
 @end

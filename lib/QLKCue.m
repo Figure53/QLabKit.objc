@@ -496,7 +496,7 @@
     return [[self propertyForKey:QLKOSCFlaggedKey] boolValue];
 }
 - (NSString *)type {
-    return [self propertyForKey:@"type"];
+    return [self propertyForKey:QLKOSCTypeKey];
 }
 - (NSString *)notes {
     return [self propertyForKey:QLKOSCNotesKey];

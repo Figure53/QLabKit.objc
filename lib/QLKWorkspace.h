@@ -159,6 +159,6 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (NSString *) addressForCue:(QLKCue *)cue action:(NSString *)action;
 
 // Helper for sending messages to a wildcarded cue number: /cue/<number>/action
-- (NSString *)addressForBatchedNumber:(NSString *)number action:(NSString *)action;
+- (NSString *)addressForWildcardNumber:(NSString *)number action:(NSString *)action;
 
 @end

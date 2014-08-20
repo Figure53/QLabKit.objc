@@ -107,28 +107,28 @@
     [self.OSCClient sendPacket:message];
 }
 
-- (void) sendMessage:(NSObject *)message toAddress:(NSString *)address
+- (void) sendMessageWithArgument:(NSObject *)message toAddress:(NSString *)address
 {
-    [self sendMessage:message toAddress:address block:nil];
+    [self sendMessageWithArgument:message toAddress:address block:nil];
 }
 
-- (void) sendMessage:(NSObject *)message toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
+- (void) sendMessageWithArgument:(NSObject *)message toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
 {
     NSArray *messages = (message != nil) ? @[message] : nil;
-    [self sendMessages:messages toAddress:address block:block];
+    [self sendMessagesWithArguments:messages toAddress:address block:block];
 }
 
-- (void) sendMessages:(NSArray *)messages toAddress:(NSString *)address
+- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address
 {
-    [self sendMessages:messages toAddress:address block:nil];
+    [self sendMessagesWithArguments:messages toAddress:address block:nil];
 }
 
-- (void) sendMessages:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
+- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
 {
-    [self sendMessages:messages toAddress:address workspace:YES block:block];
+    [self sendMessagesWithArguments:messages toAddress:address workspace:YES block:block];
 }
 
-- (void) sendMessages:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block
+- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block
 {
     if ( block )
         self.callbacks[address] = block;
