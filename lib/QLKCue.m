@@ -387,6 +387,12 @@
 }
 
 - (void)pushDownProperty:(id)value forKey:(NSString *)propertyKey {
+    if (!propertyKey) {
+#if DEBUG
+        NSLog(@"You can't set property on nil key.");
+#endif
+        return;
+    }
     id old_data = [self propertyForKey:propertyKey];
     
     [self setProperty:value
@@ -419,19 +425,15 @@
 }
 
 - (void)pullDownPropertyForKey:(NSString *)propertyKey block:(void (^) (id value))block {
-    if ([self propertyForKey:propertyKey]) {
-        block([self propertyForKey:propertyKey]);
-    } else {
-        //don't have an entry for this one yet; make a fetch
-        [self.workspace cue:self
-                valueForKey:propertyKey
-                 completion:^(id data) {
-                     [self setProperty:data
-                                forKey:propertyKey
-                           tellQLab:NO];
-                     block(data);
-                 }];
-    }
+    [self.workspace cue:self
+            valueForKey:propertyKey
+             completion:^(id data) {
+                 [self setProperty:data
+                            forKey:propertyKey
+                       tellQLab:NO];
+                 block(data);
+             }];
+    
 }
 
 #pragma mark - Actions
@@ -471,7 +473,7 @@
     [self.workspace panicCue:self];
 }
 
-#pragma mark - Deprecated Accessors
+#pragma mark - Convenience Accessors
 //accessors
 - (NSString *)uid {
     return [self propertyForKey:QLKOSCUIDKey];
