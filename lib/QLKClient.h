@@ -37,7 +37,7 @@
 - (NSString *) workspaceID;
 - (void) workspaceUpdated;
 - (void) playbackPositionUpdated:(NSString *)cueID;
-- (void) cueUpdated:(NSString *)cueID;
+- (void) cueNeedsUpdate:(NSString *)cueID;
 - (void) cueUpdated:(NSString *)cueID withProperties:(NSDictionary *)properties;
 - (void) clientConnectionErrorOccurred;
 

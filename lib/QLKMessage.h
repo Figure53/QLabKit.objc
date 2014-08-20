@@ -37,7 +37,7 @@
 
 // Identifying the different types of messages.
 - (BOOL) isReply;
-- (BOOL) isReplyCueUpdate;
+- (BOOL) isReplyFromCue;
 - (BOOL) isUpdate;
 - (BOOL) isWorkspaceUpdate;
 - (BOOL) isCueUpdate;

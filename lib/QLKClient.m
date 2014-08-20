@@ -179,8 +179,9 @@
         id data = message.response; // Get the deserialized value sent back in this reply.
     
         // Special case, want to update cue properties.
-        if ( [message isReplyCueUpdate] )
+        if ( [message isReplyFromCue] )
         {
+            //this check is sufficient for determining whether new info is arriving
             if ( [data isKindOfClass:[NSDictionary class]] )
             {
                 [self.delegate cueUpdated:message.cueID withProperties:data];
@@ -208,7 +209,7 @@
         }
         else if ( [message isCueUpdate] )
         {
-            [self.delegate cueUpdated:message.cueID];
+            [self.delegate cueNeedsUpdate:message.cueID];
         }
         else if ( [message isPlaybackPositionUpdate] )
         {

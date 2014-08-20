@@ -124,6 +124,7 @@
     NSMutableDictionary *tempDict = [NSMutableDictionary dictionary];
     [tempDict addEntriesFromDictionary:self.cueData];
     NSMutableArray *children = [NSMutableArray array];
+    
     for (NSDictionary *subdict in dict[@"cues"]) {
         //if we have a child matching this UID, then update; otherwise, insert. If the cue is no longer there, then it is lost locally too.
         QLKCue *subcue = [self cueWithId:subdict[@"uniqueID"]];
@@ -137,9 +138,11 @@
     [tempDict addEntriesFromDictionary:dict]; //adding will overwrite
     self.cueData = [NSMutableDictionary dictionaryWithDictionary:tempDict];
     
-    [self setProperty:children
-               forKey:@"cues"
-          doUpdateOSC:NO];
+    if (dict[@"cues"]) {
+        [self setProperty:children
+                   forKey:@"cues"
+              doUpdateOSC:NO];
+    }
     
     _icon = [QLKImage imageNamed:[self iconFile]];
     

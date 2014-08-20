@@ -694,7 +694,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     });
 }
 
-- (void) cueUpdated:(NSString *)cueID
+- (void) cueNeedsUpdate:(NSString *)cueID
 {
     QLKCue *cue = [self cueWithId:cueID];
     
