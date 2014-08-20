@@ -70,14 +70,13 @@
 + (NSString *) iconForType:(NSString *)type;
 - (NSString *)workspaceName;
 
-- (void)pushDownProperty:(id)value forKey:(NSString *)propertyKey;
 - (void)pushUpProperty:(id)value forKey:(NSString *)propertyKey;
 - (void)pullDownPropertyForKey:(NSString *)propertyKey block:(void (^) (id))block;
-- (void)fetchAndPushDownPropertyForKey:(NSString *)propertyKey;
+- (void)triggerPushDownPropertyForKey:(NSString *)propertyKey;
 
 - (void)setProperty:(id)value forKey:(NSString *)propertyKey;
 - (void)setProperty:(id)value forKey:(NSString *)propertyKey tellQLab:(BOOL)osc;
-- (void)updateAllPropertiesSendOSC;
+- (void)sendAllPropertiesToQLab;
 - (id)propertyForKey:(NSString *)key;
 - (NSArray *)propertyKeys;
 - (GLKQuaternion)quaternion;

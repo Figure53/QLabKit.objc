@@ -69,6 +69,8 @@ NSString * const QLKCueTypeDisarm = @"Disarm";
 NSString * const QLKCueTypeStagetracker = @"Stagetracker";
 
 // OSC key constants (moved from QLKCue.m)
+NSString * const QLKOSCUIDKey = @"uniqueID";
+NSString * const QLKOSCTypeKey = @"type";
 NSString * const QLKOSCNameKey = @"name";
 NSString * const QLKOSCNumberKey = @"number";
 NSString * const QLKOSCNotesKey = @"notes";
@@ -91,7 +93,9 @@ NSString * const QLKOSCSurfaceListKey = @"surfaceList";
 NSString * const QLKOSCCuesKey = @"cues";
 NSString * const QLKOSCListNameKey = @"listName";
 NSString * const QLKOSCSurfaceIDKey = @"surfaceID";
-NSString * const QLKOSCFulLScreenKey = @"fullScreen";
+NSString * const QLKOSCFullScreenKey = @"fullScreen";
+NSString * const QLKOSCOpacityKey = @"opacity";
+NSString * const QLKOSCRotationZKey = @"rotationZ";
 NSString * const QLKOSCRotationYKey = @"rotationY";
 NSString * const QLKOSCRotationXKey = @"rotationX";
 NSString * const QLKOSCPlaybackPositionIdKey = @"playbackPositionId";

@@ -90,6 +90,7 @@ typedef enum {
 
 
 extern NSString * const QLKOSCUIDKey;
+extern NSString * const QLKOSCTypeKey;
 extern NSString * const QLKOSCNameKey;
 extern NSString * const QLKOSCNumberKey;
 extern NSString * const QLKOSCNotesKey;
@@ -112,7 +113,9 @@ extern NSString * const QLKOSCSurfaceListKey;
 extern NSString * const QLKOSCCuesKey;
 extern NSString * const QLKOSCListNameKey;
 extern NSString * const QLKOSCSurfaceIDKey;
-extern NSString * const QLKOSCFulLScreenKey;
+extern NSString * const QLKOSCFullScreenKey;
+extern NSString * const QLKOSCOpacityKey;
+extern NSString * const QLKOSCRotationZKey;
 extern NSString * const QLKOSCRotationYKey;
 extern NSString * const QLKOSCRotationXKey;
 extern NSString * const QLKOSCPlaybackPositionIdKey;

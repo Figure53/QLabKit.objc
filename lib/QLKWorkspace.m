@@ -495,7 +495,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 }
 
 - (void)updateAllCuePropertiesSendOSC {
-    [self.root updateAllPropertiesSendOSC];
+    [self.root sendAllPropertiesToQLab];
 }
 
 #pragma mark - Cue Setters

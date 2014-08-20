@@ -28,6 +28,7 @@
 
 #import "QLKCue.h"
 #import "QLKColor.h"
+#import "QLKCue_private.h"
 
 
 
@@ -36,7 +37,7 @@
 @property (nonatomic, weak) QLKWorkspace *workspace;
 @property (strong, nonatomic) NSMutableDictionary *cueData;
 
-//- (void) updateDisplayName; deprecated
+
 - (NSArray *) flattenCuesWithDepth:(NSInteger)depth;
 
 @end
@@ -148,12 +149,13 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKCueUpdatedNotification object:self];
 }
 
-- (void)updateAllPropertiesSendOSC {
+- (void)sendAllPropertiesToQLab {
     NSArray *cueArray = [self propertyForKey:QLKOSCCuesKey];
     if (cueArray != nil)
         for (QLKCue *cue in cueArray)
-            [cue updateAllPropertiesSendOSC];
+            [cue sendAllPropertiesToQLab];
     for (NSString *key in [self.cueData allKeys]) {
+        if ([key isEqualToString:QLKOSCCuesKey]) continue;
         [self.workspace cue:self
          updatePropertySend:[self propertyForKey:key]
                      forKey:key];
@@ -417,7 +419,7 @@
           tellQLab:YES];
 }
 
-- (void)fetchAndPushDownPropertyForKey:(NSString *)propertyKey {
+- (void)triggerPushDownPropertyForKey:(NSString *)propertyKey {
     [self.workspace cue:self
             valueForKey:propertyKey
              completion:^(id data) {
@@ -510,33 +512,27 @@
 }
 - (void)setName:(NSString *)name {
     [self setProperty:name
-               forKey:QLKOSCNameKey
-          tellQLab:self.workspace.defaultSendUpdatesOSC];
+               forKey:QLKOSCNameKey];
 }
 - (void)setListName:(NSString *)listName {
     [self setProperty:listName
-               forKey:QLKOSCListNameKey
-          tellQLab:self.workspace.defaultSendUpdatesOSC];
+               forKey:QLKOSCListNameKey];
 }
 - (void)setNumber:(NSString *)number {
     [self setProperty:number
-               forKey:QLKOSCNumberKey
-          tellQLab:self.workspace.defaultSendUpdatesOSC];
+               forKey:QLKOSCNumberKey];
 }
 - (void)setFlagged:(BOOL)flagged {
     [self setProperty:@(flagged)
-               forKey:QLKOSCFlaggedKey
-          tellQLab:self.workspace.defaultSendUpdatesOSC];
+               forKey:QLKOSCFlaggedKey];
 }
 - (void)setType:(NSString *)type {
     [self setProperty:type
-               forKey:@"type"
-          tellQLab:self.workspace.defaultSendUpdatesOSC];
+               forKey:QLKOSCTypeKey];
 }
 - (void)setNotes:(NSString *)notes {
     [self setProperty:notes
-               forKey:QLKOSCNotesKey
-          tellQLab:self.workspace.defaultSendUpdatesOSC];
+               forKey:QLKOSCNotesKey];
 }
 
 - (void)setCues:(NSArray *)cues {
