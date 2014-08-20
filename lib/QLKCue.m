@@ -37,9 +37,6 @@
 @property (nonatomic, weak) QLKWorkspace *workspace;
 @property (strong, nonatomic) NSMutableDictionary *cueData;
 
-
-- (NSArray *) flattenCuesWithDepth:(NSInteger)depth;
-
 @end
 
 @implementation QLKCue
@@ -291,31 +288,6 @@
     }
     
     return nil;
-}
-
-- (NSArray *) flattenedCues
-{
-    return [self flattenCuesWithDepth:0];
-}
-
-- (NSArray *) flattenCuesWithDepth:(NSInteger)depth
-{
-    NSMutableArray *cues = [NSMutableArray array];
-    
-    for ( QLKCue *cue in [self propertyForKey:QLKOSCCuesKey] )
-    {
-        [cue setProperty:@(depth)
-                  forKey:@"depth"
-             tellQLab:NO];
-        [cues addObject:cue];
-        
-        if ( [cue isGroup] && [[cue propertyForKey:@"expanded"] boolValue])
-        {
-            [cues addObjectsFromArray:[cue flattenCuesWithDepth:depth + 1]];
-        }
-    }
-    
-    return cues;
 }
 
 #pragma mark - Accessors

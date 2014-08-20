@@ -64,11 +64,10 @@
 - (QLKCue *) cueAtIndex:(NSInteger)index;
 - (QLKCue *) cueWithId:(NSString *)cueId;
 - (QLKCue *) cueWithNumber:(NSString *)number;
-- (NSArray *) flattenedCues;
 - (NSString *) surfaceName;
 - (NSString *) patchName;
 + (NSString *) iconForType:(NSString *)type;
-- (NSString *)workspaceName;
+- (NSString *) workspaceName;
 
 - (void)pushUpProperty:(id)value forKey:(NSString *)propertyKey;
 - (void)pullDownPropertyForKey:(NSString *)propertyKey block:(void (^) (id))block;
