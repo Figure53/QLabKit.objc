@@ -41,6 +41,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1ADE787519A535D8009E29E2 /* QLKCue_private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QLKCue_private.h; sourceTree = "<group>"; };
 		921DB1CC1796F65700ADDB2D /* QLKMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKMessage.h; sourceTree = "<group>"; };
 		921DB1CD1796F65700ADDB2D /* QLKMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKMessage.m; sourceTree = "<group>"; };
 		92B2542A18185A2800710257 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -188,6 +189,7 @@
 				92F3EA57178B4DF500A4C617 /* QLKWorkspace.h */,
 				92F3EA58178B4DF500A4C617 /* QLKWorkspace.m */,
 				92F3EA5F178C597D00A4C617 /* QLKCue.h */,
+				1ADE787519A535D8009E29E2 /* QLKCue_private.h */,
 				92F3EA60178C597D00A4C617 /* QLKCue.m */,
 				92F3EA65178C5D4100A4C617 /* QLKColor.h */,
 				92F3EA66178C5D4100A4C617 /* QLKColor.m */,

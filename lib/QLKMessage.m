@@ -99,7 +99,7 @@
     return [self.address hasSuffix:@"/disconnect"];
 }
 
-- (BOOL) isReplyCueUpdate
+- (BOOL) isReplyFromCue
 {
     // /reply/cue_id/1/action
     return [self.address hasPrefix:@"/reply/cue_id"];
@@ -115,7 +115,7 @@
     {
         return (self.arguments.count > 0) ? self.arguments[0] : nil;
     }
-    else if ( [self isReplyCueUpdate] )
+    else if ( [self isReplyFromCue] )
     {
         return self.addressParts[2];
     }

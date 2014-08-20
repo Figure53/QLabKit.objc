@@ -28,93 +28,29 @@
 #import <Foundation/Foundation.h>
 #import <GLKit/GLKit.h>
 #import "QLKDefines.h"
+#import "QLKWorkspace.h"
 
-// Notifications
-extern NSString * const QLKCueUpdatedNotification;
-extern NSString * const QLKCueNeedsUpdateNotification;
-extern NSString * const QLKCueEditCueNotification;
 
-// Cue types
-extern NSString * const QLKCueTypeCue;
-extern NSString * const QLKCueTypeGroup;
-extern NSString * const QLKCueTypeAudio;
-extern NSString * const QLKCueTypeFade;
-extern NSString * const QLKCueTypeMicrophone;
-extern NSString * const QLKCueTypeVideo;
-extern NSString * const QLKCueTypeAnimation;
-extern NSString * const QLKCueTypeCamera;
-extern NSString * const QLKCueTypeMIDI;
-extern NSString * const QLKCueTypeMIDISysEx;
-extern NSString * const QLKCueTypeTimecode;
-extern NSString * const QLKCueTypeMTC;
-extern NSString * const QLKCueTypeMSC;
-extern NSString * const QLKCueTypeStop;
-extern NSString * const QLKCueTypeMIDIFile;
-extern NSString * const QLKCueTypePause;
-extern NSString * const QLKCueTypeReset;
-extern NSString * const QLKCueTypeStart;
-extern NSString * const QLKCueTypeDevamp;
-extern NSString * const QLKCueTypeLoad;
-extern NSString * const QLKCueTypeScript;
-extern NSString * const QLKCueTypeGoto;
-extern NSString * const QLKCueTypeTarget;
-extern NSString * const QLKCueTypeWait;
-extern NSString * const QLKCueTypeMemo;
-extern NSString * const QLKCueTypeArm;
-extern NSString * const QLKCueTypeDisarm;
-extern NSString * const QLKCueTypeStagetracker;
-
-// Special cue identifiers
-extern NSString * const QLKActiveCueListIdentifier;
-extern NSString * const QLKRootCueIdentifier;
-
-// Continue mode type
-typedef enum {
-  QLKCueContinueModeNoContinue,
-  QLKCueContinueModeAutoContinue,
-  QLKCueContinueModeAutoFollow
-} QLKCueContinueMode;
-
-@class QLKColor;
+@class QLKColor, QLKWorkspace;
 
 @interface QLKCue : NSObject
 
-@property (strong, nonatomic) NSString *uid;
-@property (strong, nonatomic) NSString *number;
+
+
+
+@property (strong, nonatomic) QLKImage *icon;
+@property (strong, nonatomic) NSArray *cues;
 @property (strong, nonatomic) NSString *name;
+@property (strong, nonatomic) NSString *number;
+@property (strong, nonatomic) NSString *uid;
 @property (strong, nonatomic) NSString *listName;
-@property (strong, nonatomic) NSString *displayName;
 @property (strong, nonatomic) NSString *type;
 @property (strong, nonatomic) NSString *notes;
-@property (strong, nonatomic) QLKImage *icon;
-@property (strong, nonatomic) QLKColor *color;
-@property (strong, nonatomic) NSMutableArray *cues;
 @property (assign, nonatomic) BOOL flagged;
-@property (assign, nonatomic) BOOL armed;
-@property (assign, nonatomic) double preWait;
-@property (assign, nonatomic) double postWait;
-@property (assign, nonatomic) double duration;
-@property (assign, nonatomic) QLKCueContinueMode continueMode;
-@property (assign, nonatomic) NSInteger patch;
-@property (strong, nonatomic) NSArray *patches;
-@property (assign, nonatomic) BOOL fullScreen;
-@property (assign, nonatomic) CGFloat translationX;
-@property (assign, nonatomic) CGFloat translationY;
-@property (assign, nonatomic) CGFloat scaleX;
-@property (assign, nonatomic) CGFloat scaleY;
-@property (assign, nonatomic) BOOL preserveAspectRatio;
-@property (assign, nonatomic) GLKQuaternion quaternion;
-@property (assign, nonatomic) CGSize surfaceSize;
-@property (assign, nonatomic) CGSize cueSize;
-@property (assign, nonatomic) NSInteger videoLayer;
-@property (assign, nonatomic) NSInteger videoOpacity;
-@property (assign, nonatomic) NSInteger depth;
-@property (assign, nonatomic) NSInteger surfaceID;
-@property (strong, nonatomic) NSArray *surfaces;
-@property (assign, nonatomic) BOOL expanded;
 
-+ (QLKCue *) cueWithDictionary:(NSDictionary *)dict;
-- (id) initWithDictionary:(NSDictionary *)dict;
+
+- (id) initWithDictionary:(NSDictionary *)dict workspace:(QLKWorkspace *)workspace;
+- (id) initWithWorkspace:(QLKWorkspace *)workspace;
 - (BOOL) isEqualToCue:(QLKCue *)cue;
 - (NSString *) iconFile;
 - (NSString *) nonEmptyName;
@@ -127,9 +63,70 @@ typedef enum {
 - (QLKCue *) lastCue;
 - (QLKCue *) cueAtIndex:(NSInteger)index;
 - (QLKCue *) cueWithId:(NSString *)cueId;
-- (NSArray *) flattenedCues;
+- (QLKCue *) cueWithNumber:(NSString *)number;
 - (NSString *) surfaceName;
 - (NSString *) patchName;
 + (NSString *) iconForType:(NSString *)type;
+- (NSString *) workspaceName;
+
+- (void)pushUpProperty:(id)value forKey:(NSString *)propertyKey;
+- (void)pullDownPropertyForKey:(NSString *)propertyKey block:(void (^) (id))block;
+- (void)triggerPushDownPropertyForKey:(NSString *)propertyKey;
+
+- (void)setProperty:(id)value forKey:(NSString *)propertyKey;
+- (void)setProperty:(id)value forKey:(NSString *)propertyKey tellQLab:(BOOL)osc;
+- (void)sendAllPropertiesToQLab;
+- (id)propertyForKey:(NSString *)key;
+- (NSArray *)propertyKeys;
+- (GLKQuaternion)quaternion;
+- (CGSize)surfaceSize;
+- (CGSize)cueSize;
+- (QLKColor *)color;
+- (NSString *)displayName;
+
+- (void)start;
+- (void)stop;
+- (void)pause;
+- (void)reset;
+- (void)load;
+- (void)resume;
+- (void)hardStop;
+- (void)togglePause;
+- (void)preview;
+- (void)panic;
+
+//   Deprecated Cue Properties (guide to the dictionary)
+//      Necessities
+//QLKOSCUIDKey: @property (strong, nonatomic) NSString *uid;
+//QLKOSCNameKey: @property (strong, nonatomic) NSString *name;
+//QLKOSCListNameKey: @property (strong, nonatomic) NSString *listName;
+//QLKOSCNumberKey: @property (strong, nonatomic) NSString *number;
+//QLKOSCFlaggedKey: @property (assign, nonatomic) BOOL flagged;
+//@"type": @property (strong, nonatomic) NSString *type;
+//QLKOSCNotesKey: @property (strong, nonatomic) NSString *notes;
+
+//      Optionals
+
+
+//QLKOSCArmedKey: @property (assign, nonatomic) BOOL armed;
+//QLKOSCPreWaitKey: @property (assign, nonatomic) double preWait;
+//QLKOSCPostWaitKey: @property (assign, nonatomic) double postWait;
+//QLKOSCDurationKey: @property (assign, nonatomic) double duration;
+//QLKOSCContinueModeKey: @property (assign, nonatomic) QLKCueContinueMode continueMode;
+//QLKOSCPatchKey: @property (assign, nonatomic) NSInteger patch;
+//@"patchList": @property (strong, nonatomic) NSArray *patches;
+//QLKOSCFullScreenKey: @property (assign, nonatomic) BOOL fullScreen;
+//QLKOSCTranslationXKey: @property (assign, nonatomic) CGFloat translationX;
+//QLKOSCTranslationYKey: @property (assign, nonatomic) CGFloat translationY;
+//QLKOSCScaleXKey: @property (assign, nonatomic) CGFloat scaleX;
+//QLKOSCScaleYKey: @property (assign, nonatomic) CGFloat scaleY;
+//QLKOSCPreserveAspectRatioKey: @property (assign, nonatomic) BOOL preserveAspectRatio;
+//@"quaternion": @property (assign, nonatomic) GLKQuaternion quaternion;
+//@"surfaceSize": @property (assign, nonatomic) CGSize surfaceSize;
+//@"cueSize": @property (assign, nonatomic) CGSize cueSize;
+//QLKOSCLayerKey: @property (assign, nonatomic) NSInteger videoLayer;
+//QLKOSCOpacityKey: @property (assign, nonatomic) NSInteger videoOpacity;
+//QLKOSCSurfaceIDKey: @property (assign, nonatomic) NSInteger surfaceID;
+//@"surfaceList": @property (strong, nonatomic) NSArray *surfaces;
 
 @end
