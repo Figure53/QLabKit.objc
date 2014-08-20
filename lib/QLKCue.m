@@ -38,7 +38,6 @@
 
 //- (void) updateDisplayName; deprecated
 - (NSArray *) flattenCuesWithDepth:(NSInteger)depth;
-- (void)setProperty:(id)value forKey:(NSString *)propertyKey doUpdateOSC:(BOOL)osc;
 
 @end
 
@@ -125,9 +124,9 @@
     [tempDict addEntriesFromDictionary:self.cueData];
     NSMutableArray *children = [NSMutableArray array];
     
-    for (NSDictionary *subdict in dict[@"cues"]) {
+    for (NSDictionary *subdict in dict[QLKOSCCuesKey]) {
         //if we have a child matching this UID, then update; otherwise, insert. If the cue is no longer there, then it is lost locally too.
-        QLKCue *subcue = [self cueWithId:subdict[@"uniqueID"]];
+        QLKCue *subcue = [self cueWithId:subdict[QLKOSCUIDKey]];
         if (subcue) {
             [subcue updatePropertiesWithDictionary:subdict];
             [children addObject:subcue];
@@ -138,10 +137,10 @@
     [tempDict addEntriesFromDictionary:dict]; //adding will overwrite
     self.cueData = [NSMutableDictionary dictionaryWithDictionary:tempDict];
     
-    if (dict[@"cues"]) {
+    if (dict[QLKOSCCuesKey]) {
         [self setProperty:children
-                   forKey:@"cues"
-              doUpdateOSC:NO];
+                   forKey:QLKOSCCuesKey
+              tellQLab:NO];
     }
     
     _icon = [QLKImage imageNamed:[self iconFile]];
@@ -150,7 +149,7 @@
 }
 
 - (void)updateAllPropertiesSendOSC {
-    NSArray *cueArray = [self propertyForKey:@"cues"];
+    NSArray *cueArray = [self propertyForKey:QLKOSCCuesKey];
     if (cueArray != nil)
         for (QLKCue *cue in cueArray)
             [cue updateAllPropertiesSendOSC];
@@ -231,31 +230,31 @@
 
 - (BOOL) hasChildren
 {
-    return [self isGroup] && [[self propertyForKey:@"cues"] count] > 0;
+    return [self isGroup] && [[self propertyForKey:QLKOSCCuesKey] count] > 0;
 }
 
 #pragma mark - Children cues
 
 - (QLKCue *) firstCue
 {
-    return [self hasChildren] ? [[self propertyForKey:@"cues"] objectAtIndex:0] : nil;
+    return [self hasChildren] ? [[self propertyForKey:QLKOSCCuesKey] objectAtIndex:0] : nil;
 }
 
 - (QLKCue *) lastCue
 {
-    return [self hasChildren] ? [[self propertyForKey:@"cues"] lastObject] : nil;
+    return [self hasChildren] ? [[self propertyForKey:QLKOSCCuesKey] lastObject] : nil;
 }
 
 - (QLKCue *) cueAtIndex:(NSInteger)index
 {
-    return ([self hasChildren] && [[self propertyForKey:@"cues"] count] > index) ? [[self propertyForKey:@"cues"] objectAtIndex: index] : nil;
+    return ([self hasChildren] && [[self propertyForKey:QLKOSCCuesKey] count] > index) ? [[self propertyForKey:QLKOSCCuesKey] objectAtIndex: index] : nil;
 }
 
 // Recursively search for a cue with a matching id
 - (QLKCue *) cueWithId:(NSString *)cueId
 {
     
-    for ( QLKCue *cue in [self propertyForKey:@"cues"] )
+    for ( QLKCue *cue in [self propertyForKey:QLKOSCCuesKey] )
     {
         if ( [cue.uid isEqualToString:cueId] )
         {
@@ -274,7 +273,7 @@
 }
 
 - (QLKCue *)cueWithNumber:(NSString *)number {
-    for ( QLKCue *cue in [self propertyForKey:@"cues"] )
+    for ( QLKCue *cue in [self propertyForKey:QLKOSCCuesKey] )
     {
         if ( [cue.number isEqualToString:number] )
         {
@@ -301,11 +300,11 @@
 {
     NSMutableArray *cues = [NSMutableArray array];
     
-    for ( QLKCue *cue in [self propertyForKey:@"cues"] )
+    for ( QLKCue *cue in [self propertyForKey:QLKOSCCuesKey] )
     {
         [cue setProperty:@(depth)
                   forKey:@"depth"
-             doUpdateOSC:NO];
+             tellQLab:NO];
         [cues addObject:cue];
         
         if ( [cue isGroup] && [[cue propertyForKey:@"expanded"] boolValue])
@@ -321,20 +320,20 @@
 
 - (NSString *) surfaceName
 {
-    NSArray *surfaces = [self.cueData valueForKey:@"surfaceList"] ? [[self.cueData valueForKey:@"surfaceList"] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"surfaceID == %@", @([[self propertyForKey:@"surfaceID"] integerValue])]] : @[];
+    NSArray *surfaces = [self.cueData valueForKey:@"surfaceList"] ? [[self.cueData valueForKey:@"surfaceList"] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"surfaceID == %@", @([[self propertyForKey:QLKOSCSurfaceIDKey] integerValue])]] : @[];
     
     return (surfaces.count > 0) ? surfaces[0][@"surfaceName"] : nil;
 }
 
 - (NSString *) patchName
 {
-    NSArray *patches = ([self.cueData valueForKey:@"patchList"]) ? [[self.cueData valueForKey:@"patchList"] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"patchNumber == %@", @([[self propertyForKey:@"patch"] integerValue])]] : @[];
+    NSArray *patches = ([self.cueData valueForKey:@"patchList"]) ? [[self.cueData valueForKey:@"patchList"] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"patchNumber == %@", @([[self propertyForKey:QLKOSCPatchKey] integerValue])]] : @[];
     
     return (patches.count > 0) ? patches[0][@"patchName"] : nil;
 }
 
 - (QLKColor *) color {
-    return [QLKColor colorWithName:[self propertyForKey:@"colorName"]];
+    return [QLKColor colorWithName:[self propertyForKey:QLKOSCColorNameKey]];
 }
 
 - (GLKQuaternion)quaternion {
@@ -352,7 +351,7 @@
     return CGSizeMake([cueSize[@"width"] floatValue], [cueSize[@"height"] floatValue]);
 }
 
-- (void)setProperty:(id)value forKey:(NSString *)propertyKey doUpdateOSC:(BOOL)osc {
+- (void)setProperty:(id)value forKey:(NSString *)propertyKey tellQLab:(BOOL)osc {
     //change the value
     [self.cueData setValue:value
                     forKey:propertyKey];
@@ -362,6 +361,12 @@
     if (osc) {
         [self.workspace cue:self updatePropertySend:value forKey:propertyKey];
     }
+}
+
+- (void)setProperty:(id)value forKey:(NSString *)propertyKey {
+    [self setProperty:value
+               forKey:propertyKey
+             tellQLab:[[self workspace] defaultSendUpdatesOSC]];
 }
 
 - (id)propertyForKey:(NSString *)key {
@@ -386,7 +391,7 @@
     
     [self setProperty:value
                forKey:propertyKey
-          doUpdateOSC:NO];
+          tellQLab:NO];
     
     id null = [NSNull null];
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKCueHasNewDataNotification
@@ -400,7 +405,7 @@
 - (void)pushUpProperty:(id)value forKey:(NSString *)propertyKey {
     [self setProperty:value
                forKey:propertyKey
-          doUpdateOSC:YES];
+          tellQLab:YES];
 }
 
 - (void)fetchAndPushDownPropertyForKey:(NSString *)propertyKey {
@@ -423,7 +428,7 @@
                  completion:^(id data) {
                      [self setProperty:data
                                 forKey:propertyKey
-                           doUpdateOSC:NO];
+                           tellQLab:NO];
                      block(data);
                  }];
     }
@@ -469,13 +474,13 @@
 #pragma mark - Deprecated Accessors
 //accessors
 - (NSString *)uid {
-    return [self propertyForKey:@"uniqueID"];
+    return [self propertyForKey:QLKOSCUIDKey];
 }
 - (NSString *)name {
     return [self propertyForKey:QLKOSCNameKey];
 }
 - (NSString *)listName {
-    return [self propertyForKey:@"listName"];
+    return [self propertyForKey:QLKOSCListNameKey];
 }
 - (NSString *)number {
     return [self propertyForKey:QLKOSCNumberKey];
@@ -490,41 +495,47 @@
     return [self propertyForKey:QLKOSCNotesKey];
 }
 
+- (NSArray *)cues {
+    return [self propertyForKey:QLKOSCCuesKey];
+}
+
 //mutators
 - (void)setUid:(NSString *)uid {
-    [self setProperty:uid
-               forKey:@"uniqueID"
-          doUpdateOSC:self.workspace.defaultSendUpdatesOSC];
+    [self setProperty:uid forKey:QLKOSCUIDKey];
 }
 - (void)setName:(NSString *)name {
     [self setProperty:name
                forKey:QLKOSCNameKey
-          doUpdateOSC:self.workspace.defaultSendUpdatesOSC];
+          tellQLab:self.workspace.defaultSendUpdatesOSC];
 }
 - (void)setListName:(NSString *)listName {
     [self setProperty:listName
-               forKey:@"listName"
-          doUpdateOSC:self.workspace.defaultSendUpdatesOSC];
+               forKey:QLKOSCListNameKey
+          tellQLab:self.workspace.defaultSendUpdatesOSC];
 }
 - (void)setNumber:(NSString *)number {
     [self setProperty:number
                forKey:QLKOSCNumberKey
-          doUpdateOSC:self.workspace.defaultSendUpdatesOSC];
+          tellQLab:self.workspace.defaultSendUpdatesOSC];
 }
 - (void)setFlagged:(BOOL)flagged {
     [self setProperty:@(flagged)
                forKey:QLKOSCFlaggedKey
-          doUpdateOSC:self.workspace.defaultSendUpdatesOSC];
+          tellQLab:self.workspace.defaultSendUpdatesOSC];
 }
 - (void)setType:(NSString *)type {
     [self setProperty:type
                forKey:@"type"
-          doUpdateOSC:self.workspace.defaultSendUpdatesOSC];
+          tellQLab:self.workspace.defaultSendUpdatesOSC];
 }
 - (void)setNotes:(NSString *)notes {
     [self setProperty:notes
                forKey:QLKOSCNotesKey
-          doUpdateOSC:self.workspace.defaultSendUpdatesOSC];
+          tellQLab:self.workspace.defaultSendUpdatesOSC];
+}
+
+- (void)setCues:(NSArray *)cues {
+    [self setProperty:cues forKey:QLKOSCCuesKey];
 }
 
 @end

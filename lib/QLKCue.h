@@ -39,7 +39,13 @@
 
 
 @property (strong, nonatomic) QLKImage *icon;
-@property (strong, nonatomic) NSString *name, *number, *uid, *listName, *type, *notes;
+@property (strong, nonatomic) NSArray *cues;
+@property (strong, nonatomic) NSString *name;
+@property (strong, nonatomic) NSString *number;
+@property (strong, nonatomic) NSString *uid;
+@property (strong, nonatomic) NSString *listName;
+@property (strong, nonatomic) NSString *type;
+@property (strong, nonatomic) NSString *notes;
 @property (assign, nonatomic) BOOL flagged;
 
 //+ (QLKCue *) cueWithDictionary:(NSDictionary *)dict;
@@ -69,7 +75,8 @@
 - (void)pullDownPropertyForKey:(NSString *)propertyKey block:(void (^) (id))block;
 - (void)fetchAndPushDownPropertyForKey:(NSString *)propertyKey;
 
-- (void)setProperty:(id)value forKey:(NSString *)propertyKey doUpdateOSC:(BOOL)osc;
+- (void)setProperty:(id)value forKey:(NSString *)propertyKey;
+- (void)setProperty:(id)value forKey:(NSString *)propertyKey tellQLab:(BOOL)osc;
 - (void)updateAllPropertiesSendOSC;
 - (id)propertyForKey:(NSString *)key;
 - (NSArray *)propertyKeys;
@@ -92,9 +99,9 @@
 
 //   Deprecated Cue Properties (guide to the dictionary)
 //      Necessities
-//@"uniqueID": @property (strong, nonatomic) NSString *uid;
+//QLKOSCUIDKey: @property (strong, nonatomic) NSString *uid;
 //QLKOSCNameKey: @property (strong, nonatomic) NSString *name;
-//@"listName": @property (strong, nonatomic) NSString *listName;
+//QLKOSCListNameKey: @property (strong, nonatomic) NSString *listName;
 //QLKOSCNumberKey: @property (strong, nonatomic) NSString *number;
 //QLKOSCFlaggedKey: @property (assign, nonatomic) BOOL flagged;
 //@"type": @property (strong, nonatomic) NSString *type;
@@ -104,24 +111,24 @@
 
 
 //QLKOSCArmedKey: @property (assign, nonatomic) BOOL armed;
-//@"preWait": @property (assign, nonatomic) double preWait;
-//@"postWait": @property (assign, nonatomic) double postWait;
-//@"duration": @property (assign, nonatomic) double duration;
-//@"continueMode": @property (assign, nonatomic) QLKCueContinueMode continueMode;
-//@"patch": @property (assign, nonatomic) NSInteger patch;
+//QLKOSCPreWaitKey: @property (assign, nonatomic) double preWait;
+//QLKOSCPostWaitKey: @property (assign, nonatomic) double postWait;
+//QLKOSCDurationKey: @property (assign, nonatomic) double duration;
+//QLKOSCContinueModeKey: @property (assign, nonatomic) QLKCueContinueMode continueMode;
+//QLKOSCPatchKey: @property (assign, nonatomic) NSInteger patch;
 //@"patchList": @property (strong, nonatomic) NSArray *patches;
-//@"fullScreen": @property (assign, nonatomic) BOOL fullScreen;
-//@"translationX": @property (assign, nonatomic) CGFloat translationX;
-//@"translationY": @property (assign, nonatomic) CGFloat translationY;
-//@"scaleX": @property (assign, nonatomic) CGFloat scaleX;
-//@"scaleY": @property (assign, nonatomic) CGFloat scaleY;
-//@"preserveAspectRatio": @property (assign, nonatomic) BOOL preserveAspectRatio;
+//QLKOSCFullScreenKey: @property (assign, nonatomic) BOOL fullScreen;
+//QLKOSCTranslationXKey: @property (assign, nonatomic) CGFloat translationX;
+//QLKOSCTranslationYKey: @property (assign, nonatomic) CGFloat translationY;
+//QLKOSCScaleXKey: @property (assign, nonatomic) CGFloat scaleX;
+//QLKOSCScaleYKey: @property (assign, nonatomic) CGFloat scaleY;
+//QLKOSCPreserveAspectRatioKey: @property (assign, nonatomic) BOOL preserveAspectRatio;
 //@"quaternion": @property (assign, nonatomic) GLKQuaternion quaternion;
 //@"surfaceSize": @property (assign, nonatomic) CGSize surfaceSize;
 //@"cueSize": @property (assign, nonatomic) CGSize cueSize;
-//@"layer": @property (assign, nonatomic) NSInteger videoLayer;
-//@"opacity": @property (assign, nonatomic) NSInteger videoOpacity;
-//@"surfaceID": @property (assign, nonatomic) NSInteger surfaceID;
+//QLKOSCLayerKey: @property (assign, nonatomic) NSInteger videoLayer;
+//QLKOSCOpacityKey: @property (assign, nonatomic) NSInteger videoOpacity;
+//QLKOSCSurfaceIDKey: @property (assign, nonatomic) NSInteger surfaceID;
 //@"surfaceList": @property (strong, nonatomic) NSArray *surfaces;
 
 @end

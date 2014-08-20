@@ -88,13 +88,37 @@ typedef enum {
     QLKCueContinueModeAutoFollow
 } QLKCueContinueMode;
 
-// OSC key constants (moved from QLKCue.h)
+
+extern NSString * const QLKOSCUIDKey;
 extern NSString * const QLKOSCNameKey;
 extern NSString * const QLKOSCNumberKey;
 extern NSString * const QLKOSCNotesKey;
 extern NSString * const QLKOSCColorNameKey;
 extern NSString * const QLKOSCFlaggedKey;
 extern NSString * const QLKOSCArmedKey;
+extern NSString * const QLKOSCContinueModeKey;
+extern NSString * const QLKOSCPreWaitKey;
+extern NSString * const QLKOSCPostWaitKey;
+extern NSString * const QLKOSCDurationKey;
+extern NSString * const QLKOSCTranslationXKey;
+extern NSString * const QLKOSCTranslationYKey;
+extern NSString * const QLKOSCScaleXKey;
+extern NSString * const QLKOSCScaleYKey;
+extern NSString * const QLKOSCPreserveAspectRatioKey;
+extern NSString * const QLKOSCLayerKey;
+extern NSString * const QLKOSCPatchKey;
+extern NSString * const QLKOSCPatchListKey;
+extern NSString * const QLKOSCSurfaceListKey;
+extern NSString * const QLKOSCCuesKey;
+extern NSString * const QLKOSCListNameKey;
+extern NSString * const QLKOSCSurfaceIDKey;
+extern NSString * const QLKOSCFulLScreenKey;
+extern NSString * const QLKOSCRotationYKey;
+extern NSString * const QLKOSCRotationXKey;
+extern NSString * const QLKOSCPlaybackPositionIdKey;
+extern NSString * const QLKOSCStartNextCueWhenSliceEndsKey;
+extern NSString * const QLKOSCStopTargetWhenSliceEndsKey;
+extern NSString * const QLKOSCSliderLevelKey;
 
 // Identifiers for "fake" cues (moved from QLKCue.h)
 extern NSString * const QLKActiveCueListIdentifier;

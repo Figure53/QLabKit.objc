@@ -148,7 +148,7 @@
 
 - (NSInteger) numberOfRowsInTableView:(NSTableView *)tableView
 {
-    return (tableView == self.serversTableView) ? self.rows.count : [[self.workspace.firstCueList propertyForKey:@"cues"] count];
+    return (tableView == self.serversTableView) ? self.rows.count : [[self.workspace.firstCueList propertyForKey:QLKOSCCuesKey] count];
 }
 
 - (NSView *) tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
@@ -163,10 +163,10 @@
     else
     {
         QLKCue *fql = [self.workspace firstCueList];
-        NSArray *cues = [fql propertyForKey:@"cues"];
+        NSArray *cues = [fql propertyForKey:QLKOSCCuesKey];
         QLKCue *cue = cues[row];
         
-        cellView.textField.stringValue = ([tableColumn.identifier isEqualToString:@"number"]) ? cue.number : [cue displayName];
+        cellView.textField.stringValue = ([tableColumn.identifier isEqualToString:QLKOSCNumberKey]) ? cue.number : [cue displayName];
     }
   
     return cellView;
