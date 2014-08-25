@@ -2,7 +2,7 @@
 
 QLabKit is an Objective-C library for controlling QLab over the new OSC API introduced in QLab 3. It runs on OS X (10.7+) and iOS (6.0+).
 
-**NOTE** this is under active development and the API may change
+**NOTE:** This library is under active development and the API may change.
 
 ## Installation
 
