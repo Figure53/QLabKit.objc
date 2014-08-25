@@ -87,6 +87,10 @@
   return [NSString stringWithFormat:@"%@ - %@ - %@:%ld", [super description], self.name, self.host, (long)self.port];
 }
 
+- (BOOL)isConnected {
+    return ([self.client isConnected]);
+}
+
 #pragma mark - Workspaces
 
 - (void) updateWorkspaces:(NSArray *)workspaces
@@ -114,7 +118,7 @@
         }
     }
     
-    [self.client sendMessages:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
+    [self.client sendMessagesWithArguments:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
     {
         [self updateWorkspaces:data];
     }];
@@ -131,7 +135,7 @@
         }
     }
 
-    [self.client sendMessages:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
+    [self.client sendMessagesWithArguments:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
     {
         [self updateWorkspaces:data];
         

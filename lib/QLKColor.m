@@ -42,7 +42,7 @@ static NSSet *_colors = nil;
     if ( !self )
         return nil;
 
-    _name = [decoder decodeObjectForKey:@"name"];
+    _name = [decoder decodeObjectForKey:QLKOSCNameKey];
     _startColor = [decoder decodeObjectForKey:@"startColor"];
     _endColor = [decoder decodeObjectForKey:@"endColor"];
 
@@ -53,7 +53,7 @@ static NSSet *_colors = nil;
 {
     if ( [coder allowsKeyedCoding] )
     {
-        [coder encodeObject:_name forKey:@"name"];
+        [coder encodeObject:_name forKey:QLKOSCNameKey];
         [coder encodeObject:_startColor forKey:@"startColor"];
         [coder encodeObject:_endColor forKey:@"endColor"];
     }
