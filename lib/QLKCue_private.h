@@ -10,6 +10,6 @@
 
 @interface QLKCue ()
 
-- (void)pushDownProperty:(id)value forKey:(NSString *)propertyKey;
+- (void) pushDownProperty:(id)value forKey:(NSString *)propertyKey;
 
 @end

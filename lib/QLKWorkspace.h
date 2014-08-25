@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2014 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -81,7 +81,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (QLKCue *) firstCue;
 - (QLKCue *) firstCueList;
 - (QLKCue *) cueWithId:(NSString *)uid;
-- (QLKCue *)cueWithNumber:(NSString *)number;
+- (QLKCue *) cueWithNumber:(NSString *)number;
 
 // QLab Server API
 - (void) startReceivingUpdates;
@@ -102,11 +102,11 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void) loadCue:(QLKCue *)cue;
 - (void) resetCue:(QLKCue *)cue;
 - (void) deleteCue:(QLKCue *)cue;
-- (void)resumeCue:(QLKCue *)cue;
-- (void)hardStopCue:(QLKCue *)cue;
-- (void)togglePauseCue:(QLKCue *)cue;
-- (void)previewCue:(QLKCue *)cue;
-- (void)panicCue:(QLKCue *)cue;
+- (void) resumeCue:(QLKCue *)cue;
+- (void) hardStopCue:(QLKCue *)cue;
+- (void) togglePauseCue:(QLKCue *)cue;
+- (void) previewCue:(QLKCue *)cue;
+- (void) panicCue:(QLKCue *)cue;
 
 - (void)updateAllCuePropertiesSendOSC;
 - (void)cue:(QLKCue *)cue updatePropertySend:(id)value forKey:(NSString *)key;
@@ -159,6 +159,6 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (NSString *) addressForCue:(QLKCue *)cue action:(NSString *)action;
 
 // Helper for sending messages to a wildcarded cue number: /cue/<number>/action
-- (NSString *)addressForWildcardNumber:(NSString *)number action:(NSString *)action;
+- (NSString *) addressForWildcardNumber:(NSString *)number action:(NSString *)action;
 
 @end

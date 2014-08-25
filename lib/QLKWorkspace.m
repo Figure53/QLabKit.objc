@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2014 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,8 @@
 #import "QLKClient.h"
 #import "F53OSC.h"
 
-#define HEARTBEAT_INTERVAL 5 // seconds
-#define HEARTBEAT_FAILURE_INTERVAL 1 // seconds
+#define HEARTBEAT_INTERVAL 5          // seconds
+#define HEARTBEAT_FAILURE_INTERVAL 1  // seconds
 #define HEARTBEAT_MAX_ATTEMPTS 5
 
 #define DEBUG_OSC 0
@@ -422,19 +422,28 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self.client sendMessageWithArgument:nil toAddress:@"/delete"];
 }
 
-- (void)resumeCue:(QLKCue *)cue {
+- (void) resumeCue:(QLKCue *)cue
+{
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"resume"]];
 }
-- (void)hardStopCue:(QLKCue *)cue {
+
+- (void) hardStopCue:(QLKCue *)cue
+{
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"hardStop"]];
 }
-- (void)togglePauseCue:(QLKCue *)cue {
+
+- (void) togglePauseCue:(QLKCue *)cue
+{
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"togglePause"]];
 }
-- (void)previewCue:(QLKCue *)cue {
+
+- (void) previewCue:(QLKCue *)cue
+{
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"preview"]];
 }
-- (void)panicCue:(QLKCue *)cue {
+
+- (void) panicCue:(QLKCue *)cue
+{
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"panic"]];
 }
 
@@ -447,7 +456,8 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self.client sendMessageWithArgument:JSONKeys toAddress:[self addressForCue:cue action:@"valuesForKeys"] block:nil];
 }
 
-- (void)cue:(QLKCue *)cue valueForKey:(NSString *)key completion:(QLKMessageHandlerBlock)block {
+- (void) cue:(QLKCue *)cue valueForKey:(NSString *)key completion:(QLKMessageHandlerBlock)block
+{
     [self.client sendMessageWithArgument:nil
                    toAddress:[self addressForCue:cue
                                           action:key] block:block];
@@ -494,13 +504,15 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self.client sendMessagesWithArguments:nil toAddress:@"/runningOrPausedCues" block:block];
 }
 
-- (void)updateAllCuePropertiesSendOSC {
+- (void) updateAllCuePropertiesSendOSC
+{
     [self.root sendAllPropertiesToQLab];
 }
 
 #pragma mark - Cue Setters
 
-- (void) cue:(QLKCue *)cue updatePropertySend:(id)value forKey:(NSString *)key {
+- (void) cue:(QLKCue *)cue updatePropertySend:(id)value forKey:(NSString *)key
+{
     [self.client sendMessageWithArgument:value toAddress:[self addressForCue:cue action:key]];
 }
 
@@ -656,7 +668,8 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self.client sendMessageWithArgument:object toAddress:address block:block];
 }
 
-- (NSString *)addressForWildcardNumber:(NSString *)number action:(NSString *)action {
+- (NSString *) addressForWildcardNumber:(NSString *)number action:(NSString *)action
+{
     return [NSString stringWithFormat:@"/cue/%@/%@", number, action];
 }
 

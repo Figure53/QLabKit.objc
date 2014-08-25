@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2014 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -107,28 +107,28 @@
     [self.OSCClient sendPacket:message];
 }
 
-- (void) sendMessageWithArgument:(NSObject *)message toAddress:(NSString *)address
+- (void) sendMessageWithArgument:(NSObject *)argument toAddress:(NSString *)address
 {
-    [self sendMessageWithArgument:message toAddress:address block:nil];
+    [self sendMessageWithArgument:argument toAddress:address block:nil];
 }
 
-- (void) sendMessageWithArgument:(NSObject *)message toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
+- (void) sendMessageWithArgument:(NSObject *)argument toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
 {
-    NSArray *messages = (message != nil) ? @[message] : nil;
-    [self sendMessagesWithArguments:messages toAddress:address block:block];
+    NSArray *arguments = (argument != nil) ? @[argument] : nil;
+    [self sendMessagesWithArguments:arguments toAddress:address block:block];
 }
 
-- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address
+- (void) sendMessagesWithArguments:(NSArray *)arguments toAddress:(NSString *)address
 {
-    [self sendMessagesWithArguments:messages toAddress:address block:nil];
+    [self sendMessagesWithArguments:arguments toAddress:address block:nil];
 }
 
-- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
+- (void) sendMessagesWithArguments:(NSArray *)arguments toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block
 {
-    [self sendMessagesWithArguments:messages toAddress:address workspace:YES block:block];
+    [self sendMessagesWithArguments:arguments toAddress:address workspace:YES block:block];
 }
 
-- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block
+- (void) sendMessagesWithArguments:(NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block
 {
     if ( block )
         self.callbacks[address] = block;
@@ -136,10 +136,10 @@
     NSString *fullAddress = (toWorkspace && self.delegate) ? [NSString stringWithFormat:@"%@%@", [self workspacePrefix], address] : address;
   
 #if DEBUG_OSC
-    NSLog( @"QLKClient sending OSC message to (%@:%d): %@ data: %@", self.OSCClient.host, self.OSCClient.port, fullAddress, messages );
+    NSLog( @"QLKClient sending OSC message to (%@:%d): %@ data: %@", self.OSCClient.host, self.OSCClient.port, fullAddress, arguments );
 #endif
 
-    F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:fullAddress arguments:messages];
+    F53OSCMessage *message = [F53OSCMessage messageWithAddressPattern:fullAddress arguments:arguments];
     [self.OSCClient sendPacket:message];
 }
 

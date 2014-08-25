@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2014 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,9 +34,6 @@
 @class QLKColor, QLKWorkspace;
 
 @interface QLKCue : NSObject
-
-
-
 
 @property (strong, nonatomic) QLKImage *icon;
 @property (strong, nonatomic) NSArray *cues;
@@ -69,31 +66,31 @@
 + (NSString *) iconForType:(NSString *)type;
 - (NSString *) workspaceName;
 
-- (void)pushUpProperty:(id)value forKey:(NSString *)propertyKey;
-- (void)pullDownPropertyForKey:(NSString *)propertyKey block:(void (^) (id))block;
-- (void)triggerPushDownPropertyForKey:(NSString *)propertyKey;
+- (void) pushUpProperty:(id)value forKey:(NSString *)propertyKey;
+- (void) pullDownPropertyForKey:(NSString *)propertyKey block:(void (^) (id))block;
+- (void) triggerPushDownPropertyForKey:(NSString *)propertyKey;
 
-- (void)setProperty:(id)value forKey:(NSString *)propertyKey;
-- (void)setProperty:(id)value forKey:(NSString *)propertyKey tellQLab:(BOOL)osc;
-- (void)sendAllPropertiesToQLab;
-- (id)propertyForKey:(NSString *)key;
-- (NSArray *)propertyKeys;
-- (GLKQuaternion)quaternion;
-- (CGSize)surfaceSize;
-- (CGSize)cueSize;
-- (QLKColor *)color;
-- (NSString *)displayName;
+- (void) setProperty:(id)value forKey:(NSString *)propertyKey;
+- (void) setProperty:(id)value forKey:(NSString *)propertyKey tellQLab:(BOOL)osc;
+- (void) sendAllPropertiesToQLab;
+- (id) propertyForKey:(NSString *)key;
+- (NSArray *) propertyKeys;
+- (GLKQuaternion) quaternion;
+- (CGSize) surfaceSize;
+- (CGSize) cueSize;
+- (QLKColor *) color;
+- (NSString *) displayName;
 
-- (void)start;
-- (void)stop;
-- (void)pause;
-- (void)reset;
-- (void)load;
-- (void)resume;
-- (void)hardStop;
-- (void)togglePause;
-- (void)preview;
-- (void)panic;
+- (void) start;
+- (void) stop;
+- (void) pause;
+- (void) reset;
+- (void) load;
+- (void) resume;
+- (void) hardStop;
+- (void) togglePause;
+- (void) preview;
+- (void) panic;
 
 //   Deprecated Cue Properties (guide to the dictionary)
 //      Necessities

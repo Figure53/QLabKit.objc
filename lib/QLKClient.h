@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2014 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -57,10 +57,10 @@
 - (void) sendOscMessage:(F53OSCMessage *)message;
 - (void) sendOscMessage:(F53OSCMessage *)message block:(QLKMessageHandlerBlock)block;
 
-- (void) sendMessageWithArgument:(NSObject *)message toAddress:(NSString *)address;
-- (void) sendMessageWithArgument:(NSObject *)message toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
-- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address;
-- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
-- (void) sendMessagesWithArguments:(NSArray *)messages toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block;
+- (void) sendMessageWithArgument:(NSObject *)argument toAddress:(NSString *)address;
+- (void) sendMessageWithArgument:(NSObject *)argument toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
+- (void) sendMessagesWithArguments:(NSArray *)arguments toAddress:(NSString *)address;
+- (void) sendMessagesWithArguments:(NSArray *)arguments toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
+- (void) sendMessagesWithArguments:(NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block;
 
 @end

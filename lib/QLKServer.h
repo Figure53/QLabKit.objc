@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2014 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -72,7 +72,7 @@
 - (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
 - (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval;
 - (void) disableAutoRefresh;
-- (BOOL)isConnected;
+- (BOOL) isConnected;
 
 - (void) sendOscMessage:(F53OSCMessage *)message;
 - (void) sendOscMessage:(F53OSCMessage *)message block:(QLKMessageHandlerBlock)block;
