@@ -314,6 +314,8 @@
 - (GLKQuaternion) quaternion
 {
     NSArray *quaternionComponents = [self.cueData valueForKey:@"quaternion"];
+    if ( !quaternionComponents )
+        return GLKQuaternionIdentity;
     return GLKQuaternionMake([quaternionComponents[0] floatValue], [quaternionComponents[1] floatValue], [quaternionComponents[2] floatValue], [quaternionComponents[3] floatValue]);
 }
 
