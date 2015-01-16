@@ -133,7 +133,11 @@
         }
     }
     [tempDict addEntriesFromDictionary:dict]; //adding will overwrite
-    self.cueData = [NSMutableDictionary dictionaryWithDictionary:tempDict];
+    for (NSString *key in [tempDict allKeys]) {
+        if (![key isEqualToString:QLKOSCCuesKey]) {
+            [self setProperty:tempDict[key] forKey:key tellQLab:NO];
+        }
+    }
     
     if (dict[QLKOSCCuesKey]) {
         [self setProperty:children
@@ -334,8 +338,10 @@
 - (void) setProperty:(id)value forKey:(NSString *)propertyKey tellQLab:(BOOL)osc
 {
     // change the value
+    [self willChangeValueForKey:propertyKey];
     [self.cueData setValue:value
                     forKey:propertyKey];
+    [self didChangeValueForKey:propertyKey];
     
     // send network update
     if (osc) {
