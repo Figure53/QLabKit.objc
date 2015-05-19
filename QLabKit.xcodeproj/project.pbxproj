@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		832575321B0BA3D600EFC922 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 832575311B0BA3D600EFC922 /* GLKit.framework */; };
 		921DB1CE1796F65800ADDB2D /* QLKMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 921DB1CD1796F65700ADDB2D /* QLKMessage.m */; };
 		92F3E9ED178B1BC500A4C617 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F3E9EC178B1BC500A4C617 /* Cocoa.framework */; };
 		92F3E9F7178B1BC500A4C617 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 92F3E9F5178B1BC500A4C617 /* InfoPlist.strings */; };
@@ -42,6 +43,7 @@
 
 /* Begin PBXFileReference section */
 		1ADE787519A535D8009E29E2 /* QLKCue_private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QLKCue_private.h; sourceTree = "<group>"; };
+		832575311B0BA3D600EFC922 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		921DB1CC1796F65700ADDB2D /* QLKMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKMessage.h; sourceTree = "<group>"; };
 		921DB1CD1796F65700ADDB2D /* QLKMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKMessage.m; sourceTree = "<group>"; };
 		92B2542A18185A2800710257 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -111,6 +113,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				832575321B0BA3D600EFC922 /* GLKit.framework in Frameworks */,
 				92F3EA69178C5F6A00A4C617 /* Security.framework in Frameworks */,
 				92F3E9ED178B1BC500A4C617 /* Cocoa.framework in Frameworks */,
 			);
@@ -143,6 +146,7 @@
 				92B2542A18185A2800710257 /* XCTest.framework */,
 				92F3EA68178C5F6A00A4C617 /* Security.framework */,
 				92F3E9EC178B1BC500A4C617 /* Cocoa.framework */,
+				832575311B0BA3D600EFC922 /* GLKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

@@ -27,6 +27,8 @@
 
 #import <Foundation/Foundation.h>
 #import <GLKit/GLKit.h>
+#import <GLKit/GLKMathTypes.h>
+#import <GLKit/GLKQuaternion.h>
 #import "QLKDefines.h"
 #import "QLKWorkspace.h"
 
