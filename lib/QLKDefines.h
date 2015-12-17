@@ -25,10 +25,14 @@
 //  THE SOFTWARE.
 //
 
+@import Foundation;
+
 #if TARGET_OS_IPHONE
+@import UIKit;
 #define QLKImage UIImage
 #define QLKColorClass UIColor
 #else
+@import AppKit;
 #define QLKImage NSImage
 #define QLKColorClass NSColor
 #endif
