@@ -66,7 +66,7 @@
 @property (strong, nonatomic) NSNetService *netService;
 
 // Array of QLKWorkspace objects that belong to this server.
-@property (strong, nonatomic, readonly) NSMutableArray *workspaces;
+@property (strong, nonatomic, readonly) NSMutableArray<QLKWorkspace *> *workspaces;
 
 - (void) refreshWorkspaces;
 - (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
