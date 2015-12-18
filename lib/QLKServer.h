@@ -47,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 // Create a server with the host and port to connect.
 // Host should almost always be either @"localhost" or IP address, e.g. @"10.0.1.1".
 // Pass in port 0 to use default port (53000).
-- (id) initWithHost:(NSString *)host port:(NSInteger)port;
+- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port NS_DESIGNATED_INITIALIZER;
 
 // delegate object implementing QLKServerDelegate protocol
 @property (unsafe_unretained, nonatomic, nullable) id<QLKServerDelegate> delegate;
@@ -74,7 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) refreshWorkspacesWithCompletion:(void (^)(NSArray<QLKWorkspace *> *workspaces))block;
 - (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval;
 - (void) disableAutoRefresh;
-- (BOOL) isConnected;
+@property (nonatomic, getter=isConnected, readonly) BOOL connected;
 
 - (void) sendOscMessage:(F53OSCMessage *)message;
 - (void) sendOscMessage:(F53OSCMessage *)message block:(nullable QLKMessageHandlerBlock)block;

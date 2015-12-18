@@ -51,7 +51,7 @@
 
 @implementation QLKBrowser
 
-- (id) init
+- (instancetype) init
 {
     self = [super init];
     if ( !self )
@@ -85,7 +85,7 @@
     
     // Create Bonjour browser to find QLab instances.
     self.browser = [[NSNetServiceBrowser alloc] init];
-    [self.browser setDelegate:self];
+    self.browser.delegate = self;
     [self.browser searchForServicesOfType:QLKBonjourTCPServiceType inDomain:QLKBonjourServiceDomain];
 }
 
@@ -176,7 +176,7 @@
 #endif
     
     [self.services addObject:netService];
-    [netService setDelegate:self];
+    netService.delegate = self;
     [netService resolveWithTimeout:5.0f];
 }
 

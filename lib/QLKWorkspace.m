@@ -60,7 +60,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 @implementation QLKWorkspace
 
-- (id) init
+- (instancetype) init
 {
     self = [super init];
     if ( !self )
@@ -88,7 +88,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     return self;
 }
 
-- (id) initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server
+- (instancetype) initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server
 {
     self = [self init];
     if ( !self )
@@ -112,7 +112,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (NSString *) description
 {
-    return [NSString stringWithFormat:@"%@ - %@ : %@", [super description], self.name, self.uniqueId];
+    return [NSString stringWithFormat:@"%@ - %@ : %@", super.description, self.name, self.uniqueId];
 }
 
 - (NSString *) fullName
@@ -226,7 +226,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 - (QLKCue *) firstCue
 {
-    return [[self firstCueList] firstCue];
+    return [self.firstCueList firstCue];
 }
 
 - (QLKCue *) firstCueList

@@ -40,7 +40,7 @@
 
 @implementation QLKCue
 
-- (id) init
+- (instancetype) init
 {
     self = [super init];
     if ( !self )
@@ -51,14 +51,14 @@
     return self;
 }
 
-- (id) initWithWorkspace:(QLKWorkspace *)workspace
+- (instancetype) initWithWorkspace:(QLKWorkspace *)workspace
 {
     self = [self init];
     self.workspace = workspace;
     return self;
 }
 
-- (id) initWithDictionary:(NSDictionary *)dict workspace:(QLKWorkspace *)workspace
+- (instancetype) initWithDictionary:(NSDictionary *)dict workspace:(QLKWorkspace *)workspace
 {
     self = [self init];
     if ( !self )
@@ -97,7 +97,7 @@
 
 - (NSUInteger) hash
 {
-    return [self.uid hash];
+    return self.uid.hash;
 }
 
 - (BOOL) isEqualToCue:(QLKCue *)cue
@@ -133,7 +133,7 @@
         }
     }
     [tempDict addEntriesFromDictionary:dict]; //adding will overwrite
-    for (NSString *key in [tempDict allKeys]) {
+    for (NSString *key in tempDict.allKeys) {
         if (![key isEqualToString:QLKOSCCuesKey]) {
             [self setProperty:tempDict[key] forKey:key tellQLab:NO];
         }
@@ -156,7 +156,7 @@
     if (cueArray != nil)
         for (QLKCue *cue in cueArray)
             [cue sendAllPropertiesToQLab];
-    for (NSString *key in [self.cueData allKeys]) {
+    for (NSString *key in self.cueData.allKeys) {
         if ([key isEqualToString:QLKOSCCuesKey]) continue;
         [self.workspace cue:self
          updatePropertySend:[self propertyForKey:key]
@@ -209,7 +209,7 @@
     }
     else
     {
-        return [type lowercaseString];
+        return type.lowercaseString;
     }
 }
 
@@ -247,7 +247,7 @@
 
 - (QLKCue *) firstCue
 {
-    return [self hasChildren] ? [[self propertyForKey:QLKOSCCuesKey] objectAtIndex:0] : nil;
+    return [self hasChildren] ? [self propertyForKey:QLKOSCCuesKey][0] : nil;
 }
 
 - (QLKCue *) lastCue
@@ -257,7 +257,7 @@
 
 - (QLKCue *) cueAtIndex:(NSInteger)index
 {
-    return ([self hasChildren] && [[self propertyForKey:QLKOSCCuesKey] count] > index) ? [[self propertyForKey:QLKOSCCuesKey] objectAtIndex: index] : nil;
+    return ([self hasChildren] && [[self propertyForKey:QLKOSCCuesKey] count] > index) ? [self propertyForKey:QLKOSCCuesKey][index] : nil;
 }
 
 // Recursively search for a cue with a matching id
@@ -358,7 +358,7 @@
 {
     [self setProperty:value
                forKey:propertyKey
-             tellQLab:[[self workspace] defaultSendUpdatesOSC]];
+             tellQLab:self.workspace.defaultSendUpdatesOSC];
 }
 
 - (id) propertyForKey:(NSString *)key
@@ -369,7 +369,7 @@
     } else if ([key isEqualToString:@"patchName"]) {
         return [self patchName];
     } else if ([key isEqualToString:@"color"]) {
-        return [self color];
+        return self.color;
     } else if ([key isEqualToString:@"quaternion"]) {
         GLKQuaternion quaternion = [self quaternion];
         return [NSValue valueWithBytes:&quaternion objCType:@encode(GLKQuaternion)];
@@ -380,7 +380,7 @@
 
 - (NSArray *) propertyKeys
 {
-    return [self.cueData allKeys];
+    return self.cueData.allKeys;
 }
 
 - (void) pushDownProperty:(id)value forKey:(NSString *)propertyKey

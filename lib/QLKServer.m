@@ -52,7 +52,7 @@
 
 @implementation QLKServer
 
-- (id) initWithHost:(NSString *)host port:(NSInteger)port
+- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port
 {
     self = [super init];
     if ( !self )
@@ -84,12 +84,12 @@
 
 - (NSString *) description
 {
-    return [NSString stringWithFormat:@"%@ - %@ - %@:%ld", [super description], self.name, self.host, (long)self.port];
+    return [NSString stringWithFormat:@"%@ - %@ - %@:%ld", super.description, self.name, self.host, (long)self.port];
 }
 
 - (BOOL) isConnected
 {
-    return ([self.client isConnected]);
+    return self.client.isConnected;
 }
 
 #pragma mark - Workspaces

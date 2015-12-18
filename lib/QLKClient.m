@@ -42,7 +42,7 @@
 
 @implementation QLKClient
 
-- (id) initWithHost:(NSString *)host port:(NSInteger)port
+- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port
 {
     self = [super init];
     if ( !self )

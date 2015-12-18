@@ -68,7 +68,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 
 @property (assign, nonatomic) BOOL defaultSendUpdatesOSC;
 
-- (id) initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
+- (instancetype) initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
 
 - (void) connect;
 - (void) connectWithPasscode:(nullable NSString *)passcode completion:(nullable QLKMessageHandlerBlock)block;
@@ -155,7 +155,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void) sendMessage:(id)object toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block;
 
 // Helper for sending messages to this workspace: /workspace/<workspace_id>
-- (NSString *) workspacePrefix;
+@property (nonatomic, readonly, copy) NSString *workspacePrefix;
 
 // Helper for sending message to a specific cue: /cue_id/<cue.uid>/action
 - (NSString *) addressForCue:(QLKCue *)cue action:(NSString *)action;
