@@ -27,6 +27,7 @@
 
 #import <Foundation/Foundation.h>
 #import "QLKDefines.h"
+#import "QLKServer.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -50,7 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (unsafe_unretained, nonatomic, nullable) id<QLKBrowserDelegate> delegate;
 
 // array of QLKServer objects
-@property (strong, nonatomic) NSMutableArray<QLKServer *> *servers;
+@property (copy, atomic, readonly) NSArray<QLKServer *> *servers;
 
 // Start server discovery.
 - (void) start;

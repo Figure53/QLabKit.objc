@@ -240,6 +240,11 @@
 
 #pragma mark - Children cues
 
+- (NSArray<QLKCue *> *)cues
+{
+	return [self hasChildren] ? [self propertyForKey:QLKOSCCuesKey] : @[];
+}
+
 - (QLKCue *) firstCue
 {
     return [self hasChildren] ? [[self propertyForKey:QLKOSCCuesKey] objectAtIndex:0] : nil;
@@ -519,11 +524,6 @@
 - (NSString *) notes
 {
     return [self propertyForKey:QLKOSCNotesKey];
-}
-
-- (NSArray *) cues
-{
-    return [self propertyForKey:QLKOSCCuesKey];
 }
 
 // mutators

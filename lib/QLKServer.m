@@ -44,6 +44,7 @@
 
 @property (strong, nonatomic) QLKClient *client;
 @property (strong) NSTimer *refreshTimer;
+@property (copy, atomic) NSArray<QLKWorkspace *> *workspaces;
 
 - (void) updateWorkspaces:(NSArray *)workspaces;
 
@@ -65,8 +66,8 @@
     _name = host;
     _browser = nil;
     _netService = nil;
-    _workspaces = [[NSMutableArray alloc] init];
-    
+	_workspaces = @[];
+	
     // Create a private client that we'll use for querying the list of workspaces on the QLab server.
     // (Usually these clients are associated with a specific workspace, but not in this case.)
     self.client = [[QLKClient alloc] initWithHost:host port:port];
@@ -79,7 +80,6 @@
 {
     [self disableAutoRefresh];
     [self.client disconnect];
-    [self.workspaces removeAllObjects];
 }
 
 - (NSString *) description
@@ -96,13 +96,15 @@
 
 - (void) updateWorkspaces:(NSArray *)workspaces
 {
-    [self.workspaces removeAllObjects];
+	NSMutableArray *newWorkspaces = [NSMutableArray array];
     
     for ( NSDictionary *dict in workspaces )
     {
         QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:self];
-        [self.workspaces addObject:workspace];
+        [newWorkspaces addObject:workspace];
     }
+	
+	self.workspaces = newWorkspaces;
     
     [self.browser serverDidUpdateWorkspaces:self];
     [self.delegate serverDidUpdateWorkspaces:self];
