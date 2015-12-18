@@ -81,8 +81,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (GLKQuaternion) quaternion;
 - (CGSize) surfaceSize;
 - (CGSize) cueSize;
-- (QLKColor *) color;
-- (NSString *) displayName;
+@property (nonatomic, readonly) QLKColor *color;
+@property (nonatomic, readonly) NSString *displayName;
 
 - (void) start;
 - (void) stop;

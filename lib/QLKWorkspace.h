@@ -77,11 +77,11 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (void) temporarilyDisconnect;
 - (void) reconnect;
 
-- (NSString *) fullName;
+@property (nonatomic, readonly) NSString *fullName;
 - (NSString *) fullNameWithCueList:(QLKCue *)cueList;
 
-- (QLKCue *) firstCue;
-- (QLKCue *) firstCueList;
+@property (nonatomic, readonly, nullable) QLKCue *firstCue;
+@property (nonatomic, readonly, nullable) QLKCue *firstCueList;
 - (QLKCue *) cueWithId:(NSString *)uid;
 - (QLKCue *) cueWithNumber:(NSString *)number;
 
