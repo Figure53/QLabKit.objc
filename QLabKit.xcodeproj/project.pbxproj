@@ -39,6 +39,31 @@
 		92F3EA67178C5D4100A4C617 /* QLKColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA66178C5D4100A4C617 /* QLKColor.m */; };
 		92F3EA69178C5F6A00A4C617 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F3EA68178C5F6A00A4C617 /* Security.framework */; };
 		92F3EA6F178C6A8200A4C617 /* QLKClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA6E178C6A8200A4C617 /* QLKClient.m */; };
+		A50195941C23CF480088BF39 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 92F3EA01178B1BC500A4C617 /* MainMenu.xib */; };
+		A50195981C23D2A90088BF39 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50195961C23D2A90088BF39 /* AppDelegate.swift */; };
+		A50195991C23D2A90088BF39 /* QLabKitSwiftDemo-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A50195971C23D2A90088BF39 /* QLabKitSwiftDemo-Info.plist */; };
+		A501959A1C23D2D20088BF39 /* QLKDefines.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA63178C5CF300A4C617 /* QLKDefines.m */; };
+		A501959B1C23D2D20088BF39 /* QLKBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */; };
+		A501959C1C23D2D20088BF39 /* QLKServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA56178B4DF500A4C617 /* QLKServer.m */; };
+		A501959D1C23D2D20088BF39 /* QLKClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA6E178C6A8200A4C617 /* QLKClient.m */; };
+		A501959E1C23D2D20088BF39 /* QLKMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 921DB1CD1796F65700ADDB2D /* QLKMessage.m */; };
+		A501959F1C23D2D20088BF39 /* QLKWorkspace.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA58178B4DF500A4C617 /* QLKWorkspace.m */; };
+		A50195A01C23D2D20088BF39 /* QLKCue.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA60178C597D00A4C617 /* QLKCue.m */; };
+		A50195A11C23D2D20088BF39 /* QLKColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA66178C5D4100A4C617 /* QLKColor.m */; };
+		A50195A21C23D2E80088BF39 /* F53OSCParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA2D178B1DA300A4C617 /* F53OSCParser.m */; };
+		A50195A31C23D2E80088BF39 /* F53OSCSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA32178B1DA300A4C617 /* F53OSCSocket.m */; };
+		A50195A41C23D2E80088BF39 /* F53OSCClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA26178B1DA300A4C617 /* F53OSCClient.m */; };
+		A50195A51C23D2E80088BF39 /* F53OSCServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA30178B1DA300A4C617 /* F53OSCServer.m */; };
+		A50195A61C23D2E80088BF39 /* F53OSCPacket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA2B178B1DA300A4C617 /* F53OSCPacket.m */; };
+		A50195A71C23D2E80088BF39 /* F53OSCMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA29178B1DA300A4C617 /* F53OSCMessage.m */; };
+		A50195A81C23D2E80088BF39 /* F53OSCBundle.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA24178B1DA300A4C617 /* F53OSCBundle.m */; };
+		A50195A91C23D2E80088BF39 /* F53OSCTimeTag.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA34178B1DA300A4C617 /* F53OSCTimeTag.m */; };
+		A50195AA1C23D2E80088BF39 /* NSData+F53OSCBlob.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3B178B1DA300A4C617 /* NSData+F53OSCBlob.m */; };
+		A50195AB1C23D2E80088BF39 /* NSDate+F53OSCTimeTag.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3D178B1DA300A4C617 /* NSDate+F53OSCTimeTag.m */; };
+		A50195AC1C23D2E80088BF39 /* NSNumber+F53OSCNumber.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA3F178B1DA300A4C617 /* NSNumber+F53OSCNumber.m */; };
+		A50195AD1C23D2E80088BF39 /* NSString+F53OSCString.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA41178B1DA300A4C617 /* NSString+F53OSCString.m */; };
+		A50195AE1C23D2E80088BF39 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA36178B1DA300A4C617 /* GCDAsyncSocket.m */; };
+		A50195AF1C23D2E80088BF39 /* GCDAsyncUdpSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA38178B1DA300A4C617 /* GCDAsyncUdpSocket.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -106,6 +131,10 @@
 		92F3EA6A178C607700A4C617 /* QLabKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLabKit.h; sourceTree = "<group>"; };
 		92F3EA6D178C6A8200A4C617 /* QLKClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKClient.h; sourceTree = "<group>"; };
 		92F3EA6E178C6A8200A4C617 /* QLKClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKClient.m; sourceTree = "<group>"; };
+		A50195871C23CF030088BF39 /* QLabKitSwiftDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QLabKitSwiftDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A50195951C23D24A0088BF39 /* QLabKit-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "QLabKit-Bridging-Header.h"; sourceTree = "<group>"; };
+		A50195961C23D2A90088BF39 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A50195971C23D2A90088BF39 /* QLabKitSwiftDemo-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "QLabKitSwiftDemo-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +148,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A50195841C23CF030088BF39 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -127,6 +163,7 @@
 			children = (
 				92F3EA20178B1CE400A4C617 /* QLabKit */,
 				92F3E9F2178B1BC500A4C617 /* Demo */,
+				A50195881C23CF040088BF39 /* QLabKitSwiftDemo */,
 				92F3E9EB178B1BC500A4C617 /* Frameworks */,
 				92F3E9EA178B1BC500A4C617 /* Products */,
 			);
@@ -136,6 +173,7 @@
 			isa = PBXGroup;
 			children = (
 				92F3E9E9178B1BC500A4C617 /* QLabKitDemo.app */,
+				A50195871C23CF030088BF39 /* QLabKitSwiftDemo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -242,6 +280,17 @@
 			path = F53OSC;
 			sourceTree = "<group>";
 		};
+		A50195881C23CF040088BF39 /* QLabKitSwiftDemo */ = {
+			isa = PBXGroup;
+			children = (
+				A50195961C23D2A90088BF39 /* AppDelegate.swift */,
+				A50195971C23D2A90088BF39 /* QLabKitSwiftDemo-Info.plist */,
+				A50195951C23D24A0088BF39 /* QLabKit-Bridging-Header.h */,
+			);
+			name = QLabKitSwiftDemo;
+			path = demo;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -262,6 +311,23 @@
 			productReference = 92F3E9E9178B1BC500A4C617 /* QLabKitDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
+		A50195861C23CF030088BF39 /* QLabKitSwiftDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A50195931C23CF040088BF39 /* Build configuration list for PBXNativeTarget "QLabKitSwiftDemo" */;
+			buildPhases = (
+				A50195831C23CF030088BF39 /* Sources */,
+				A50195841C23CF030088BF39 /* Frameworks */,
+				A50195851C23CF030088BF39 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = QLabKitSwiftDemo;
+			productName = QLabKitSwiftDemo;
+			productReference = A50195871C23CF030088BF39 /* QLabKitSwiftDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -269,8 +335,14 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = QLK;
+				LastSwiftUpdateCheck = 0720;
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = "Figure 53";
+				TargetAttributes = {
+					A50195861C23CF030088BF39 = {
+						CreatedOnToolsVersion = 7.2;
+					};
+				};
 			};
 			buildConfigurationList = 92F3E9E4178B1BC500A4C617 /* Build configuration list for PBXProject "QLabKit" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -278,6 +350,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 92F3E9E0178B1BC500A4C617;
 			productRefGroup = 92F3E9EA178B1BC500A4C617 /* Products */;
@@ -285,6 +358,7 @@
 			projectRoot = "";
 			targets = (
 				92F3E9E8178B1BC500A4C617 /* QLabKitDemo */,
+				A50195861C23CF030088BF39 /* QLabKitSwiftDemo */,
 			);
 		};
 /* End PBXProject section */
@@ -299,6 +373,15 @@
 				92F3EA03178B1BC500A4C617 /* MainMenu.xib in Resources */,
 				92F3EA4D178B1DA300A4C617 /* LICENSE.txt in Resources */,
 				92F3EA52178B1DA300A4C617 /* README.markdown in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A50195851C23CF030088BF39 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A50195991C23D2A90088BF39 /* QLabKitSwiftDemo-Info.plist in Resources */,
+				A50195941C23CF480088BF39 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,6 +416,36 @@
 				92F3EA67178C5D4100A4C617 /* QLKColor.m in Sources */,
 				92F3EA6F178C6A8200A4C617 /* QLKClient.m in Sources */,
 				921DB1CE1796F65800ADDB2D /* QLKMessage.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A50195831C23CF030088BF39 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A50195AA1C23D2E80088BF39 /* NSData+F53OSCBlob.m in Sources */,
+				A50195A61C23D2E80088BF39 /* F53OSCPacket.m in Sources */,
+				A50195AF1C23D2E80088BF39 /* GCDAsyncUdpSocket.m in Sources */,
+				A50195A91C23D2E80088BF39 /* F53OSCTimeTag.m in Sources */,
+				A50195A11C23D2D20088BF39 /* QLKColor.m in Sources */,
+				A50195A01C23D2D20088BF39 /* QLKCue.m in Sources */,
+				A501959D1C23D2D20088BF39 /* QLKClient.m in Sources */,
+				A50195A41C23D2E80088BF39 /* F53OSCClient.m in Sources */,
+				A501959B1C23D2D20088BF39 /* QLKBrowser.m in Sources */,
+				A50195AB1C23D2E80088BF39 /* NSDate+F53OSCTimeTag.m in Sources */,
+				A50195A81C23D2E80088BF39 /* F53OSCBundle.m in Sources */,
+				A50195AD1C23D2E80088BF39 /* NSString+F53OSCString.m in Sources */,
+				A501959C1C23D2D20088BF39 /* QLKServer.m in Sources */,
+				A50195981C23D2A90088BF39 /* AppDelegate.swift in Sources */,
+				A50195A31C23D2E80088BF39 /* F53OSCSocket.m in Sources */,
+				A501959E1C23D2D20088BF39 /* QLKMessage.m in Sources */,
+				A50195A71C23D2E80088BF39 /* F53OSCMessage.m in Sources */,
+				A501959F1C23D2D20088BF39 /* QLKWorkspace.m in Sources */,
+				A501959A1C23D2D20088BF39 /* QLKDefines.m in Sources */,
+				A50195A21C23D2E80088BF39 /* F53OSCParser.m in Sources */,
+				A50195A51C23D2E80088BF39 /* F53OSCServer.m in Sources */,
+				A50195AE1C23D2E80088BF39 /* GCDAsyncSocket.m in Sources */,
+				A50195AC1C23D2E80088BF39 /* NSNumber+F53OSCNumber.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,6 +565,60 @@
 			};
 			name = Release;
 		};
+		A50195911C23CF040088BF39 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "demo/QLabKitSwiftDemo-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.figure53.QLabKitSwiftDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "demo/QLabKit-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A50195921C23CF040088BF39 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "demo/QLabKitSwiftDemo-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.figure53.QLabKitSwiftDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "demo/QLabKit-Bridging-Header.h";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -472,6 +639,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		A50195931C23CF040088BF39 /* Build configuration list for PBXNativeTarget "QLabKitSwiftDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A50195911C23CF040088BF39 /* Debug */,
+				A50195921C23CF040088BF39 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};

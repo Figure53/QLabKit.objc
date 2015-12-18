@@ -71,7 +71,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (copy, atomic, readonly) NSArray<QLKWorkspace *> *workspaces;
 
 - (void) refreshWorkspaces;
-- (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
+- (void) refreshWorkspacesWithCompletion:(void (^)(NSArray<QLKWorkspace *> *workspaces))block;
 - (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval;
 - (void) disableAutoRefresh;
 - (BOOL) isConnected;

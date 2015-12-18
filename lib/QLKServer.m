@@ -127,7 +127,7 @@
     }];
 }
 
-- (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block
+- (void) refreshWorkspacesWithCompletion:(void (^)(NSArray<QLKWorkspace *> *workspaces))block
 {
     if ( !self.client.isConnected )
     {
