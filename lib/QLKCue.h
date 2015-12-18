@@ -32,13 +32,14 @@
 #import "QLKDefines.h"
 #import "QLKWorkspace.h"
 
+NS_ASSUME_NONNULL_BEGIN
 
 @class QLKColor, QLKWorkspace;
 
 @interface QLKCue : NSObject
 
-@property (strong, nonatomic) QLKImage *icon;
-@property (strong, nonatomic) NSArray *cues;
+@property (strong, nonatomic, readonly, nullable) QLKImage *icon;
+@property (strong, nonatomic, readonly) NSArray<QLKCue *> *cues;
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) NSString *number;
 @property (strong, nonatomic) NSString *uid;
@@ -129,3 +130,5 @@
 //@"surfaceList": @property (strong, nonatomic) NSArray *surfaces;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -40,6 +40,7 @@
 @property (strong) NSNetServiceBrowser *browser;
 @property (strong) NSMutableArray *services;
 @property (strong) NSTimer *refreshTimer;
+@property (copy, atomic) NSArray<QLKServer *> *servers;
 
 - (QLKServer *) serverForHost:(NSString *)host;
 - (QLKServer *) serverForNetService:(NSNetService *)netService;
@@ -99,7 +100,7 @@
     self.browser = nil;
     
     // Remove all servers.
-    [self.servers removeAllObjects];
+	self.servers = @[];
     
     self.running = NO;
 }
@@ -186,7 +187,10 @@
 #endif
     
     QLKServer *server = [self serverForNetService:netService];
-    [self.servers removeObject:server];
+	
+	NSMutableArray *mutableServers = [self.servers mutableCopy];
+    [mutableServers removeObject:server];
+	self.servers = mutableServers;
     
     dispatch_async( dispatch_get_main_queue(), ^
     {
@@ -217,7 +221,7 @@
     NSLog( @"[browser] adding server: %@", server );
 #endif
     
-    [self.servers addObject:server];
+	self.servers = [self.servers arrayByAddingObject:server];
     
     dispatch_async( dispatch_get_main_queue(), ^
     {

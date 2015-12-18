@@ -32,6 +32,8 @@
 #import "QLKClient.h"
 #import "QLKDefines.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 // Notifications sent by workspaces
 extern NSString * const QLKWorkspaceDidUpdateCuesNotification;
 extern NSString * const QLKWorkspaceDidConnectNotification;
@@ -44,13 +46,13 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 @interface QLKWorkspace : NSObject <QLKClientDelegate>
 
 // Name of this workspace
-@property (copy, nonatomic) NSString *name;
+@property (copy, nonatomic, nullable) NSString *name;
 
 // A unique internal id
-@property (copy, nonatomic) NSString *uniqueId;
+@property (copy, nonatomic, nullable) NSString *uniqueId;
 
 // Name of the server (QLab machine) this workspace is on
-@property (strong, nonatomic) NSString *serverName;
+@property (strong, nonatomic, nullable) NSString *serverName;
 
 // The root cue is the parent of all the cues in this workspace
 @property (strong, nonatomic) QLKCue *root;
@@ -59,7 +61,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 @property (assign, nonatomic) BOOL hasPasscode;
 
 // Cached passcode for this workspace after entered by user
-@property (strong, nonatomic) NSString *passcode;
+@property (strong, nonatomic, nullable) NSString *passcode;
 
 // Whether we currently have a conection
 @property (assign, nonatomic) BOOL connected;
@@ -69,7 +71,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (id) initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
 
 - (void) connect;
-- (void) connectWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
+- (void) connectWithPasscode:(nullable NSString *)passcode completion:(nullable QLKMessageHandlerBlock)block;
 - (void) finishConnection;
 - (void) disconnect;
 - (void) temporarilyDisconnect;
@@ -150,7 +152,7 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 
 // Lower level API
 - (void) sendMessage:(id)object toAddress:(NSString *)address;
-- (void) sendMessage:(id)object toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
+- (void) sendMessage:(id)object toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block;
 
 // Helper for sending messages to this workspace: /workspace/<workspace_id>
 - (NSString *) workspacePrefix;
@@ -162,3 +164,5 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (NSString *) addressForWildcardNumber:(NSString *)number action:(NSString *)action;
 
 @end
+
+NS_ASSUME_NONNULL_END

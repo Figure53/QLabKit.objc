@@ -29,6 +29,8 @@
 #import "QLKDefines.h"
 #import "F53OSC.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class F53OSCClient, QLKBrowser, QLKServer, QLKWorkspace;
 
 
@@ -48,16 +50,16 @@
 - (id) initWithHost:(NSString *)host port:(NSInteger)port;
 
 // delegate object implementing QLKServerDelegate protocol
-@property (unsafe_unretained, nonatomic) id<QLKServerDelegate> delegate;
+@property (unsafe_unretained, nonatomic, nullable) id<QLKServerDelegate> delegate;
 
 // Host address of the server.
-@property (strong, nonatomic, readonly) NSString *host;
+@property (strong, nonatomic, readonly, nullable) NSString *host;
 
 // Port to connect to on the server, 53000 by default.
 @property (assign, nonatomic, readonly) NSInteger port;
 
 // Name of the machine running QLab.
-@property (strong, nonatomic) NSString *name;
+@property (strong, nonatomic, nullable) NSString *name;
 
 // The browser that owns this server (if any). You probably don't need this.
 @property (weak, nonatomic) QLKBrowser *browser;
@@ -66,7 +68,7 @@
 @property (strong, nonatomic) NSNetService *netService;
 
 // Array of QLKWorkspace objects that belong to this server.
-@property (strong, nonatomic, readonly) NSMutableArray<QLKWorkspace *> *workspaces;
+@property (copy, atomic, readonly) NSArray<QLKWorkspace *> *workspaces;
 
 - (void) refreshWorkspaces;
 - (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block;
@@ -75,6 +77,8 @@
 - (BOOL) isConnected;
 
 - (void) sendOscMessage:(F53OSCMessage *)message;
-- (void) sendOscMessage:(F53OSCMessage *)message block:(QLKMessageHandlerBlock)block;
+- (void) sendOscMessage:(F53OSCMessage *)message block:(nullable QLKMessageHandlerBlock)block;
 
 @end
+
+NS_ASSUME_NONNULL_END
