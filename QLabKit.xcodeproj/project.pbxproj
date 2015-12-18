@@ -41,7 +41,6 @@
 		92F3EA6F178C6A8200A4C617 /* QLKClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA6E178C6A8200A4C617 /* QLKClient.m */; };
 		A50195941C23CF480088BF39 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 92F3EA01178B1BC500A4C617 /* MainMenu.xib */; };
 		A50195981C23D2A90088BF39 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50195961C23D2A90088BF39 /* AppDelegate.swift */; };
-		A50195991C23D2A90088BF39 /* QLabKitSwiftDemo-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A50195971C23D2A90088BF39 /* QLabKitSwiftDemo-Info.plist */; };
 		A501959A1C23D2D20088BF39 /* QLKDefines.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA63178C5CF300A4C617 /* QLKDefines.m */; };
 		A501959B1C23D2D20088BF39 /* QLKBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA5D178B4E8100A4C617 /* QLKBrowser.m */; };
 		A501959C1C23D2D20088BF39 /* QLKServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3EA56178B4DF500A4C617 /* QLKServer.m */; };
@@ -168,6 +167,7 @@
 				92F3E9EA178B1BC500A4C617 /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 0;
 		};
 		92F3E9EA178B1BC500A4C617 /* Products */ = {
 			isa = PBXGroup;
@@ -380,7 +380,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A50195991C23D2A90088BF39 /* QLabKitSwiftDemo-Info.plist in Resources */,
 				A50195941C23CF480088BF39 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

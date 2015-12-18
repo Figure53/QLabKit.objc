@@ -34,165 +34,165 @@ let QLAB_PORT = 53000
 
 @NSApplicationMain
 @objc(QLKAppDelegate) class QLKAppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSplitViewDelegate, QLKBrowserDelegate {
-
-	@IBOutlet weak var window: NSWindow!
-	@IBOutlet var serversTableView: NSTableView!
-	@IBOutlet var cuesTableView: NSTableView!
-	@IBOutlet var connectionLabel: NSTextField!
-
-	// dynamic makes this work with Cococa bindings
-	dynamic var workspace: QLKWorkspace?
-	var browser = QLKBrowser()
-	var rows = [NSObject]()
-
-	func applicationDidFinishLaunching(aNotification: NSNotification) {
-		
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: "cuesUpdated:", name: QLKWorkspaceDidUpdateCuesNotification, object: nil)
-		
-		if AUTOMATIC_CONNECTION {
-			// Find QLab using continuously updating browser
-			browser.delegate = self
-			browser.start()
-			browser.enableAutoRefreshWithInterval(REFRESH_INTERVAL)
-		}
-		else {
-			let server = QLKServer(host: QLAB_IP, port: QLAB_PORT)
-			server.name = "QLab"
-			server.refreshWorkspacesWithCompletion({ (workspaces: [QLKWorkspace]) -> Void in
-				self.rows.append(server)
-				
-				for workspace in server.workspaces {
-					self.rows.append(workspace)
-				}
-				
-				self.serversTableView.reloadData()
-			})
-		}
-		
-		serversTableView.doubleAction = "connect:"
-		serversTableView.target = self
-	}
-
-	
-	// MARK: IBActions
-	
-	@IBAction func go(sender: AnyObject?) {
-		workspace?.go()
-	}
-	
-	@IBAction func stop(sender: AnyObject?) {
-		workspace?.stopAll()
-	}
-	
-	@IBAction func disconnect(sender: AnyObject?) {
-		if let w = workspace {
-			w.disconnect()
-			workspace = nil
-			
-			connectionLabel.stringValue = ""
-			cuesTableView.reloadData()
-		}
-	}
-	
-	@IBAction func connect(sender: AnyObject?) {
-		disconnect(nil)
-		
-		let selectedRow = serversTableView.selectedRow
-		
-		// Make sure something is selected
-		guard selectedRow != -1 else {
-			return
-		}
-		
-		workspace = rows[selectedRow] as? QLKWorkspace
-		
-		workspace?.connectWithPasscode(nil, completion: { (data: AnyObject!) -> Void in
-			NSLog("[app delegate] workspace did connect");
-			self.connectionLabel.stringValue = "Connected: \(self.workspace?.fullName ?? "")"
-		})
-	}
-	
-	
-	// MARK: Updating
-	
-	@objc func cuesUpdated(notification: NSNotification) {
-		cuesTableView.reloadData()
-	}
-	
-	private func updateView() {
-		rows = []
-		
-		for server in browser.servers {
-			rows.append(server)
-			
-			for workspace in server.workspaces {
-				rows.append(workspace)
-			}
-		}
-		
-		serversTableView.reloadData()
-	}
-	
-	
-	// MARK: QLKBrowserDelegate
-	
-	func browserDidUpdateServers(browser: QLKBrowser) {
-		updateView()
-	}
-	
-	func serverDidUpdateWorkspaces(server: QLKServer) {
-		updateView()
-	}
-	
-	
-	// MARK: TableViewDataSource
-	
-	func numberOfRowsInTableView(tableView: NSTableView) -> Int {
-		if tableView === serversTableView {
-			return rows.count
-		} else {
-			return workspace?.firstCueList?.cues.count ?? 0
-		}
-	}
-	
-	func tableView(tableView: NSTableView, viewForTableColumn tableColumn: NSTableColumn?, row: Int) -> NSView? {
-		
-		let cellView = tableView.makeViewWithIdentifier("MainCell", owner: self) as! NSTableCellView
-		
-		if tableView === serversTableView {
-			let obj = rows[row]
-			
-			if let server = obj as? QLKServer {
-				cellView.textField?.stringValue = server.name?.uppercaseString ?? ""
-			}
-			else if let workspace = obj as? QLKWorkspace {
-				cellView.textField?.stringValue = workspace.name ?? ""
-			}
-		}
-		else {
-			guard let firstCueList = workspace?.firstCueList else {
-				return cellView
-			}
-			
-			let cue = firstCueList.cues[row]
-			
-			cellView.textField?.stringValue = tableColumn?.identifier == QLKOSCNumberKey ? cue.number : cue.displayName
-		}
-		
-		return cellView
-	}
-	
-	func tableView(tableView: NSTableView, isGroupRow row: Int) -> Bool {
-		return tableView === serversTableView && rows[row].isKindOfClass(QLKServer)
-	}
-	
-	func tableView(tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
-		return !self.tableView(tableView, isGroupRow: row)
-	}
-	
-	// MARK: NSSplitViewDelegate
-	
-	func splitView(splitView: NSSplitView, shouldAdjustSizeOfSubview view: NSView) -> Bool {
-		return splitView.subviews[0] != view
-	}
+    
+    @IBOutlet weak var window: NSWindow!
+    @IBOutlet var serversTableView: NSTableView!
+    @IBOutlet var cuesTableView: NSTableView!
+    @IBOutlet var connectionLabel: NSTextField!
+    
+    // dynamic makes this work with Cococa bindings
+    dynamic var workspace: QLKWorkspace?
+    var browser = QLKBrowser()
+    var rows = [NSObject]()
+    
+    func applicationDidFinishLaunching(aNotification: NSNotification) {
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "cuesUpdated:", name: QLKWorkspaceDidUpdateCuesNotification, object: nil)
+        
+        if AUTOMATIC_CONNECTION {
+            // Find QLab using continuously updating browser
+            browser.delegate = self
+            browser.start()
+            browser.enableAutoRefreshWithInterval(REFRESH_INTERVAL)
+        }
+        else {
+            let server = QLKServer(host: QLAB_IP, port: QLAB_PORT)
+            server.name = "QLab"
+            server.refreshWorkspacesWithCompletion({ (workspaces: [QLKWorkspace]) -> Void in
+                self.rows.append(server)
+                
+                for workspace in server.workspaces {
+                    self.rows.append(workspace)
+                }
+                
+                self.serversTableView.reloadData()
+            })
+        }
+        
+        serversTableView.doubleAction = "connect:"
+        serversTableView.target = self
+    }
+    
+    
+    // MARK: IBActions
+    
+    @IBAction func go(sender: AnyObject?) {
+        workspace?.go()
+    }
+    
+    @IBAction func stop(sender: AnyObject?) {
+        workspace?.stopAll()
+    }
+    
+    @IBAction func disconnect(sender: AnyObject?) {
+        if let w = workspace {
+            w.disconnect()
+            workspace = nil
+            
+            connectionLabel.stringValue = ""
+            cuesTableView.reloadData()
+        }
+    }
+    
+    @IBAction func connect(sender: AnyObject?) {
+        disconnect(nil)
+        
+        let selectedRow = serversTableView.selectedRow
+        
+        // Make sure something is selected
+        guard selectedRow != -1 else {
+            return
+        }
+        
+        workspace = rows[selectedRow] as? QLKWorkspace
+        
+        workspace?.connectWithPasscode(nil, completion: { (data: AnyObject!) -> Void in
+            NSLog("[app delegate] workspace did connect");
+            self.connectionLabel.stringValue = "Connected: \(self.workspace?.fullName ?? "")"
+        })
+    }
+    
+    
+    // MARK: Updating
+    
+    @objc func cuesUpdated(notification: NSNotification) {
+        cuesTableView.reloadData()
+    }
+    
+    private func updateView() {
+        rows = []
+        
+        for server in browser.servers {
+            rows.append(server)
+            
+            for workspace in server.workspaces {
+                rows.append(workspace)
+            }
+        }
+        
+        serversTableView.reloadData()
+    }
+    
+    
+    // MARK: QLKBrowserDelegate
+    
+    func browserDidUpdateServers(browser: QLKBrowser) {
+        updateView()
+    }
+    
+    func serverDidUpdateWorkspaces(server: QLKServer) {
+        updateView()
+    }
+    
+    
+    // MARK: TableViewDataSource
+    
+    func numberOfRowsInTableView(tableView: NSTableView) -> Int {
+        if tableView === serversTableView {
+            return rows.count
+        } else {
+            return workspace?.firstCueList?.cues.count ?? 0
+        }
+    }
+    
+    func tableView(tableView: NSTableView, viewForTableColumn tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        
+        let cellView = tableView.makeViewWithIdentifier("MainCell", owner: self) as! NSTableCellView
+        
+        if tableView === serversTableView {
+            let obj = rows[row]
+            
+            if let server = obj as? QLKServer {
+                cellView.textField?.stringValue = server.name?.uppercaseString ?? ""
+            }
+            else if let workspace = obj as? QLKWorkspace {
+                cellView.textField?.stringValue = workspace.name ?? ""
+            }
+        }
+        else {
+            guard let firstCueList = workspace?.firstCueList else {
+                return cellView
+            }
+            
+            let cue = firstCueList.cues[row]
+            
+            cellView.textField?.stringValue = tableColumn?.identifier == QLKOSCNumberKey ? cue.number : cue.displayName
+        }
+        
+        return cellView
+    }
+    
+    func tableView(tableView: NSTableView, isGroupRow row: Int) -> Bool {
+        return tableView === serversTableView && rows[row].isKindOfClass(QLKServer)
+    }
+    
+    func tableView(tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
+        return !self.tableView(tableView, isGroupRow: row)
+    }
+    
+    // MARK: NSSplitViewDelegate
+    
+    func splitView(splitView: NSSplitView, shouldAdjustSizeOfSubview view: NSView) -> Bool {
+        return splitView.subviews[0] != view
+    }
 }

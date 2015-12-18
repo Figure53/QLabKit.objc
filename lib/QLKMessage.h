@@ -27,6 +27,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class F53OSCMessage;
 
 @interface QLKMessage : NSObject
@@ -45,7 +47,7 @@
 @property (nonatomic, getter=isDisconnect, readonly) BOOL disconnect;
 
 // Host the message came from, almost always will be the IP address.
-@property (nonatomic, readonly, copy) NSString *host;
+@property (nonatomic, readonly, copy, nullable) NSString *host;
 
 // Full address path of this message, e.g. /update/workspace/12345/cue_id/4
 @property (nonatomic, readonly, copy) NSString *address;
@@ -60,12 +62,14 @@
 - (NSString *) addressWithoutWorkspace:(NSString *)workspaceID;
 
 // Deserialized objects from the "data" key of QLab's reply.
-@property (nonatomic, readonly, strong) id response;
+@property (nonatomic, readonly, strong, nullable) id response;
 
 // Direct arguments from OSC message.
 @property (nonatomic, readonly, copy) NSArray *arguments;
 
 // Cue ID for this message, parsed out depending on what kind of message it is.
-@property (nonatomic, readonly, copy) NSString *cueID;
+@property (nonatomic, readonly, copy, nullable) NSString *cueID;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -42,6 +42,10 @@
 
 @implementation QLKClient
 
+- (instancetype) init NS_UNAVAILABLE {
+    return nil;
+}
+
 - (instancetype) initWithHost:(NSString *)host port:(NSInteger)port
 {
     self = [super init];

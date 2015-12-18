@@ -100,7 +100,7 @@
     self.browser = nil;
     
     // Remove all servers.
-	self.servers = @[];
+    self.servers = @[];
     
     self.running = NO;
 }
@@ -221,7 +221,7 @@
     NSLog( @"[browser] adding server: %@", server );
 #endif
     
-	self.servers = [self.servers arrayByAddingObject:server];
+    self.servers = [self.servers arrayByAddingObject:server];
     
     dispatch_async( dispatch_get_main_queue(), ^
     {
