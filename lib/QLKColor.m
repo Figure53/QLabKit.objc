@@ -36,7 +36,7 @@ static NSSet *_colors = nil;
     _colors = [NSSet setWithObjects:@"red", @"orange", @"blue", @"lightblue", @"yellow", @"green", @"purple", nil];
 }
 
-- (id) initWithCoder:(NSCoder *)decoder
+- (instancetype) initWithCoder:(NSCoder *)decoder
 {
     self = [super init];
     if ( !self )
@@ -51,7 +51,7 @@ static NSSet *_colors = nil;
 
 - (void) encodeWithCoder:(NSCoder *)coder
 {
-    if ( [coder allowsKeyedCoding] )
+    if ( coder.allowsKeyedCoding )
     {
         [coder encodeObject:_name forKey:QLKOSCNameKey];
         [coder encodeObject:_startColor forKey:@"startColor"];
@@ -161,9 +161,9 @@ static NSSet *_colors = nil;
 {	
     QLKColor *color;
 
-    if ( [_colors containsObject:[name lowercaseString]] )
+    if ( [_colors containsObject:name.lowercaseString] )
     {
-        color = [QLKColor performSelector:NSSelectorFromString([NSString stringWithFormat:@"%@Color", [name lowercaseString]])];
+        color = [QLKColor performSelector:NSSelectorFromString([NSString stringWithFormat:@"%@Color", name.lowercaseString])];
     }
     else
     {

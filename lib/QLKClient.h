@@ -34,7 +34,7 @@
 
 @protocol QLKClientDelegate <NSObject>
 
-- (NSString *) workspaceID;
+@property (nonatomic, readonly, copy) NSString *workspaceID;
 - (void) workspaceUpdated;
 - (void) playbackPositionUpdated:(NSString *)cueID;
 - (void) cueNeedsUpdate:(NSString *)cueID;
@@ -45,7 +45,7 @@
 
 @interface QLKClient : NSObject <F53OSCPacketDestination, F53OSCClientDelegate>
 
-- (id) initWithHost:(NSString *)host port:(NSInteger)port;
+- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port NS_DESIGNATED_INITIALIZER;
 
 @property (unsafe_unretained) id<QLKClientDelegate> delegate;
 @property (assign, nonatomic) BOOL useTCP;

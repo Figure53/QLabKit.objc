@@ -86,11 +86,11 @@ extern NSString * const QLKActiveCueListIdentifier;
 extern NSString * const QLKRootCueIdentifier;
 
 // Continue mode type (moved from QLKCue.h)
-typedef enum {
+typedef NS_ENUM(unsigned int, QLKCueContinueMode) {
     QLKCueContinueModeNoContinue,
     QLKCueContinueModeAutoContinue,
     QLKCueContinueModeAutoFollow
-} QLKCueContinueMode;
+};
 
 
 extern NSString * const QLKOSCUIDKey;
