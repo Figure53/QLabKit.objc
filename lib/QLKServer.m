@@ -52,6 +52,10 @@
 
 @implementation QLKServer
 
+- (instancetype) init NS_UNAVAILABLE {
+    return nil;
+}
+
 - (instancetype) initWithHost:(NSString *)host port:(NSInteger)port
 {
     self = [super init];
@@ -66,8 +70,8 @@
     _name = host;
     _browser = nil;
     _netService = nil;
-	_workspaces = @[];
-	
+    _workspaces = @[];
+    
     // Create a private client that we'll use for querying the list of workspaces on the QLab server.
     // (Usually these clients are associated with a specific workspace, but not in this case.)
     self.client = [[QLKClient alloc] initWithHost:host port:port];
@@ -96,15 +100,15 @@
 
 - (void) updateWorkspaces:(NSArray *)workspaces
 {
-	NSMutableArray *newWorkspaces = [NSMutableArray array];
+    NSMutableArray *newWorkspaces = [NSMutableArray array];
     
     for ( NSDictionary *dict in workspaces )
     {
         QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:self];
         [newWorkspaces addObject:workspace];
     }
-	
-	self.workspaces = newWorkspaces;
+    
+    self.workspaces = newWorkspaces;
     
     [self.browser serverDidUpdateWorkspaces:self];
     [self.delegate serverDidUpdateWorkspaces:self];

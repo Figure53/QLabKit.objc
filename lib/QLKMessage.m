@@ -40,6 +40,10 @@
     return [[QLKMessage alloc] initWithOSCMessage:message];
 }
 
+- (instancetype) init NS_UNAVAILABLE {
+    return nil;
+}
+
 - (instancetype) initWithOSCMessage:(F53OSCMessage *)message
 {
     self = [super init];
