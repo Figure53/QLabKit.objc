@@ -235,7 +235,21 @@
 
 - (BOOL) hasChildren
 {
-    return [self isGroup] && [[self propertyForKey:QLKOSCCuesKey] count] > 0;
+    // Must be a group to have children (root & cue lists are groups too)
+    if(![self isGroup])
+        return false;
+    
+    id cues = [self propertyForKey:QLKOSCCuesKey];
+    
+    // Make sure we don’t have an NSNull
+    if([cues isKindOfClass:[NSArray class]])
+    {
+        return  [cues count] > 0;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 #pragma mark - Children cues
