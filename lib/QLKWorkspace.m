@@ -46,6 +46,8 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 @interface QLKWorkspace ()
 
+@property (assign, nonatomic) BOOL connected;
+
 @property (strong, readonly) QLKClient *client;
 @property (strong) NSTimer *heartbeatTimeout;
 @property (assign) NSInteger attempts;

@@ -53,13 +53,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (unsafe_unretained, nonatomic, nullable) id<QLKServerDelegate> delegate;
 
 // Host address of the server.
-@property (strong, nonatomic, readonly, nullable) NSString *host;
+@property (strong, nonatomic, readonly) NSString *host;
 
 // Port to connect to on the server, 53000 by default.
 @property (assign, nonatomic, readonly) NSInteger port;
 
 // Name of the machine running QLab.
-@property (strong, nonatomic, nullable) NSString *name;
+@property (strong, nonatomic) NSString *name;
 
 // The browser that owns this server (if any). You probably don't need this.
 @property (weak, nonatomic) QLKBrowser *browser;
