@@ -48,6 +48,9 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 // Name of this workspace
 @property (copy, nonatomic, readonly) NSString *name;
 
+// Name without the ".cues" extension, for cleaner presentation
+@property (copy, nonatomic, readonly) NSString *nameWithoutExtension;
+
 // A unique internal id
 @property (copy, nonatomic, readonly) NSString *uniqueId;
 

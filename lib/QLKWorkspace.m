@@ -118,6 +118,14 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     return [NSString stringWithFormat:@"%@ - %@ : %@", super.description, self.name, self.uniqueId];
 }
 
+- (NSString *) nameWithoutExtension
+{
+    if([self.name.pathExtension isEqualToString:@"cues"])
+        return [self.name stringByDeletingPathExtension];
+    else
+        return self.name;
+}
+
 - (NSString *) fullName
 {
     return [NSString stringWithFormat:@"%@ (%@)", self.name, self.serverName];
