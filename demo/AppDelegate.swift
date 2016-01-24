@@ -163,10 +163,10 @@ let QLAB_PORT = 53000
             let obj = rows[row]
             
             if let server = obj as? QLKServer {
-                cellView.textField?.stringValue = server.name?.uppercaseString ?? ""
+                cellView.textField?.stringValue = server.name.uppercaseString
             }
             else if let workspace = obj as? QLKWorkspace {
-                cellView.textField?.stringValue = workspace.name ?? ""
+                cellView.textField?.stringValue = workspace.name
             }
         }
         else {
