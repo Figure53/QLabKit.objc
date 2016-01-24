@@ -46,28 +46,28 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 @interface QLKWorkspace : NSObject <QLKClientDelegate>
 
 // Name of this workspace
-@property (copy, nonatomic, nullable) NSString *name;
+@property (copy, nonatomic, readonly) NSString *name;
 
 // A unique internal id
-@property (copy, nonatomic, nullable) NSString *uniqueId;
+@property (copy, nonatomic, readonly) NSString *uniqueId;
 
 // The server (QLab machine) this workspace is on
-@property (strong, nonatomic) QLKServer *server;
+@property (strong, nonatomic, readonly) QLKServer *server;
 
 // Name of the server (QLab machine) this workspace is on
-@property (strong, nonatomic, nullable) NSString *serverName;
+@property (strong, nonatomic, readonly) NSString *serverName;
 
 // The root cue is the parent of all the cues in this workspace
-@property (strong, nonatomic) QLKCue *root;
+@property (strong, nonatomic, readonly) QLKCue *root;
 
 // Whether or not this workspace is protected by a passcode
-@property (assign, nonatomic) BOOL hasPasscode;
+@property (assign, nonatomic, readonly) BOOL hasPasscode;
 
 // Cached passcode for this workspace after entered by user
 @property (strong, nonatomic, nullable) NSString *passcode;
 
 // Whether we currently have a conection
-@property (assign, nonatomic) BOOL connected;
+@property (assign, nonatomic, readonly) BOOL connected;
 
 @property (assign, nonatomic) BOOL defaultSendUpdatesOSC;
 
