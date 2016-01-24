@@ -95,6 +95,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
         return nil;
 
     _name = dict[@"displayName"];
+    _server = server;
     _serverName = server.name;
     _client = [[QLKClient alloc] initWithHost:server.host port:server.port];
     _client.useTCP = YES;

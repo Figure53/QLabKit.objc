@@ -51,6 +51,9 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 // A unique internal id
 @property (copy, nonatomic, nullable) NSString *uniqueId;
 
+// The server (QLab machine) this workspace is on
+@property (strong, nonatomic) QLKServer *server;
+
 // Name of the server (QLab machine) this workspace is on
 @property (strong, nonatomic, nullable) NSString *serverName;
 
