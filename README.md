@@ -6,7 +6,7 @@ QLabKit is an Objective-C library for controlling QLab over the new OSC API intr
 
 ## Installation
 
-All the files for the library are in the `lib` folder. Copy all the files from that folder into your project. Make sure you also include the code in the `F53OSC` folder which is a submodule. You'll also need to link against `Security.framework` and `GLKit.framework`. All files in QLabKit use ARC. All files in F53OSC are non-ARC except for the GCDAsync* files. Non-ARC files will need to have `fno-objc-arc` flag set in the build phase.
+All the files for the library are in the `lib` folder. Copy all the files from that folder into your project. Make sure you also include the code in the `F53OSC` folder which is a submodule. You'll also need to link against `Security.framework` and `GLKit.framework`. All files in QLabKit and F53OSC use ARC.
 
 ## Classes
 
