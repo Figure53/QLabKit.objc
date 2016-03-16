@@ -27,45 +27,49 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class F53OSCMessage;
 
 @interface QLKMessage : NSObject
 
 + (QLKMessage *) messageWithOSCMessage:(F53OSCMessage *)message;
 
-- (id) initWithOSCMessage:(F53OSCMessage *)message;
+- (instancetype) initWithOSCMessage:(F53OSCMessage *)message NS_DESIGNATED_INITIALIZER;
 
 // Identifying the different types of messages.
-- (BOOL) isReply;
-- (BOOL) isReplyFromCue;
-- (BOOL) isUpdate;
-- (BOOL) isWorkspaceUpdate;
-- (BOOL) isCueUpdate;
-- (BOOL) isPlaybackPositionUpdate;
-- (BOOL) isDisconnect;
+@property (nonatomic, getter=isReply, readonly) BOOL reply;
+@property (nonatomic, getter=isReplyFromCue, readonly) BOOL replyFromCue;
+@property (nonatomic, getter=isUpdate, readonly) BOOL update;
+@property (nonatomic, getter=isWorkspaceUpdate, readonly) BOOL workspaceUpdate;
+@property (nonatomic, getter=isCueUpdate, readonly) BOOL cueUpdate;
+@property (nonatomic, getter=isPlaybackPositionUpdate, readonly) BOOL playbackPositionUpdate;
+@property (nonatomic, getter=isDisconnect, readonly) BOOL disconnect;
 
 // Host the message came from, almost always will be the IP address.
-- (NSString *) host;
+@property (nonatomic, readonly, copy, nullable) NSString *host;
 
 // Full address path of this message, e.g. /update/workspace/12345/cue_id/4
-- (NSString *) address;
+@property (nonatomic, readonly, copy) NSString *address;
 
 // Individual address parts separated by "/", e.g. ("update", "workspace", "12345", "cue_id", "4")
-- (NSArray *) addressParts;
+@property (nonatomic, readonly, copy) NSArray *addressParts;
 
 // Address without reply, e.g. "/reply/workspace/12345/connect" -> "/workspace/12345/connect"
-- (NSString *) replyAddress;
+@property (nonatomic, readonly, copy) NSString *replyAddress;
 
 // Address with workspace prefix removed, will also remove /reply: "/workspace/12345/connect" -> "/connect"
 - (NSString *) addressWithoutWorkspace:(NSString *)workspaceID;
 
 // Deserialized objects from the "data" key of QLab's reply.
-- (id) response;
+@property (nonatomic, readonly, strong, nullable) id response;
 
 // Direct arguments from OSC message.
-- (NSArray *) arguments;
+@property (nonatomic, readonly, copy) NSArray *arguments;
 
 // Cue ID for this message, parsed out depending on what kind of message it is.
-- (NSString *) cueID;
+@property (nonatomic, readonly, copy, nullable) NSString *cueID;
 
 @end
+
+NS_ASSUME_NONNULL_END

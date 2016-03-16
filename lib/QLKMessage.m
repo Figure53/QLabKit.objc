@@ -30,11 +30,7 @@
 #import "F53OSCMessage.h"
 
 @interface QLKMessage ()
-
 @property (strong) F53OSCMessage *OSCMessage;
-
-- (NSArray *) addressParts;
-
 @end
 
 @implementation QLKMessage
@@ -44,7 +40,11 @@
     return [[QLKMessage alloc] initWithOSCMessage:message];
 }
 
-- (id) initWithOSCMessage:(F53OSCMessage *)message
+- (instancetype) init NS_UNAVAILABLE {
+    return nil;
+}
+
+- (instancetype) initWithOSCMessage:(F53OSCMessage *)message
 {
     self = [super init];
     if ( !self )
@@ -162,7 +162,7 @@
 
 - (NSArray *) addressParts
 {
-    NSArray *parts = [self.address pathComponents];
+    NSArray *parts = self.address.pathComponents;
     return [parts subarrayWithRange:NSMakeRange( 1, parts.count - 1 )];
 }
 

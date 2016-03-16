@@ -44,6 +44,7 @@
 
 @property (strong, nonatomic) QLKClient *client;
 @property (strong) NSTimer *refreshTimer;
+@property (copy, atomic) NSArray<QLKWorkspace *> *workspaces;
 
 - (void) updateWorkspaces:(NSArray *)workspaces;
 
@@ -51,7 +52,11 @@
 
 @implementation QLKServer
 
-- (id) initWithHost:(NSString *)host port:(NSInteger)port
+- (instancetype) init NS_UNAVAILABLE {
+    return nil;
+}
+
+- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port
 {
     self = [super init];
     if ( !self )
@@ -65,7 +70,7 @@
     _name = host;
     _browser = nil;
     _netService = nil;
-    _workspaces = [[NSMutableArray alloc] init];
+    _workspaces = @[];
     
     // Create a private client that we'll use for querying the list of workspaces on the QLab server.
     // (Usually these clients are associated with a specific workspace, but not in this case.)
@@ -79,30 +84,31 @@
 {
     [self disableAutoRefresh];
     [self.client disconnect];
-    [self.workspaces removeAllObjects];
 }
 
 - (NSString *) description
 {
-    return [NSString stringWithFormat:@"%@ - %@ - %@:%ld", [super description], self.name, self.host, (long)self.port];
+    return [NSString stringWithFormat:@"%@ - %@ - %@:%ld", super.description, self.name, self.host, (long)self.port];
 }
 
 - (BOOL) isConnected
 {
-    return ([self.client isConnected]);
+    return self.client.isConnected;
 }
 
 #pragma mark - Workspaces
 
 - (void) updateWorkspaces:(NSArray *)workspaces
 {
-    [self.workspaces removeAllObjects];
+    NSMutableArray *newWorkspaces = [NSMutableArray array];
     
     for ( NSDictionary *dict in workspaces )
     {
         QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:self];
-        [self.workspaces addObject:workspace];
+        [newWorkspaces addObject:workspace];
     }
+    
+    self.workspaces = newWorkspaces;
     
     [self.browser serverDidUpdateWorkspaces:self];
     [self.delegate serverDidUpdateWorkspaces:self];
@@ -125,7 +131,7 @@
     }];
 }
 
-- (void) refreshWorkspacesWithCompletion:(void (^)(NSArray *workspaces))block
+- (void) refreshWorkspacesWithCompletion:(void (^)(NSArray<QLKWorkspace *> *workspaces))block
 {
     if ( !self.client.isConnected )
     {

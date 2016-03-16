@@ -27,6 +27,9 @@
 
 #import <Foundation/Foundation.h>
 #import "QLKDefines.h"
+#import "QLKServer.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @class QLKBrowser, QLKServer;
 
@@ -45,10 +48,10 @@
 @interface QLKBrowser : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate>
 
 // delegate object implementing QLKBrowserDelegate protocol
-@property (unsafe_unretained, nonatomic) id<QLKBrowserDelegate> delegate;
+@property (unsafe_unretained, nonatomic, nullable) id<QLKBrowserDelegate> delegate;
 
 // array of QLKServer objects
-@property (strong, nonatomic) NSMutableArray *servers;
+@property (copy, atomic, readonly) NSArray<QLKServer *> *servers;
 
 // Start server discovery.
 - (void) start;
@@ -66,3 +69,5 @@
 - (void) disableAutoRefresh;
 
 @end
+
+NS_ASSUME_NONNULL_END

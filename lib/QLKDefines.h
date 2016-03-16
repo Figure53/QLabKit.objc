@@ -25,10 +25,14 @@
 //  THE SOFTWARE.
 //
 
+@import Foundation;
+
 #if TARGET_OS_IPHONE
+@import UIKit;
 #define QLKImage UIImage
 #define QLKColorClass UIColor
 #else
+@import AppKit;
 #define QLKImage NSImage
 #define QLKColorClass NSColor
 #endif
@@ -82,11 +86,11 @@ extern NSString * const QLKActiveCueListIdentifier;
 extern NSString * const QLKRootCueIdentifier;
 
 // Continue mode type (moved from QLKCue.h)
-typedef enum {
+typedef NS_ENUM(unsigned int, QLKCueContinueMode) {
     QLKCueContinueModeNoContinue,
     QLKCueContinueModeAutoContinue,
     QLKCueContinueModeAutoFollow
-} QLKCueContinueMode;
+};
 
 
 extern NSString * const QLKOSCUIDKey;

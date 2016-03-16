@@ -32,6 +32,8 @@
 #import "QLKClient.h"
 #import "QLKDefines.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 // Notifications sent by workspaces
 extern NSString * const QLKWorkspaceDidUpdateCuesNotification;
 extern NSString * const QLKWorkspaceDidConnectNotification;
@@ -44,42 +46,48 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 @interface QLKWorkspace : NSObject <QLKClientDelegate>
 
 // Name of this workspace
-@property (copy, nonatomic) NSString *name;
+@property (copy, nonatomic, readonly) NSString *name;
+
+// Name without the ".cues" extension, for cleaner presentation
+@property (copy, nonatomic, readonly) NSString *nameWithoutExtension;
 
 // A unique internal id
-@property (copy, nonatomic) NSString *uniqueId;
+@property (copy, nonatomic, readonly) NSString *uniqueId;
+
+// The server (QLab machine) this workspace is on
+@property (strong, nonatomic, readonly) QLKServer *server;
 
 // Name of the server (QLab machine) this workspace is on
-@property (strong, nonatomic) NSString *serverName;
+@property (strong, nonatomic, readonly) NSString *serverName;
 
 // The root cue is the parent of all the cues in this workspace
-@property (strong, nonatomic) QLKCue *root;
+@property (strong, nonatomic, readonly) QLKCue *root;
 
 // Whether or not this workspace is protected by a passcode
-@property (assign, nonatomic) BOOL hasPasscode;
+@property (assign, nonatomic, readonly) BOOL hasPasscode;
 
 // Cached passcode for this workspace after entered by user
-@property (strong, nonatomic) NSString *passcode;
+@property (strong, nonatomic, nullable) NSString *passcode;
 
 // Whether we currently have a conection
-@property (assign, nonatomic) BOOL connected;
+@property (assign, nonatomic, readonly) BOOL connected;
 
 @property (assign, nonatomic) BOOL defaultSendUpdatesOSC;
 
-- (id) initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
+- (instancetype) initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server;
 
 - (void) connect;
-- (void) connectWithPasscode:(NSString *)passcode completion:(QLKMessageHandlerBlock)block;
+- (void) connectWithPasscode:(nullable NSString *)passcode completion:(nullable QLKMessageHandlerBlock)block;
 - (void) finishConnection;
 - (void) disconnect;
 - (void) temporarilyDisconnect;
 - (void) reconnect;
 
-- (NSString *) fullName;
+@property (nonatomic, readonly) NSString *fullName;
 - (NSString *) fullNameWithCueList:(QLKCue *)cueList;
 
-- (QLKCue *) firstCue;
-- (QLKCue *) firstCueList;
+@property (nonatomic, readonly, nullable) QLKCue *firstCue;
+@property (nonatomic, readonly, nullable) QLKCue *firstCueList;
 - (QLKCue *) cueWithId:(NSString *)uid;
 - (QLKCue *) cueWithNumber:(NSString *)number;
 
@@ -150,10 +158,10 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 
 // Lower level API
 - (void) sendMessage:(id)object toAddress:(NSString *)address;
-- (void) sendMessage:(id)object toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
+- (void) sendMessage:(id)object toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block;
 
 // Helper for sending messages to this workspace: /workspace/<workspace_id>
-- (NSString *) workspacePrefix;
+@property (nonatomic, readonly, copy) NSString *workspacePrefix;
 
 // Helper for sending message to a specific cue: /cue_id/<cue.uid>/action
 - (NSString *) addressForCue:(QLKCue *)cue action:(NSString *)action;
@@ -162,3 +170,5 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 - (NSString *) addressForWildcardNumber:(NSString *)number action:(NSString *)action;
 
 @end
+
+NS_ASSUME_NONNULL_END

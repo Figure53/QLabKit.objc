@@ -32,13 +32,14 @@
 #import "QLKDefines.h"
 #import "QLKWorkspace.h"
 
+NS_ASSUME_NONNULL_BEGIN
 
 @class QLKColor, QLKWorkspace;
 
 @interface QLKCue : NSObject
 
-@property (strong, nonatomic) QLKImage *icon;
-@property (strong, nonatomic) NSArray *cues;
+@property (strong, nonatomic, readonly, nullable) QLKImage *icon;
+@property (strong, nonatomic, readonly) NSArray<QLKCue *> *cues;
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) NSString *number;
 @property (strong, nonatomic) NSString *uid;
@@ -48,25 +49,25 @@
 @property (assign, nonatomic) BOOL flagged;
 
 
-- (id) initWithDictionary:(NSDictionary *)dict workspace:(QLKWorkspace *)workspace;
-- (id) initWithWorkspace:(QLKWorkspace *)workspace;
+- (instancetype) initWithDictionary:(NSDictionary *)dict workspace:(QLKWorkspace *)workspace;
+- (instancetype) initWithWorkspace:(QLKWorkspace *)workspace;
 - (BOOL) isEqualToCue:(QLKCue *)cue;
-- (NSString *) iconFile;
-- (NSString *) nonEmptyName;
-- (BOOL) isAudio;
-- (BOOL) isVideo;
-- (BOOL) isGroup;
+@property (nonatomic, readonly, copy) NSString *iconFile;
+@property (nonatomic, readonly, copy) NSString *nonEmptyName;
+@property (nonatomic, getter=isAudio, readonly) BOOL audio;
+@property (nonatomic, getter=isVideo, readonly) BOOL video;
+@property (nonatomic, getter=isGroup, readonly) BOOL group;
 - (void) updatePropertiesWithDictionary:(NSDictionary *)dict;
-- (BOOL) hasChildren;
-- (QLKCue *) firstCue;
-- (QLKCue *) lastCue;
+@property (nonatomic, readonly) BOOL hasChildren;
+@property (nonatomic, readonly, strong, nullable) QLKCue *firstCue;
+@property (nonatomic, readonly, strong, nullable) QLKCue *lastCue;
 - (QLKCue *) cueAtIndex:(NSInteger)index;
 - (QLKCue *) cueWithId:(NSString *)cueId;
 - (QLKCue *) cueWithNumber:(NSString *)number;
-- (NSString *) surfaceName;
-- (NSString *) patchName;
+@property (nonatomic, readonly, copy) NSString *surfaceName;
+@property (nonatomic, readonly, copy) NSString *patchName;
 + (NSString *) iconForType:(NSString *)type;
-- (NSString *) workspaceName;
+@property (nonatomic, readonly, copy) NSString *workspaceName;
 
 - (void) pushUpProperty:(id)value forKey:(NSString *)propertyKey;
 - (void) pullDownPropertyForKey:(NSString *)propertyKey block:(void (^) (id))block;
@@ -76,12 +77,12 @@
 - (void) setProperty:(id)value forKey:(NSString *)propertyKey tellQLab:(BOOL)osc;
 - (void) sendAllPropertiesToQLab;
 - (id) propertyForKey:(NSString *)key;
-- (NSArray *) propertyKeys;
-- (GLKQuaternion) quaternion;
-- (CGSize) surfaceSize;
-- (CGSize) cueSize;
-- (QLKColor *) color;
-- (NSString *) displayName;
+@property (nonatomic, readonly, copy) NSArray *propertyKeys;
+@property (nonatomic, readonly) GLKQuaternion quaternion;
+@property (nonatomic, readonly) CGSize surfaceSize;
+@property (nonatomic, readonly) CGSize cueSize;
+@property (nonatomic, readonly) QLKColor *color;
+@property (nonatomic, readonly) NSString *displayName;
 
 - (void) start;
 - (void) stop;
@@ -129,3 +130,5 @@
 //@"surfaceList": @property (strong, nonatomic) NSArray *surfaces;
 
 @end
+
+NS_ASSUME_NONNULL_END

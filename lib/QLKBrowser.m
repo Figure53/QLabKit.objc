@@ -40,6 +40,7 @@
 @property (strong) NSNetServiceBrowser *browser;
 @property (strong) NSMutableArray *services;
 @property (strong) NSTimer *refreshTimer;
+@property (copy, atomic) NSArray<QLKServer *> *servers;
 
 - (QLKServer *) serverForHost:(NSString *)host;
 - (QLKServer *) serverForNetService:(NSNetService *)netService;
@@ -50,7 +51,7 @@
 
 @implementation QLKBrowser
 
-- (id) init
+- (instancetype) init
 {
     self = [super init];
     if ( !self )
@@ -84,7 +85,7 @@
     
     // Create Bonjour browser to find QLab instances.
     self.browser = [[NSNetServiceBrowser alloc] init];
-    [self.browser setDelegate:self];
+    self.browser.delegate = self;
     [self.browser searchForServicesOfType:QLKBonjourTCPServiceType inDomain:QLKBonjourServiceDomain];
 }
 
@@ -99,7 +100,7 @@
     self.browser = nil;
     
     // Remove all servers.
-    [self.servers removeAllObjects];
+    self.servers = @[];
     
     self.running = NO;
 }
@@ -175,7 +176,7 @@
 #endif
     
     [self.services addObject:netService];
-    [netService setDelegate:self];
+    netService.delegate = self;
     [netService resolveWithTimeout:5.0f];
 }
 
@@ -186,7 +187,10 @@
 #endif
     
     QLKServer *server = [self serverForNetService:netService];
-    [self.servers removeObject:server];
+	
+	NSMutableArray *mutableServers = [self.servers mutableCopy];
+    [mutableServers removeObject:server];
+	self.servers = mutableServers;
     
     dispatch_async( dispatch_get_main_queue(), ^
     {
@@ -202,7 +206,22 @@
     NSLog( @"netServiceDidResolveAddress: %@", netService );
 #endif
     
-    NSString *ip = [self IPAddressFromData:netService.addresses[0]];
+    NSString *ip = nil;
+    
+    for(NSData *address in netService.addresses)
+    {
+        ip = [self IPAddressFromData:address];
+        if(ip)
+            break;
+    }
+    
+    if(!ip)
+    {
+        // This should never happen - we just resolved an address
+        // Only possible if somehow there were no addresses
+        return;
+    }
+    
     NSInteger port = netService.port;
     QLKServer *server = [[QLKServer alloc] initWithHost:ip port:port];
     server.name = netService.name;
@@ -217,7 +236,7 @@
     NSLog( @"[browser] adding server: %@", server );
 #endif
     
-    [self.servers addObject:server];
+    self.servers = [self.servers arrayByAddingObject:server];
     
     dispatch_async( dispatch_get_main_queue(), ^
     {
@@ -234,21 +253,28 @@
 
 #pragma mark -
 
-- (NSString *) IPAddressFromData:(NSData *)data
+- (nullable NSString *) IPAddressFromData:(NSData *)data
 {
-    // Taken from Apple sample project - CocoaSoap.
+    typedef union {
+        struct sockaddr sa;
+        struct sockaddr_in ipv4;
+        struct sockaddr_in6 ipv6;
+    } ip_socket_address;
     
-    NSString *ip = @"0.0.0.0";
-    struct sockaddr_in *address_sin = (struct sockaddr_in *)data.bytes;
+    ip_socket_address *socketAddress = (ip_socket_address *)data.bytes;
+    
     const char *formatted;
     char buffer[1024];
-    if ( AF_INET == address_sin->sin_family )
+    if ( AF_INET == socketAddress->sa.sa_family || AF_INET6 == socketAddress->sa.sa_family )
     {
-        formatted = inet_ntop( AF_INET, &(address_sin->sin_addr), buffer, sizeof( buffer ) );
-        ip = [NSString stringWithFormat:@"%s", formatted];
+        formatted = inet_ntop( socketAddress->sa.sa_family,
+                              (socketAddress->sa.sa_family == AF_INET ? (void *)&(socketAddress->ipv4.sin_addr) : (void *)&(socketAddress->ipv6.sin6_addr)), buffer, sizeof( buffer ) );
+        return [NSString stringWithFormat:@"%s", formatted];
     }
-    
-    return ip;
+    else
+    {
+        return nil;
+    }
 }
 
 @end
