@@ -206,7 +206,22 @@
     NSLog( @"netServiceDidResolveAddress: %@", netService );
 #endif
     
-    NSString *ip = [self IPAddressFromData:netService.addresses[0]];
+    NSString *ip = nil;
+    
+    for(NSData *address in netService.addresses)
+    {
+        ip = [self IPAddressFromData:address];
+        if(ip)
+            break;
+    }
+    
+    if(!ip)
+    {
+        // This should never happen - we just resolved an address
+        // Only possible if somehow there were no addresses
+        return;
+    }
+    
     NSInteger port = netService.port;
     QLKServer *server = [[QLKServer alloc] initWithHost:ip port:port];
     server.name = netService.name;
@@ -238,21 +253,28 @@
 
 #pragma mark -
 
-- (NSString *) IPAddressFromData:(NSData *)data
+- (nullable NSString *) IPAddressFromData:(NSData *)data
 {
-    // Taken from Apple sample project - CocoaSoap.
+    typedef union {
+        struct sockaddr sa;
+        struct sockaddr_in ipv4;
+        struct sockaddr_in6 ipv6;
+    } ip_socket_address;
     
-    NSString *ip = @"0.0.0.0";
-    struct sockaddr_in *address_sin = (struct sockaddr_in *)data.bytes;
+    ip_socket_address *socketAddress = (ip_socket_address *)data.bytes;
+    
     const char *formatted;
     char buffer[1024];
-    if ( AF_INET == address_sin->sin_family )
+    if ( AF_INET == socketAddress->sa.sa_family || AF_INET6 == socketAddress->sa.sa_family )
     {
-        formatted = inet_ntop( AF_INET, &(address_sin->sin_addr), buffer, sizeof( buffer ) );
-        ip = [NSString stringWithFormat:@"%s", formatted];
+        formatted = inet_ntop( socketAddress->sa.sa_family,
+                              (socketAddress->sa.sa_family == AF_INET ? (void *)&(socketAddress->ipv4.sin_addr) : (void *)&(socketAddress->ipv6.sin6_addr)), buffer, sizeof( buffer ) );
+        return [NSString stringWithFormat:@"%s", formatted];
     }
-    
-    return ip;
+    else
+    {
+        return nil;
+    }
 }
 
 @end
