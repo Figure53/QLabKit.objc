@@ -101,7 +101,7 @@
         self.callbacks[message.addressPattern] = block;
     
 #if DEBUG_OSC
-    NSLog( @"QLKClient sending raw OSC message to (%@:%d): %@", self.OSCClient.host, self.OSCClient.port, messages );
+    NSLog( @"QLKClient sending raw OSC message to (%@:%d): %@", self.OSCClient.host, self.OSCClient.port, message );
 #endif
     
     [self.OSCClient sendPacket:message];
