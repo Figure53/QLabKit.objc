@@ -10,3 +10,4 @@ build
 *.perspectivev3
 xcuserdata
 .profile
+*.xcscmblueprint
