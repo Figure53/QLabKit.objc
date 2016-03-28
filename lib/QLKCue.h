@@ -25,10 +25,10 @@
 //  THE SOFTWARE.
 //
 
-#import <Foundation/Foundation.h>
-#import <GLKit/GLKit.h>
-#import <GLKit/GLKMathTypes.h>
-#import <GLKit/GLKQuaternion.h>
+@import Foundation;
+@import GLKit.GLKitBase;
+@import GLKit.GLKMathTypes;
+@import GLKit.GLKQuaternion;
 #import "QLKDefines.h"
 #import "QLKWorkspace.h"
 

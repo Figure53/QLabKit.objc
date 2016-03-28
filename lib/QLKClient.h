@@ -26,7 +26,7 @@
 //
 
 
-#import <Foundation/Foundation.h>
+@import Foundation;
 #import "QLKDefines.h"
 #import "F53OSCClient.h"
 

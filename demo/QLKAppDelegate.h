@@ -25,7 +25,7 @@
 //  THE SOFTWARE.
 //
 
-#import <Cocoa/Cocoa.h>
+@import Cocoa;
 #import "QLKBrowser.h"
 #import "QLKWorkspace.h"
 

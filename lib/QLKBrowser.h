@@ -25,7 +25,7 @@
 //  THE SOFTWARE.
 //
 
-#import <Foundation/Foundation.h>
+@import Foundation;
 #import "QLKDefines.h"
 #import "QLKServer.h"
 
