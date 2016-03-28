@@ -179,9 +179,9 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     [self stopReceivingUpdates];
     self.connected = NO;
     [self.client disconnect];
-    [self.root setProperty:[NSNull null]
+    [self.root setProperty:@[]
                     forKey:QLKOSCCuesKey
-               tellQLab:NO];
+                  tellQLab:NO];
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceDidDisconnectNotification object:self];
 }
 
