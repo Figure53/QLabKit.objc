@@ -67,6 +67,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     self = [super init];
     if ( self )
     {
+        _name = @"";
         _uniqueId = @"";
         _connected = NO;
         _attempts = 0;
@@ -94,12 +95,14 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
     self = [self init];
     if ( self )
     {
-        _name = dict[@"displayName"];
+        if ( dict[@"displayName"] )
+            _name = dict[@"displayName"];
         _server = server;
         _client = [[QLKClient alloc] initWithHost:server.host port:server.port];
         _client.useTCP = YES;
         _client.delegate = self;
-        _uniqueId = dict[QLKOSCUIDKey];
+        if ( dict[QLKOSCUIDKey] )
+            _uniqueId = dict[QLKOSCUIDKey];
         _hasPasscode = [dict[@"hasPasscode"] boolValue];
     }
     return self;
