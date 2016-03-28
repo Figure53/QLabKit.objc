@@ -208,14 +208,14 @@
     
     NSString *ip = nil;
     
-    for(NSData *address in netService.addresses)
+    for ( NSData *address in netService.addresses )
     {
         ip = [self IPAddressFromData:address];
-        if(ip)
+        if ( ip )
             break;
     }
     
-    if(!ip)
+    if ( !ip )
     {
         // This should never happen - we just resolved an address
         // Only possible if somehow there were no addresses
@@ -263,12 +263,14 @@
     
     ip_socket_address *socketAddress = (ip_socket_address *)data.bytes;
     
-    const char *formatted;
-    char buffer[1024];
-    if ( AF_INET == socketAddress->sa.sa_family || AF_INET6 == socketAddress->sa.sa_family )
+    if ( socketAddress && ( AF_INET == socketAddress->sa.sa_family || AF_INET6 == socketAddress->sa.sa_family ) )
     {
-        formatted = inet_ntop( socketAddress->sa.sa_family,
-                              (socketAddress->sa.sa_family == AF_INET ? (void *)&(socketAddress->ipv4.sin_addr) : (void *)&(socketAddress->ipv6.sin6_addr)), buffer, sizeof( buffer ) );
+        char buffer[INET6_ADDRSTRLEN];
+        memset( buffer, 0, INET6_ADDRSTRLEN );
+        
+        const char *formatted = inet_ntop( socketAddress->sa.sa_family,
+                                          (socketAddress->sa.sa_family == AF_INET ? (void *)&(socketAddress->ipv4.sin_addr) : (void *)&(socketAddress->ipv6.sin6_addr)),
+                                          buffer, sizeof( buffer ) );
         return [NSString stringWithFormat:@"%s", formatted];
     }
     else
