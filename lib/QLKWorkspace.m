@@ -123,14 +123,19 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
         return self.name;
 }
 
+- (NSString *) serverName
+{
+    return self.server.name;
+}
+
 - (NSString *) fullName
 {
-    return [NSString stringWithFormat:@"%@ (%@)", self.name, self.serverName];
+    return [NSString stringWithFormat:@"%@ (%@)", self.name, self.server.name];
 }
 
 - (NSString *) fullNameWithCueList:(QLKCue *)cueList
 {
-    return [NSString stringWithFormat:@"%@ - %@ (%@)", self.name, [cueList propertyForKey:QLKOSCNameKey], self.serverName];
+    return [NSString stringWithFormat:@"%@ - %@ (%@)", self.name, [cueList propertyForKey:QLKOSCNameKey], self.server.name];
 }
 
 #pragma mark - Connection/reconnection
