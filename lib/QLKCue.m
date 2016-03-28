@@ -34,7 +34,7 @@
 @interface QLKCue ()
 
 @property (nonatomic, weak) QLKWorkspace *workspace;
-@property (strong, nonatomic) NSMutableDictionary *cueData;
+@property (strong, nonatomic, nonnull) NSMutableDictionary *cueData;
 
 @end
 

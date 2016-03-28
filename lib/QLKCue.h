@@ -40,12 +40,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (strong, nonatomic, readonly, nullable) QLKImage *icon;
 @property (strong, nonatomic, readonly) NSArray<QLKCue *> *cues;
-@property (strong, nonatomic) NSString *name;
-@property (strong, nonatomic) NSString *number;
-@property (strong, nonatomic) NSString *uid;
-@property (strong, nonatomic) NSString *listName;
-@property (strong, nonatomic) NSString *type;
-@property (strong, nonatomic) NSString *notes;
+@property (strong, nonatomic, nullable) NSString *name;
+@property (strong, nonatomic, nullable) NSString *number;
+@property (strong, nonatomic, nullable) NSString *uid;
+@property (strong, nonatomic, nullable) NSString *listName;
+@property (strong, nonatomic, nullable) NSString *type;
+@property (strong, nonatomic, nullable) NSString *notes;
 @property (assign, nonatomic) BOOL flagged;
 
 
@@ -61,13 +61,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) BOOL hasChildren;
 @property (nonatomic, readonly, strong, nullable) QLKCue *firstCue;
 @property (nonatomic, readonly, strong, nullable) QLKCue *lastCue;
-- (QLKCue *) cueAtIndex:(NSInteger)index;
-- (QLKCue *) cueWithId:(NSString *)cueId;
-- (QLKCue *) cueWithNumber:(NSString *)number;
-@property (nonatomic, readonly, copy) NSString *surfaceName;
-@property (nonatomic, readonly, copy) NSString *patchName;
+- (nullable QLKCue *) cueAtIndex:(NSInteger)index;
+- (nullable QLKCue *) cueWithId:(NSString *)cueId;
+- (nullable QLKCue *) cueWithNumber:(NSString *)number;
+@property (nonatomic, readonly, copy, nullable) NSString *surfaceName;
+@property (nonatomic, readonly, copy, nullable) NSString *patchName;
 + (NSString *) iconForType:(NSString *)type;
-@property (nonatomic, readonly, copy) NSString *workspaceName;
+@property (nonatomic, readonly, copy, nullable) NSString *workspaceName;
 
 - (void) pushUpProperty:(id)value forKey:(NSString *)propertyKey;
 - (void) pullDownPropertyForKey:(NSString *)propertyKey block:(void (^) (id))block;
@@ -76,7 +76,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) setProperty:(id)value forKey:(NSString *)propertyKey;
 - (void) setProperty:(id)value forKey:(NSString *)propertyKey tellQLab:(BOOL)osc;
 - (void) sendAllPropertiesToQLab;
-- (id) propertyForKey:(NSString *)key;
+- (nullable id) propertyForKey:(NSString *)key;
 @property (nonatomic, readonly, copy) NSArray *propertyKeys;
 @property (nonatomic, readonly) GLKQuaternion quaternion;
 @property (nonatomic, readonly) CGSize surfaceSize;

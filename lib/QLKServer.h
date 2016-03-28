@@ -62,10 +62,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic) NSString *name;
 
 // The browser that owns this server (if any). You probably don't need this.
-@property (weak, nonatomic) QLKBrowser *browser;
+@property (weak, nonatomic, nullable) QLKBrowser *browser;
 
 // The netservice used to discover this server (if any). You probably don't need this.
-@property (strong, nonatomic) NSNetService *netService;
+@property (strong, nonatomic, nullable) NSNetService *netService;
 
 // Array of QLKWorkspace objects that belong to this server.
 @property (copy, atomic, readonly) NSArray<QLKWorkspace *> *workspaces;

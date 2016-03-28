@@ -55,10 +55,10 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 @property (copy, nonatomic, readonly) NSString *uniqueId;
 
 // The server (QLab machine) this workspace is on
-@property (strong, nonatomic, readonly) QLKServer *server;
+@property (strong, nonatomic, readonly, nullable) QLKServer *server;
 
 // Name of the server (QLab machine) this workspace is on
-@property (strong, nonatomic, readonly) NSString *serverName;
+@property (strong, nonatomic, readonly, nullable) NSString *serverName;
 
 // The root cue is the parent of all the cues in this workspace
 @property (strong, nonatomic, readonly) QLKCue *root;
@@ -88,8 +88,8 @@ extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
 
 @property (nonatomic, readonly, nullable) QLKCue *firstCue;
 @property (nonatomic, readonly, nullable) QLKCue *firstCueList;
-- (QLKCue *) cueWithId:(NSString *)uid;
-- (QLKCue *) cueWithNumber:(NSString *)number;
+- (nullable QLKCue *) cueWithId:(NSString *)uid;
+- (nullable QLKCue *) cueWithNumber:(NSString *)number;
 
 // QLab Server API
 - (void) startReceivingUpdates;
