@@ -64,7 +64,7 @@
         // Manual connect to server and get workspaces
         QLKServer *server = [[QLKServer alloc] initWithHost:QLAB_IP port:QLAB_PORT];
         server.name = @"QLab";
-        [server refreshWorkspacesWithCompletion:^(NSArray *workspaces)
+        [server refreshWorkspacesWithCompletion:^(NSArray<QLKWorkspace *> *workspaces)
         {
             [self.rows addObject:server];
             [self.rows addObjectsFromArray:server.workspaces];

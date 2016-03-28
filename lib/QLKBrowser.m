@@ -26,7 +26,6 @@
 //
 
 #import "QLKBrowser.h"
-#import "QLKServer.h"
 #import "QLKWorkspace.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -40,7 +39,7 @@
 @property (strong) NSNetServiceBrowser *browser;
 @property (strong) NSMutableArray *services;
 @property (strong) NSTimer *refreshTimer;
-@property (copy, atomic) NSArray<QLKServer *> *servers;
+@property (copy, atomic, readwrite) NSArray<QLKServer *> *servers;
 
 - (QLKServer *) serverForHost:(NSString *)host;
 - (QLKServer *) serverForNetService:(NSNetService *)netService;
@@ -54,15 +53,14 @@
 - (instancetype) init
 {
     self = [super init];
-    if ( !self )
-        return nil;
-    
-    _running = NO;
-    _browser = nil;
-    _services = [[NSMutableArray alloc] init];
-    _refreshTimer = nil;
-    _servers = [[NSMutableArray alloc] init];
-    
+    if ( self )
+    {
+        _running = NO;
+        _browser = nil;
+        _services = [[NSMutableArray alloc] init];
+        _refreshTimer = nil;
+        _servers = @[];
+    }
     return self;
 }
 

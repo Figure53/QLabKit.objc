@@ -39,13 +39,12 @@ static NSSet *_colors = nil;
 - (instancetype) initWithCoder:(NSCoder *)decoder
 {
     self = [super init];
-    if ( !self )
-        return nil;
-
-    _name = [decoder decodeObjectForKey:QLKOSCNameKey];
-    _startColor = [decoder decodeObjectForKey:@"startColor"];
-    _endColor = [decoder decodeObjectForKey:@"endColor"];
-
+    if ( self )
+    {
+        _name = [decoder decodeObjectForKey:QLKOSCNameKey];
+        _startColor = [decoder decodeObjectForKey:@"startColor"];
+        _endColor = [decoder decodeObjectForKey:@"endColor"];
+    }
     return self;
 }
 

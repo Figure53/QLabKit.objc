@@ -31,7 +31,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class QLKBrowser, QLKServer;
+@class QLKBrowser;
 
 
 @protocol QLKBrowserDelegate <NSObject>

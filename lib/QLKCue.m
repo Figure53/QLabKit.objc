@@ -43,29 +43,31 @@
 - (instancetype) init
 {
     self = [super init];
-    if ( !self )
-        return nil;
-    
-    self.cueData = [NSMutableDictionary dictionary];
-    
+    if ( self )
+    {
+        self.cueData = [NSMutableDictionary dictionary];
+    }
     return self;
 }
 
 - (instancetype) initWithWorkspace:(QLKWorkspace *)workspace
 {
     self = [self init];
-    self.workspace = workspace;
+    if ( self )
+    {
+        self.workspace = workspace;
+    }
     return self;
 }
 
 - (instancetype) initWithDictionary:(NSDictionary *)dict workspace:(QLKWorkspace *)workspace
 {
     self = [self init];
-    if ( !self )
-        return nil;
-    self.workspace = workspace;
-    [self updatePropertiesWithDictionary:dict];
-    
+    if ( self )
+    {
+        self.workspace = workspace;
+        [self updatePropertiesWithDictionary:dict];
+    }
     return self;
 }
 

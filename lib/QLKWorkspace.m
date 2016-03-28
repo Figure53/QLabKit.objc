@@ -46,7 +46,7 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 
 @interface QLKWorkspace ()
 
-@property (assign, nonatomic) BOOL connected;
+@property (assign, nonatomic, readwrite) BOOL connected;
 
 @property (strong, readonly) QLKClient *client;
 @property (strong) NSTimer *heartbeatTimeout;
@@ -65,46 +65,43 @@ NSString * const QLKWorkspaceDidChangePlaybackPositionNotification = @"QLKWorksp
 - (instancetype) init
 {
     self = [super init];
-    if ( !self )
-        return nil;
-
-    _uniqueId = @"";
-    _connected = NO;
-    _attempts = 0;
-
-    // Setup root cue - parent of cue lists
-    _root = [[QLKCue alloc] initWithWorkspace:self];
-    [self.root setProperty:QLKRootCueIdentifier
-                    forKey:QLKOSCUIDKey
-               tellQLab:NO];
-    [self.root setProperty:@"Cue Lists"
-                    forKey:QLKOSCNameKey
-               tellQLab:NO];
-    [self.root setProperty:QLKCueTypeGroup
-                    forKey:QLKOSCTypeKey
-               tellQLab:NO];
-
-    _hasPasscode = NO;
-    _defaultSendUpdatesOSC = NO;
-
+    if ( self )
+    {
+        _uniqueId = @"";
+        _connected = NO;
+        _attempts = 0;
+        
+        // Setup root cue - parent of cue lists
+        _root = [[QLKCue alloc] initWithWorkspace:self];
+        [self.root setProperty:QLKRootCueIdentifier
+                        forKey:QLKOSCUIDKey
+                      tellQLab:NO];
+        [self.root setProperty:@"Cue Lists"
+                        forKey:QLKOSCNameKey
+                      tellQLab:NO];
+        [self.root setProperty:QLKCueTypeGroup
+                        forKey:QLKOSCTypeKey
+                      tellQLab:NO];
+        
+        _hasPasscode = NO;
+        _defaultSendUpdatesOSC = NO;
+    }
     return self;
 }
 
 - (instancetype) initWithDictionary:(NSDictionary *)dict server:(QLKServer *)server
 {
     self = [self init];
-    if ( !self )
-        return nil;
-
-    _name = dict[@"displayName"];
-    _server = server;
-    _serverName = server.name;
-    _client = [[QLKClient alloc] initWithHost:server.host port:server.port];
-    _client.useTCP = YES;
-    _client.delegate = self;
-    _uniqueId = dict[QLKOSCUIDKey];
-    _hasPasscode = [dict[@"hasPasscode"] boolValue];
-
+    if ( self )
+    {
+        _name = dict[@"displayName"];
+        _server = server;
+        _client = [[QLKClient alloc] initWithHost:server.host port:server.port];
+        _client.useTCP = YES;
+        _client.delegate = self;
+        _uniqueId = dict[QLKOSCUIDKey];
+        _hasPasscode = [dict[@"hasPasscode"] boolValue];
+    }
     return self;
 }
 

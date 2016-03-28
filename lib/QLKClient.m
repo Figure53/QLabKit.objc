@@ -49,17 +49,16 @@
 - (instancetype) initWithHost:(NSString *)host port:(NSInteger)port
 {
     self = [super init];
-    if ( !self )
-        return nil;
-    
-    _OSCClient = [[F53OSCClient alloc] init];
-    _OSCClient.host = host;
-    _OSCClient.port = port;
-    _OSCClient.useTcp = YES;
-    _OSCClient.delegate = self;
-    _callbacks = [[NSMutableDictionary alloc] init]; // key: OSC address, value: code block
-    _delegate = nil;
-    
+    if ( self )
+    {
+        _OSCClient = [[F53OSCClient alloc] init];
+        _OSCClient.host = host;
+        _OSCClient.port = port;
+        _OSCClient.useTcp = YES;
+        _OSCClient.delegate = self;
+        _callbacks = [[NSMutableDictionary alloc] init]; // key: OSC address, value: code block
+        _delegate = nil;
+    }
     return self;
 }
 

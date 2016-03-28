@@ -47,11 +47,10 @@
 - (instancetype) initWithOSCMessage:(F53OSCMessage *)message
 {
     self = [super init];
-    if ( !self )
-        return nil;
-
-    _OSCMessage = message;
-
+    if ( self )
+    {
+        _OSCMessage = message;
+    }
     return self;
 }
 

@@ -44,7 +44,7 @@
 
 @property (strong, nonatomic) QLKClient *client;
 @property (strong) NSTimer *refreshTimer;
-@property (copy, atomic) NSArray<QLKWorkspace *> *workspaces;
+@property (copy, atomic, readwrite) NSArray<QLKWorkspace *> *workspaces;
 
 - (void) updateWorkspaces:(NSArray *)workspaces;
 
@@ -59,24 +59,23 @@
 - (instancetype) initWithHost:(NSString *)host port:(NSInteger)port
 {
     self = [super init];
-    if ( !self )
-        return nil;
-    
-    if ( port == 0 )
-        port = 53000;
-
-    _host = host;
-    _port = port;
-    _name = host;
-    _browser = nil;
-    _netService = nil;
-    _workspaces = @[];
-    
-    // Create a private client that we'll use for querying the list of workspaces on the QLab server.
-    // (Usually these clients are associated with a specific workspace, but not in this case.)
-    self.client = [[QLKClient alloc] initWithHost:host port:port];
-    self.client.useTCP = YES;
-
+    if ( self )
+    {
+        if ( port == 0 )
+            port = 53000;
+        
+        _host = host;
+        _port = port;
+        _name = host;
+        _browser = nil;
+        _netService = nil;
+        _workspaces = @[];
+        
+        // Create a private client that we'll use for querying the list of workspaces on the QLab server.
+        // (Usually these clients are associated with a specific workspace, but not in this case.)
+        self.client = [[QLKClient alloc] initWithHost:host port:port];
+        self.client.useTCP = YES;
+    }
     return self;
 }
 
