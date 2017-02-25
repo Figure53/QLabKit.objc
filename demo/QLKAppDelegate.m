@@ -38,6 +38,8 @@
 @property (strong) QLKBrowser *browser;
 @property (strong) NSMutableArray *rows;
 
+@property (strong) NSTimer *runningCuesTimer;
+
 @end
 
 @implementation QLKAppDelegate
@@ -46,8 +48,26 @@
 {
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector( cuesUpdated: )
-                                                 name:QLKWorkspaceDidUpdateCuesNotification
+                                                 name:QLKCueCreatedNotification
                                                object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector( cuesUpdated: )
+                                               name:QLKCueDeletedNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector( cuesUpdated: )
+                                               name:QLKCueOrderChangedNotification
+                                             object:nil];
+  
+  
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector( playbackPositionUpdated: )
+                                               name:QLKWorkspaceDidChangePlaybackPositionNotification
+                                             object:nil];
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector( cueListUpdated:) name:QLKWorkspaceDidUpdateCuesNotification object:nil];
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector( cueListSelected: ) name:@"QLKCueListSelected" object:nil]; //can't work out how to expose the static object from the swift class...
   
     self.rows = [NSMutableArray array];
   
@@ -66,18 +86,32 @@
         server.name = @"QLab";
         [server refreshWorkspacesWithCompletion:^(NSArray<QLKWorkspace *> *workspaces)
         {
+
             [self.rows addObject:server];
             [self.rows addObjectsFromArray:server.workspaces];
             [self.serversTableView reloadData];
+          
         }];
     }
 
     self.serversTableView.doubleAction = @selector(connect:);
     self.serversTableView.target = self;
+  
+    self.qlistDelegate = [[QLKCueListDelegate alloc] init];
+    self.cueListTableView.dataSource = self.qlistDelegate;
+    self.cueListTableView.delegate = self.qlistDelegate;
+  
 }
+
 
 - (IBAction) go:(id)sender
 {
+//  if (self.cuesTableView.selectedRowIndexes.count > 0)
+//  { //go with the selected cue
+//    QLKCue *cue = [self.workspace.firstCueList.cues objectAtIndex: self.cuesTableView.selectedRowIndexes.firstIndex];
+//    [cue start];
+//    
+//  } else
     [self.workspace go];
 }
 
@@ -90,11 +124,19 @@
 {
     if ( self.workspace )
     {
+      if (self.runningCuesTimer != nil)
+        [self.runningCuesTimer invalidate];
+      
         [self.workspace disconnect];
         self.workspace = nil;
+      
+        self.cueList = nil;
 
         self.connectionLabel.stringValue = @"";
-        [self.cuesTableView reloadData];
+        [self.cuesOutlineView reloadData];
+      
+        self.qlistDelegate.workspace = nil;
+        [self.cueListTableView reloadData];
     }
 }
 
@@ -107,16 +149,82 @@
         return;
 
     self.workspace = self.rows[selectedRow];
+    self.qlistDelegate.workspace = self.workspace;
+  
+  
     [self.workspace connectWithPasscode:nil completion:^(id data)
     {
         NSLog(@"[app delegate] workspace did connect");
         self.connectionLabel.stringValue = [NSString stringWithFormat:@"Connected: %@", self.workspace.fullName];
+      
+        self.runningCuesTimer = [NSTimer scheduledTimerWithTimeInterval:1
+                                                               target:self
+                                                             selector:@selector(runningCuesTimerAction)
+                                                             userInfo:nil
+                                                              repeats:YES];
     }];
 }
 
 - (void) cuesUpdated:(NSNotification *)notification
 {
-    [self.cuesTableView reloadData];
+  if (self.cueList == nil)
+  {
+    self.cueList = self.workspace.firstCueList;
+  }
+  [self.cuesOutlineView reloadData];
+}
+
+- (void) cueListUpdated:(NSNotification *)notification
+{
+  [self.cueListTableView reloadData];
+}
+
+- (void) cueListSelected:(NSNotification *)notification
+{
+  QLKCue *q = notification.object;
+  self.cueList = q;
+  [self.cuesOutlineView reloadData];
+}
+
+NSMutableArray *runningCues; //this is ugly, should notify to the cells and use custom cells maybe? this won't work for rows that are off the screen maybe?
+
+- (void) runningCuesTimerAction
+{
+  
+  if (runningCues == nil)
+    runningCues = [[NSMutableArray alloc] init];
+  [self.workspace runningOrPausedCuesWithBlock:^(id data)
+  {
+    if (![data isKindOfClass:[NSArray class]])
+      return;
+    
+    for (QLKCue *q in runningCues)
+    {
+      
+      if (!([self.cuesOutlineView rowForItem:q] >= 0))
+        continue;
+      
+      [self.cuesOutlineView rowViewAtRow:[self.cuesOutlineView rowForItem:q] makeIfNecessary:YES].backgroundColor = [NSColor clearColor];
+    }
+    
+    [runningCues removeAllObjects];
+    
+    NSArray *da = (NSArray*)data;
+    
+    for (NSDictionary *q in da)
+    {
+      QLKCue *cue = [self.workspace cueWithId:[q valueForKey:QLKOSCUIDKey]];
+      
+      if (!([self.cuesOutlineView rowForItem:cue]>=0))
+        continue;
+      
+      [self.cuesOutlineView rowViewAtRow:[self.cuesOutlineView rowForItem:cue] makeIfNecessary:YES].backgroundColor = [NSColor redColor];
+      
+      [runningCues addObject:cue];
+    }
+    
+    
+  }];
 }
 
 - (void) updateView
@@ -144,43 +252,149 @@
     [self updateView];
 }
 
+
+- (void) playbackPositionUpdated:(NSNotification*) notification
+{
+  
+  if (![notification.object isKindOfClass:[QLKCue class]])
+    return;
+  
+  QLKCue *cue = (QLKCue*)notification.object;
+
+  
+  if (![self.cuesOutlineView doesContain:cue])
+  { //this row must be collapsed, so need to hunt for the cue
+    //todo: should we be able to check that this cue is in our cue list?
+    NSArray *location = [self recursiveFindCue:cue in:self.cueList];
+    
+    if (location == nil || location.count == 0)
+      return; //give up
+    
+    //now expand all the items to find it
+    QLKCue *q = self.cueList;
+    
+    for (NSNumber *num in location)
+    {
+    
+      int index = num.intValue;
+      [self.cuesOutlineView expandItem:[q.cues objectAtIndex: index]];
+      q = [q.cues objectAtIndex:index];
+    }
+  
+  }
+  
+  [self.cuesOutlineView selectRowIndexes:[NSIndexSet indexSetWithIndex: [self.cuesOutlineView rowForItem:cue]] byExtendingSelection:NO];
+
+  //NSLog(@" row for item %lu", [self.cuesOutlineView rowForItem:cue]);
+  
+}
+//returns an array of the needles to find the item
+//this is quite nifty, should be be in the class above?
+- (NSArray*)recursiveFindCue:(QLKCue*)cue in: (QLKCue*) list
+{
+  //one of out cues is it
+  if ([list.cues containsObject:cue])
+  {
+    return [NSArray arrayWithObject:[NSNumber numberWithInt:(int)[list.cues indexOfObject:cue]]];
+  }
+  //otherwise search through our cues for it
+  for (QLKCue *q in list.cues)
+  {
+    if (q.hasChildren)
+    {
+      NSArray *halfResult = [self recursiveFindCue:cue in:q];
+      if (halfResult != nil)
+      {
+        NSArray *result = [NSArray arrayWithObject:[NSNumber numberWithInt:(int)[list.cues indexOfObject:q]]];
+        result = [NSArray arrayWithArray:[result arrayByAddingObjectsFromArray:halfResult]];
+        return result;
+      }
+    }
+  }
+  
+  return nil;
+
+}
+#pragma mark - NSOutlineViewDelegate
+
+- (NSInteger) outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+{
+  if (item == nil)
+    return self.cueList.cues.count;
+  
+  QLKCue *q = (QLKCue*)item;
+
+  return q.cues.count;
+}
+
+- (id) outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
+{
+  if (item == nil)
+    return [self.cueList.cues objectAtIndex:index];
+  QLKCue *q = (QLKCue*)item;
+  return [q.cues objectAtIndex:index];
+
+}
+
+- (BOOL) outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
+{
+  QLKCue *q = (QLKCue*)item;
+  return q.isGroup;
+}
+
+
+-(NSView *) outlineView:(NSOutlineView *)outlineView viewForTableColumn:(NSTableColumn *)tableColumn item:(id)item
+{
+  
+  NSTableCellView *cellView = [outlineView makeViewWithIdentifier:@"MainCell" owner:self];
+  
+  QLKCue *cue = (QLKCue*)item;
+    
+  cellView.textField.stringValue = ([tableColumn.identifier isEqualToString:QLKOSCNumberKey]) ? cue.number : [cue displayName];
+  
+  
+  return cellView;
+}
+-(void) outlineViewSelectionDidChange:(NSNotification *)notification
+{
+  
+  QLKCue *q =   [self.cuesOutlineView itemAtRow:
+                 [self.cuesOutlineView selectedRow]];
+  
+  [self.workspace cue:self.cueList updatePropertySend:q.uid forKey:QLKOSCPlaybackPositionIdKey];
+  
+}
+
+
 #pragma mark - NSTableViewDelegate
 
 - (NSInteger) numberOfRowsInTableView:(NSTableView *)tableView
 {
-    return (tableView == self.serversTableView) ? self.rows.count : [[self.workspace.firstCueList propertyForKey:QLKOSCCuesKey] count];
+  return self.rows.count;
 }
 
 - (NSView *) tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
     NSTableCellView *cellView = [tableView makeViewWithIdentifier:@"MainCell" owner:self];
 
-    if ( tableView == self.serversTableView )
-    {
-        id obj = self.rows[row];
-        cellView.textField.stringValue = ([obj isKindOfClass:[QLKServer class]]) ? [(QLKServer *)obj name].uppercaseString : [(QLKWorkspace *)obj name];
-    }
-    else
-    {
-        QLKCue *fql = [self.workspace firstCueList];
-        NSArray *cues = [fql propertyForKey:QLKOSCCuesKey];
-        QLKCue *cue = cues[row];
-        
-        cellView.textField.stringValue = ([tableColumn.identifier isEqualToString:QLKOSCNumberKey]) ? cue.number : [cue displayName];
-    }
+
+    id obj = self.rows[row];
+    cellView.textField.stringValue = ([obj isKindOfClass:[QLKServer class]]) ? [(QLKServer *)obj name].uppercaseString : [(QLKWorkspace *)obj name];
+  
   
     return cellView;
 }
 
 - (BOOL) tableView:(NSTableView *)tableView isGroupRow:(NSInteger)row
 {
-    return (tableView == self.serversTableView) ? [self.rows[row] isKindOfClass:[QLKServer class]] : NO;
+  return [self.rows[row] isKindOfClass:[QLKServer class]];
 }
 
 - (BOOL) tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row
 {
     return ![self tableView:tableView isGroupRow:row];
 }
+
 
 #pragma mark - NSSplitViewDelegate
 
@@ -189,4 +403,8 @@
     return (splitView.subviews[0] != view);
 }
 
+
+- (void)keyDown: (NSEvent *) event {
+  NSLog(@"here");
+}
 @end

@@ -131,6 +131,7 @@
     [self sendMessagesWithArguments:arguments toAddress:address workspace:YES block:block];
 }
 
+
 - (void) sendMessagesWithArguments:(NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block
 {
     if ( block )
@@ -170,7 +171,6 @@
 }
 
 #pragma mark - 
-
 - (void) processMessage:(QLKMessage *)message
 {
 #if DEBUG_OSC

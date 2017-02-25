@@ -28,14 +28,21 @@
 @import Cocoa;
 #import "QLKBrowser.h"
 #import "QLKWorkspace.h"
+#import "QLabKitDemo-Swift.h"
 
-@interface QLKAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSplitViewDelegate, QLKBrowserDelegate>
+@interface QLKAppDelegate : NSObject <NSApplicationDelegate, NSOutlineViewDataSource, NSOutlineViewDelegate, NSTableViewDataSource, NSTableViewDataSource, NSSplitViewDelegate, QLKBrowserDelegate>
 
 @property (strong) QLKWorkspace *workspace;
+@property (strong) QLKCue *cueList;
+
 @property (assign) IBOutlet NSWindow *window;
 @property (weak) IBOutlet NSTableView *serversTableView;
-@property (weak) IBOutlet NSTableView *cuesTableView;
+@property (weak) IBOutlet NSTableView *cueListTableView;
+@property (weak) IBOutlet NSOutlineView *cuesOutlineView;
 @property (weak) IBOutlet NSTextField *connectionLabel;
+
+@property (strong) IBOutlet QLKCueListDelegate *qlistDelegate;
+
 
 - (IBAction) go:(id)sender;
 - (IBAction) stop:(id)sender;

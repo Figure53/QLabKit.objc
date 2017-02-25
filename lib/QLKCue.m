@@ -31,6 +31,8 @@
 #import "QLKCue_private.h"
 
 
+
+
 @interface QLKCue ()
 
 @property (nonatomic, weak) QLKWorkspace *workspace;
@@ -39,6 +41,8 @@
 @end
 
 @implementation QLKCue
+
+
 
 - (instancetype) init
 {
@@ -111,7 +115,7 @@
 - (void) updatePropertiesWithDictionary:(NSDictionary *)dict
 {
 #if DEBUG
-    //NSLog(@"updateProperties: %@", dict);
+    //NSLog(@"updateProperties: %@ for cue: %@", dict, self);
 #endif
     
     //Merge existing properties with new properties dict (conflicts default overwrite)
