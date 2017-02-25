@@ -34,6 +34,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+
+
 @class QLKColor, QLKWorkspace;
 
 @interface QLKCue : NSObject

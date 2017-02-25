@@ -40,6 +40,11 @@ extern NSString * const QLKWorkspaceDidConnectNotification;
 extern NSString * const QLKWorkspaceDidDisconnectNotification;
 extern NSString * const QLKWorkspaceConnectionErrorNotification;
 extern NSString * const QLKWorkspaceDidChangePlaybackPositionNotification;
+extern NSString * const QLKCueCreatedNotification;
+extern NSString * const QLKCueDeletedNotification;
+extern NSString * const QLKCueOrderChangedNotification;
+
+
 
 @class QLKServer, QLKCue;
 
