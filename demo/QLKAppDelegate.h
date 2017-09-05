@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +26,15 @@
 //
 
 @import Cocoa;
+
 #import "QLKBrowser.h"
 #import "QLKWorkspace.h"
 
+
 @interface QLKAppDelegate : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSplitViewDelegate, QLKBrowserDelegate>
+
+
+NS_ASSUME_NONNULL_BEGIN
 
 @property (strong) QLKWorkspace *workspace;
 @property (assign) IBOutlet NSWindow *window;
@@ -40,5 +45,8 @@
 - (IBAction) go:(id)sender;
 - (IBAction) stop:(id)sender;
 - (IBAction) disconnect:(id)sender;
+- (IBAction) update:(id)sender;
 
 @end
+
+NS_ASSUME_NONNULL_END

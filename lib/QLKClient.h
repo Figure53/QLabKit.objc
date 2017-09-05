@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2014 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,42 +25,53 @@
 //  THE SOFTWARE.
 //
 
-
 @import Foundation;
+
 #import "QLKDefines.h"
 #import "F53OSCClient.h"
 
+
 @class QLKCue, F53OSCMessage;
+@protocol QLKClientDelegate;
 
-@protocol QLKClientDelegate <NSObject>
 
-@property (nonatomic, readonly, copy) NSString *workspaceID;
-- (void) workspaceUpdated;
-- (void) playbackPositionUpdated:(NSString *)cueID;
-- (void) cueNeedsUpdate:(NSString *)cueID;
-- (void) cueUpdated:(NSString *)cueID withProperties:(NSDictionary *)properties;
-- (void) clientConnectionErrorOccurred;
-
-@end
+NS_ASSUME_NONNULL_BEGIN
 
 @interface QLKClient : NSObject <F53OSCPacketDestination, F53OSCClientDelegate>
 
 - (instancetype) initWithHost:(NSString *)host port:(NSInteger)port NS_DESIGNATED_INITIALIZER;
 
-@property (unsafe_unretained) id<QLKClientDelegate> delegate;
-@property (assign, nonatomic) BOOL useTCP;
-@property (readonly) BOOL isConnected;
+@property (nonatomic, weak, nullable)               id<QLKClientDelegate> delegate;
+@property (nonatomic)                               BOOL useTCP;
+@property (nonatomic, readonly)                     BOOL isConnected;
 
 - (BOOL) connect;
 - (void) disconnect;
 
 - (void) sendOscMessage:(F53OSCMessage *)message;
-- (void) sendOscMessage:(F53OSCMessage *)message block:(QLKMessageHandlerBlock)block;
+- (void) sendOscMessage:(F53OSCMessage *)message block:(nullable QLKMessageHandlerBlock)block;
 
-- (void) sendMessageWithArgument:(NSObject *)argument toAddress:(NSString *)address;
-- (void) sendMessageWithArgument:(NSObject *)argument toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
-- (void) sendMessagesWithArguments:(NSArray *)arguments toAddress:(NSString *)address;
-- (void) sendMessagesWithArguments:(NSArray *)arguments toAddress:(NSString *)address block:(QLKMessageHandlerBlock)block;
-- (void) sendMessagesWithArguments:(NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(QLKMessageHandlerBlock)block;
+// NOTE: `arguments` must be a type supported by F53OSCMessage `arguments`: NSString, NSData, or NSNumber
+- (void) sendMessageWithArgument:(nullable NSObject *)argument toAddress:(NSString *)address;
+- (void) sendMessageWithArgument:(nullable NSObject *)argument toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block;
+- (void) sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address;
+- (void) sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block;
+- (void) sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(nullable QLKMessageHandlerBlock)block;
 
 @end
+
+
+@protocol QLKClientDelegate <NSObject>
+
+@property (nonatomic, readonly, copy)               NSString *workspaceID;
+
+- (void) workspaceUpdated;
+- (void) workspaceSettingsUpdated:(NSString *)settingsType;
+- (void) cueNeedsUpdate:(NSString *)cueID;
+- (void) cueUpdated:(NSString *)cueID withProperties:(NSDictionary<NSString *, id> *)properties;
+- (void) cueListUpdated:(NSString *)cueListID withPlaybackPositionID:(nullable NSString *)cueID;
+- (void) clientConnectionErrorOccurred;
+
+@end
+
+NS_ASSUME_NONNULL_END

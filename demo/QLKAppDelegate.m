@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -28,25 +28,31 @@
 #import "QLKAppDelegate.h"
 #import "QLabKit.h"
 
-#define REFRESH_INTERVAL 3 // seconds
-#define AUTOMATIC_CONNECTION 1
-#define QLAB_IP @"10.0.1.111"
-#define QLAB_PORT 53000
+#define REFRESH_INTERVAL        3 // seconds
+#define AUTOMATIC_CONNECTION    1
+#define QLAB_IP                 @"10.0.1.111"
+#define QLAB_PORT               53000
+
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface QLKAppDelegate ()
 
 @property (strong) QLKBrowser *browser;
 @property (strong) NSMutableArray *rows;
 
+- (void) handleCueUpdated:(NSNotification *)notification;
+
 @end
+
 
 @implementation QLKAppDelegate
 
-- (void) applicationDidFinishLaunching:(NSNotification *)aNotification
+- (void) applicationDidFinishLaunching:(NSNotification *)notification
 {
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector( cuesUpdated: )
-                                                 name:QLKWorkspaceDidUpdateCuesNotification
+                                             selector:@selector(handleCueUpdated:)
+                                                 name:QLKCueUpdatedNotification
                                                object:nil];
   
     self.rows = [NSMutableArray array];
@@ -61,7 +67,7 @@
     }
     else
     {
-        // Manual connect to server and get workspaces
+        // Manually connect to server and get workspaces
         QLKServer *server = [[QLKServer alloc] initWithHost:QLAB_IP port:QLAB_PORT];
         server.name = @"QLab";
         [server refreshWorkspacesWithCompletion:^(NSArray<QLKWorkspace *> *workspaces)
@@ -91,16 +97,21 @@
     if ( self.workspace )
     {
         [self.workspace disconnect];
-        self.workspace = nil;
+        _workspace = nil;
 
         self.connectionLabel.stringValue = @"";
         [self.cuesTableView reloadData];
     }
 }
 
+- (IBAction) update:(id)sender
+{
+    [self.cuesTableView reloadData];
+}
+
 - (void) connect:(id)sender
 {
-    [self disconnect:nil];
+    [self disconnect:sender];
 
     NSInteger selectedRow = self.serversTableView.selectedRow;
     if ( selectedRow == -1 )
@@ -114,9 +125,15 @@
     }];
 }
 
-- (void) cuesUpdated:(NSNotification *)notification
+- (void) handleCueUpdated:(NSNotification *)notification
 {
-    [self.cuesTableView reloadData];
+    QLKCue *cue = notification.object;
+    if ( !cue )
+        return;
+    
+    // coalesce multiple cue updates into a single call to reloadData
+    [NSObject cancelPreviousPerformRequestsWithTarget:self.cuesTableView selector:@selector(reloadData) object:nil];
+    [self.cuesTableView performSelector:@selector(reloadData) withObject:nil afterDelay:0.05];
 }
 
 - (void) updateView
@@ -132,6 +149,8 @@
     [self.serversTableView reloadData];
 }
 
+
+
 #pragma mark - QLKBrowserDelegate
 
 - (void) browserDidUpdateServers:(QLKBrowser *)browser
@@ -139,34 +158,46 @@
     [self updateView];
 }
 
-- (void) serverDidUpdateWorkspaces:(QLKServer *)server
+- (void) browserServerDidUpdateWorkspaces:(QLKServer *)server
 {
     [self updateView];
 }
+
+
 
 #pragma mark - NSTableViewDelegate
 
 - (NSInteger) numberOfRowsInTableView:(NSTableView *)tableView
 {
-    return (tableView == self.serversTableView) ? self.rows.count : [[self.workspace.firstCueList propertyForKey:QLKOSCCuesKey] count];
+    if ( tableView == self.serversTableView )
+        return self.rows.count;
+    else
+        return [[self.workspace.firstCueList propertyForKey:QLKOSCCuesKey] count];
 }
 
-- (NSView *) tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+- (nullable NSView *) tableView:(NSTableView *)tableView viewForTableColumn:(nullable NSTableColumn *)tableColumn row:(NSInteger)row
 {
     NSTableCellView *cellView = [tableView makeViewWithIdentifier:@"MainCell" owner:self];
 
     if ( tableView == self.serversTableView )
     {
         id obj = self.rows[row];
-        cellView.textField.stringValue = ([obj isKindOfClass:[QLKServer class]]) ? [(QLKServer *)obj name].uppercaseString : [(QLKWorkspace *)obj name];
+        
+        if ( [obj isKindOfClass:[QLKServer class]] )
+            cellView.textField.stringValue = ((QLKServer *)obj).name.uppercaseString;
+        else
+            cellView.textField.stringValue = ((QLKWorkspace *)obj).name;
     }
     else
     {
-        QLKCue *fql = [self.workspace firstCueList];
-        NSArray *cues = [fql propertyForKey:QLKOSCCuesKey];
+        QLKCue *cueList = self.workspace.firstCueList;
+        NSArray<QLKCue *> *cues = [cueList propertyForKey:QLKOSCCuesKey];
         QLKCue *cue = cues[row];
         
-        cellView.textField.stringValue = ([tableColumn.identifier isEqualToString:QLKOSCNumberKey]) ? cue.number : [cue displayName];
+        if ( [tableColumn.identifier isEqualToString:QLKOSCNumberKey] )
+            cellView.textField.stringValue = cue.number;
+        else
+            cellView.textField.stringValue = cue.listName;
     }
   
     return cellView;
@@ -174,7 +205,10 @@
 
 - (BOOL) tableView:(NSTableView *)tableView isGroupRow:(NSInteger)row
 {
-    return (tableView == self.serversTableView) ? [self.rows[row] isKindOfClass:[QLKServer class]] : NO;
+    if ( tableView == self.serversTableView )
+        return [self.rows[row] isKindOfClass:[QLKServer class]];
+    else
+        return NO;
 }
 
 - (BOOL) tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row
@@ -182,11 +216,15 @@
     return ![self tableView:tableView isGroupRow:row];
 }
 
+
+
 #pragma mark - NSSplitViewDelegate
 
 - (BOOL) splitView:(NSSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view
 {
-    return (splitView.subviews[0] != view);
+    return ( splitView.subviews[0] != view );
 }
 
 @end
+
+NS_ASSUME_NONNULL_END

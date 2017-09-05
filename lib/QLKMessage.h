@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2014 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -27,9 +27,10 @@
 
 @import Foundation;
 
-NS_ASSUME_NONNULL_BEGIN
-
 @class F53OSCMessage;
+
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface QLKMessage : NSObject
 
@@ -38,37 +39,38 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype) initWithOSCMessage:(F53OSCMessage *)message NS_DESIGNATED_INITIALIZER;
 
 // Identifying the different types of messages.
-@property (nonatomic, getter=isReply, readonly) BOOL reply;
-@property (nonatomic, getter=isReplyFromCue, readonly) BOOL replyFromCue;
-@property (nonatomic, getter=isUpdate, readonly) BOOL update;
-@property (nonatomic, getter=isWorkspaceUpdate, readonly) BOOL workspaceUpdate;
-@property (nonatomic, getter=isCueUpdate, readonly) BOOL cueUpdate;
-@property (nonatomic, getter=isPlaybackPositionUpdate, readonly) BOOL playbackPositionUpdate;
-@property (nonatomic, getter=isDisconnect, readonly) BOOL disconnect;
+@property (nonatomic, getter=isReply, readonly)                     BOOL reply;
+@property (nonatomic, getter=isReplyFromCue, readonly)              BOOL replyFromCue;
+@property (nonatomic, getter=isUpdate, readonly)                    BOOL update;
+@property (nonatomic, getter=isWorkspaceUpdate, readonly)           BOOL workspaceUpdate;
+@property (nonatomic, getter=isWorkspaceSettingsUpdate, readonly)   BOOL workspaceSettingsUpdate;
+@property (nonatomic, getter=isCueUpdate, readonly)                 BOOL cueUpdate;
+@property (nonatomic, getter=isPlaybackPositionUpdate, readonly)    BOOL playbackPositionUpdate;
+@property (nonatomic, getter=isDisconnect, readonly)                BOOL disconnect;
 
 // Host the message came from, almost always will be the IP address.
-@property (nonatomic, readonly, copy, nullable) NSString *host;
+@property (nonatomic, readonly, copy, nullable)     NSString *host;
 
 // Full address path of this message, e.g. /update/workspace/12345/cue_id/4
-@property (nonatomic, readonly, copy) NSString *address;
+@property (nonatomic, readonly, copy)               NSString *address;
 
 // Individual address parts separated by "/", e.g. ("update", "workspace", "12345", "cue_id", "4")
-@property (nonatomic, readonly, copy) NSArray *addressParts;
+@property (nonatomic, readonly, copy)               NSArray<NSString *> *addressParts;
 
 // Address without reply, e.g. "/reply/workspace/12345/connect" -> "/workspace/12345/connect"
-@property (nonatomic, readonly, copy) NSString *replyAddress;
+@property (nonatomic, readonly, copy)               NSString *replyAddress;
 
 // Address with workspace prefix removed, will also remove /reply: "/workspace/12345/connect" -> "/connect"
-- (NSString *) addressWithoutWorkspace:(NSString *)workspaceID;
+- (NSString *) addressWithoutWorkspace:(nullable NSString *)workspaceID;
 
 // Deserialized objects from the "data" key of QLab's reply.
-@property (nonatomic, readonly, strong, nullable) id response;
+@property (nonatomic, readonly, strong, nullable)   id response;
 
 // Direct arguments from OSC message.
-@property (nonatomic, readonly, copy) NSArray *arguments;
+@property (nonatomic, readonly, copy)               NSArray *arguments;
 
 // Cue ID for this message, parsed out depending on what kind of message it is.
-@property (nonatomic, readonly, copy, nullable) NSString *cueID;
+@property (nonatomic, readonly, copy, nullable)     NSString *cueID;
 
 @end
 

@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2011-2014 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2011-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -27,64 +27,99 @@
 
 #import "QLKDefines.h"
 
+
+NS_ASSUME_NONNULL_BEGIN
+
 NSString * const QLKBonjourTCPServiceType = @"_qlab._tcp.";
 NSString * const QLKBonjourUDPServiceType = @"_qlab._udp.";
 NSString * const QLKBonjourServiceDomain = @"local.";
 
-// Notifications (moved from QLKCue.m)
+// Notifications
 NSString * const QLKCueUpdatedNotification = @"QLKCueUpdatedNotification";
 NSString * const QLKCueNeedsUpdateNotification = @"QLKCueNeedsUpdateNotification";
-NSString * const QLKCueEditCueNotification = @"QLKCueEditCueNotification";
-NSString * const QLKCueHasNewDataNotification = @"QLKCueHasNewDataNotification";
+NSString * const QLKCueListDidChangePlaybackPositionIDNotification = @"QLKCueListDidChangePlaybackPositionIDNotification";
 
-// Cue Types (moved from QLKCue.m)
+// Cue Types
 NSString * const QLKCueTypeCue = @"Cue";
+NSString * const QLKCueTypeCueList = @"Cue List";
+NSString * const QLKCueTypeCart = @"Cart";
 NSString * const QLKCueTypeGroup = @"Group";
 NSString * const QLKCueTypeAudio = @"Audio";
-NSString * const QLKCueTypeFade = @"Fade";
-NSString * const QLKCueTypeMicrophone = @"Mic";
+NSString * const QLKCueTypeMic = @"Mic";
 NSString * const QLKCueTypeVideo = @"Video";
-NSString * const QLKCueTypeAnimation = @"Animation";
 NSString * const QLKCueTypeCamera = @"Camera";
+NSString * const QLKCueTypeText = @"Text";
+NSString * const QLKCueTypeLight = @"Light";
+NSString * const QLKCueTypeFade = @"Fade";
+NSString * const QLKCueTypeNetwork = @"Network";
 NSString * const QLKCueTypeMIDI = @"MIDI";
-NSString * const QLKCueTypeMIDISysEx = @"MIDI SysEx";
-NSString * const QLKCueTypeMTC = @"MTC";
-NSString * const QLKCueTypeMSC = @"MSC";
-NSString * const QLKCueTypeArtNet = @"ArtNet";
-NSString * const QLKCueTypeStop = @"Stop";
 NSString * const QLKCueTypeMIDIFile = @"MIDI File";
 NSString * const QLKCueTypeTimecode = @"Timecode";
-NSString * const QLKCueTypePause = @"Pause";
-NSString * const QLKCueTypeReset = @"Reset";
 NSString * const QLKCueTypeStart = @"Start";
-NSString * const QLKCueTypeDevamp = @"Devamp";
+NSString * const QLKCueTypeStop = @"Stop";
+NSString * const QLKCueTypePause = @"Pause";
 NSString * const QLKCueTypeLoad = @"Load";
-NSString * const QLKCueTypeScript = @"Script";
-NSString * const QLKCueTypeGoto = @"Goto";
+NSString * const QLKCueTypeReset = @"Reset";
+NSString * const QLKCueTypeDevamp = @"Devamp";
+NSString * const QLKCueTypeGoto = @"GoTo";
 NSString * const QLKCueTypeTarget = @"Target";
-NSString * const QLKCueTypeWait = @"Wait";
-NSString * const QLKCueTypeMemo = @"Memo";
 NSString * const QLKCueTypeArm = @"Arm";
 NSString * const QLKCueTypeDisarm = @"Disarm";
+NSString * const QLKCueTypeWait = @"Wait";
+NSString * const QLKCueTypeMemo = @"Memo";
+NSString * const QLKCueTypeScript = @"Script";
 NSString * const QLKCueTypeStagetracker = @"Stagetracker";
 
-// OSC key constants (moved from QLKCue.m)
+// v3 compatibility
+NSString * const QLKCueTypeOSC = @"OSC";
+NSString * const QLKCueTypeTitles = @"Titles";
+
+
+// OSC key constants
 NSString * const QLKOSCUIDKey = @"uniqueID";
 NSString * const QLKOSCTypeKey = @"type";
+NSString * const QLKOSCParentKey = @"parent";
 NSString * const QLKOSCNameKey = @"name";
 NSString * const QLKOSCNumberKey = @"number";
 NSString * const QLKOSCNotesKey = @"notes";
+NSString * const QLKOSCFileTargetKey = @"fileTarget";
+NSString * const QLKOSCCueTargetNumberKey = @"cueTargetNumber";
 NSString * const QLKOSCColorNameKey = @"colorName";
 NSString * const QLKOSCFlaggedKey = @"flagged";
 NSString * const QLKOSCArmedKey = @"armed";
 NSString * const QLKOSCContinueModeKey = @"continueMode";
 NSString * const QLKOSCPreWaitKey = @"preWait";
 NSString * const QLKOSCPostWaitKey = @"postWait";
-NSString * const QLKOSCDurationKey = @"duration";
+NSString * const QLKOSCCurrentDurationKey = @"currentDuration";
+NSString * const QLKOSCPercentPreWaitElapsedKey = @"percentPreWaitElapsed";
+NSString * const QLKOSCPercentPostWaitElapsedKey = @"percentPostWaitElapsed";
+NSString * const QLKOSCPercentActionElapsedKey = @"percentActionElapsed";
+NSString * const QLKOSCPreWaitElapsedKey = @"preWaitElapsed";
+NSString * const QLKOSCPostWaitElapsedKey = @"postWaitElapsed";
+NSString * const QLKOSCActionElapsedKey = @"actionElapsed";
+NSString * const QLKOSCGroupModeKey = @"mode";
+NSString * const QLKOSCCartPositionKey = @"cartPosition";
+NSString * const QLKOSCCartRowsKey = @"cartRows";
+NSString * const QLKOSCCartColumnsKey = @"cartColumns";
+NSString * const QLKOSCHasFileTargetsKey = @"hasFileTargets";
+NSString * const QLKOSCHasCueTargetsKey = @"hasCueTargets";
+NSString * const QLKOSCAllowsEditingDurationKey = @"allowsEditingDuration";
+NSString * const QLKOSCIsPanickingKey = @"isPanicking";
+NSString * const QLKOSCIsTailingOutKey = @"isTailingOut";
+NSString * const QLKOSCIsRunningKey = @"isRunning";
+NSString * const QLKOSCIsLoadedKey = @"isLoaded";
+NSString * const QLKOSCIsPausedKey = @"isPaused";
+NSString * const QLKOSCIsBrokenKey = @"isBroken";
+NSString * const QLKOSCIsOverriddenKey = @"isOverridden";
 NSString * const QLKOSCTranslationXKey = @"translationX";
 NSString * const QLKOSCTranslationYKey = @"translationY";
 NSString * const QLKOSCScaleXKey = @"scaleX";
 NSString * const QLKOSCScaleYKey = @"scaleY";
+NSString * const QLKOSCOriginXKey = @"originX";
+NSString * const QLKOSCOriginYKey = @"originY";
+NSString * const QLKOSCQuaternionKey = @"quaternion";
+NSString * const QLKOSCSurfaceSizeKey = @"surfaceSize";
+NSString * const QLKOSCCueSizeKey = @"cueSize";
 NSString * const QLKOSCPreserveAspectRatioKey = @"preserveAspectRatio";
 NSString * const QLKOSCLayerKey = @"layer";
 NSString * const QLKOSCPatchKey = @"patch";
@@ -93,7 +128,7 @@ NSString * const QLKOSCSurfaceListKey = @"surfaceList";
 NSString * const QLKOSCCuesKey = @"cues";
 NSString * const QLKOSCListNameKey = @"listName";
 NSString * const QLKOSCSurfaceIDKey = @"surfaceID";
-NSString * const QLKOSCFullScreenKey = @"fullScreen";
+NSString * const QLKOSCFullSurfaceKey = @"fullSurface";
 NSString * const QLKOSCOpacityKey = @"opacity";
 NSString * const QLKOSCRotationZKey = @"rotationZ";
 NSString * const QLKOSCRotationYKey = @"rotationY";
@@ -103,6 +138,13 @@ NSString * const QLKOSCStartNextCueWhenSliceEndsKey = @"startNextCueWhenSliceEnd
 NSString * const QLKOSCStopTargetWhenSliceEndsKey = @"stopTargetWhenSliceEnds";
 NSString * const QLKOSCSliderLevelKey = @"sliderLevel";
 
-// Identifiers for "fake" cues (moved from QLKCue.m)
-NSString * const QLKActiveCueListIdentifier = @"__active__";
+// v3 compatibility
+NSString * const QLKOSCDurationKey = @"duration";
+NSString * const QLKOSCFullScreenKey = @"fullScreen";
+
+
+// Identifiers for "fake" cues
 NSString * const QLKRootCueIdentifier = @"__root__";
+NSString * const QLKActiveCuesIdentifier = @"__active__";
+
+NS_ASSUME_NONNULL_END

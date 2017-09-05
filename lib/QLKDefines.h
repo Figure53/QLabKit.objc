@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2011-2014 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2011-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
 
 @import Foundation;
 
+
 #if TARGET_OS_IPHONE
 @import UIKit;
 #define QLKImage UIImage
@@ -37,57 +38,61 @@
 #define QLKColorClass NSColor
 #endif
 
+
+NS_ASSUME_NONNULL_BEGIN
+
 // Blocks
-typedef void (^QLKMessageHandlerBlock)(id data);
+typedef void (^QLKMessageHandlerBlock)( id data );
 
 // Bonjour
 extern NSString * const QLKBonjourTCPServiceType;
 extern NSString * const QLKBonjourUDPServiceType;
 extern NSString * const QLKBonjourServiceDomain;
 
-// Notifications (moved from QLKCue.h)
+// Notifications
 extern NSString * const QLKCueUpdatedNotification;
 extern NSString * const QLKCueNeedsUpdateNotification;
-extern NSString * const QLKCueEditCueNotification;
-extern NSString * const QLKCueHasNewDataNotification;
+extern NSString * const QLKCueListDidChangePlaybackPositionIDNotification;
 
-// Cue types (moved from QLKCue.h)
+// Cue types
 extern NSString * const QLKCueTypeCue;
+extern NSString * const QLKCueTypeCueList;
+extern NSString * const QLKCueTypeCart;
 extern NSString * const QLKCueTypeGroup;
 extern NSString * const QLKCueTypeAudio;
-extern NSString * const QLKCueTypeFade;
-extern NSString * const QLKCueTypeMicrophone;
+extern NSString * const QLKCueTypeMic;
 extern NSString * const QLKCueTypeVideo;
-extern NSString * const QLKCueTypeAnimation;
 extern NSString * const QLKCueTypeCamera;
+extern NSString * const QLKCueTypeText;
+extern NSString * const QLKCueTypeLight;
+extern NSString * const QLKCueTypeFade;
+extern NSString * const QLKCueTypeNetwork;
 extern NSString * const QLKCueTypeMIDI;
-extern NSString * const QLKCueTypeMIDISysEx;
-extern NSString * const QLKCueTypeTimecode;
-extern NSString * const QLKCueTypeMTC;
-extern NSString * const QLKCueTypeMSC;
-extern NSString * const QLKCueTypeStop;
 extern NSString * const QLKCueTypeMIDIFile;
-extern NSString * const QLKCueTypePause;
-extern NSString * const QLKCueTypeReset;
+extern NSString * const QLKCueTypeTimecode;
 extern NSString * const QLKCueTypeStart;
-extern NSString * const QLKCueTypeDevamp;
+extern NSString * const QLKCueTypeStop;
+extern NSString * const QLKCueTypePause;
 extern NSString * const QLKCueTypeLoad;
-extern NSString * const QLKCueTypeScript;
+extern NSString * const QLKCueTypeReset;
+extern NSString * const QLKCueTypeDevamp;
 extern NSString * const QLKCueTypeGoto;
 extern NSString * const QLKCueTypeTarget;
-extern NSString * const QLKCueTypeWait;
-extern NSString * const QLKCueTypeMemo;
 extern NSString * const QLKCueTypeArm;
 extern NSString * const QLKCueTypeDisarm;
+extern NSString * const QLKCueTypeWait;
+extern NSString * const QLKCueTypeMemo;
+extern NSString * const QLKCueTypeScript;
 extern NSString * const QLKCueTypeStagetracker;
 
-// Special cue identifiers (moved from QLKCue.h)
-extern NSString * const QLKActiveCueListIdentifier;
-extern NSString * const QLKRootCueIdentifier;
+// v3 compatibility
+extern NSString * const QLKCueTypeOSC;
+extern NSString * const QLKCueTypeTitles;
 
-// Continue mode type (moved from QLKCue.h)
-typedef NS_ENUM(unsigned int, QLKCueContinueMode) {
-    QLKCueContinueModeNoContinue,
+
+// Continue mode type
+typedef NS_ENUM( NSUInteger, QLKCueContinueMode ) {
+    QLKCueContinueModeNoContinue = 0,
     QLKCueContinueModeAutoContinue,
     QLKCueContinueModeAutoFollow
 };
@@ -95,20 +100,48 @@ typedef NS_ENUM(unsigned int, QLKCueContinueMode) {
 
 extern NSString * const QLKOSCUIDKey;
 extern NSString * const QLKOSCTypeKey;
+extern NSString * const QLKOSCParentKey;
 extern NSString * const QLKOSCNameKey;
 extern NSString * const QLKOSCNumberKey;
 extern NSString * const QLKOSCNotesKey;
+extern NSString * const QLKOSCFileTargetKey;
+extern NSString * const QLKOSCCueTargetNumberKey;
 extern NSString * const QLKOSCColorNameKey;
 extern NSString * const QLKOSCFlaggedKey;
 extern NSString * const QLKOSCArmedKey;
 extern NSString * const QLKOSCContinueModeKey;
 extern NSString * const QLKOSCPreWaitKey;
 extern NSString * const QLKOSCPostWaitKey;
-extern NSString * const QLKOSCDurationKey;
+extern NSString * const QLKOSCCurrentDurationKey;
+extern NSString * const QLKOSCPercentPreWaitElapsedKey;
+extern NSString * const QLKOSCPercentPostWaitElapsedKey;
+extern NSString * const QLKOSCPercentActionElapsedKey;
+extern NSString * const QLKOSCPreWaitElapsedKey;
+extern NSString * const QLKOSCPostWaitElapsedKey;
+extern NSString * const QLKOSCActionElapsedKey;
+extern NSString * const QLKOSCGroupModeKey;
+extern NSString * const QLKOSCHasFileTargetsKey;
+extern NSString * const QLKOSCHasCueTargetsKey;
+extern NSString * const QLKOSCCartPositionKey;
+extern NSString * const QLKOSCCartRowsKey;
+extern NSString * const QLKOSCCartColumnsKey;
+extern NSString * const QLKOSCAllowsEditingDurationKey;
+extern NSString * const QLKOSCIsPanickingKey;
+extern NSString * const QLKOSCIsTailingOutKey;
+extern NSString * const QLKOSCIsRunningKey;
+extern NSString * const QLKOSCIsLoadedKey;
+extern NSString * const QLKOSCIsPausedKey;
+extern NSString * const QLKOSCIsBrokenKey;
+extern NSString * const QLKOSCIsOverriddenKey;
 extern NSString * const QLKOSCTranslationXKey;
 extern NSString * const QLKOSCTranslationYKey;
 extern NSString * const QLKOSCScaleXKey;
 extern NSString * const QLKOSCScaleYKey;
+extern NSString * const QLKOSCOriginXKey;
+extern NSString * const QLKOSCOriginYKey;
+extern NSString * const QLKOSCQuaternionKey;
+extern NSString * const QLKOSCSurfaceSizeKey;
+extern NSString * const QLKOSCCueSizeKey;
 extern NSString * const QLKOSCPreserveAspectRatioKey;
 extern NSString * const QLKOSCLayerKey;
 extern NSString * const QLKOSCPatchKey;
@@ -117,16 +150,23 @@ extern NSString * const QLKOSCSurfaceListKey;
 extern NSString * const QLKOSCCuesKey;
 extern NSString * const QLKOSCListNameKey;
 extern NSString * const QLKOSCSurfaceIDKey;
-extern NSString * const QLKOSCFullScreenKey;
+extern NSString * const QLKOSCFullSurfaceKey;
 extern NSString * const QLKOSCOpacityKey;
 extern NSString * const QLKOSCRotationZKey;
 extern NSString * const QLKOSCRotationYKey;
 extern NSString * const QLKOSCRotationXKey;
-extern NSString * const QLKOSCPlaybackPositionIdKey;
+extern NSString * const QLKOSCPlaybackPositionIdKey; // NOTE: QLab OSC dictionary uses "Id" capitalization
 extern NSString * const QLKOSCStartNextCueWhenSliceEndsKey;
 extern NSString * const QLKOSCStopTargetWhenSliceEndsKey;
 extern NSString * const QLKOSCSliderLevelKey;
 
-// Identifiers for "fake" cues (moved from QLKCue.h)
-extern NSString * const QLKActiveCueListIdentifier;
+// v3 compatibility
+extern NSString * const QLKOSCDurationKey;
+extern NSString * const QLKOSCFullScreenKey;
+
+
+// Identifiers for "fake" cues
 extern NSString * const QLKRootCueIdentifier;
+extern NSString * const QLKActiveCuesIdentifier;
+
+NS_ASSUME_NONNULL_END

@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2014 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,13 +25,19 @@
 //  THE SOFTWARE.
 //
 
-
 #import "QLKMessage.h"
+
 #import "F53OSCMessage.h"
 
+
+NS_ASSUME_NONNULL_BEGIN
+
 @interface QLKMessage ()
+
 @property (strong) F53OSCMessage *OSCMessage;
+
 @end
+
 
 @implementation QLKMessage
 
@@ -40,7 +46,8 @@
     return [[QLKMessage alloc] initWithOSCMessage:message];
 }
 
-- (instancetype) init NS_UNAVAILABLE {
+- (instancetype) init NS_UNAVAILABLE
+{
     return nil;
 }
 
@@ -59,9 +66,19 @@
     return [NSString stringWithFormat:@"address: %@, arguments: %@", self.address, [self.arguments componentsJoinedByString:@" - "]];
 }
 
+
+
+#pragma mark -
+
 - (BOOL) isReply
 {
     return [self.OSCMessage.addressPattern hasPrefix:@"/reply"];
+}
+
+- (BOOL) isReplyFromCue
+{
+    // /reply/cue_id/1/action
+    return [self.address hasPrefix:@"/reply/cue_id"];
 }
 
 - (BOOL) isUpdate
@@ -72,25 +89,33 @@
 - (BOOL) isWorkspaceUpdate
 {
     // /update/workspace/{workspace_id}
-    NSArray *parts = self.addressParts;
+    NSArray<NSString *> *parts = self.addressParts;
+    
+    return ( parts.count == 3 && [parts[1] isEqualToString:@"workspace"] );
+}
 
-    return (parts.count == 3 && [parts[1] isEqualToString:@"workspace"]);
+- (BOOL) isWorkspaceSettingsUpdate
+{
+    // /update/workspace/{workspace_id}/settings/{settings_controller}
+    NSArray<NSString *> *parts = self.addressParts;
+    
+    return ( parts.count == 5 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"settings"] );
 }
 
 - (BOOL) isCueUpdate
 {
     // /update/workspace/{workspace_id}/cue_id/{cue_id}
-    NSArray *parts = self.addressParts;
-
-    return (parts.count == 5 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"cue_id"]);
+    NSArray<NSString *> *parts = self.addressParts;
+    
+    return ( parts.count == 5 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"cue_id"] );
 }
 
 - (BOOL) isPlaybackPositionUpdate
 {
     // /update/workspace/{workspace_id}/cueList/{cue_list_id}/playbackPosition {cue_id}
-    NSArray *parts = self.addressParts;
-
-    return (parts.count == 6 && [self.address hasSuffix:@"/playbackPosition"]);
+    NSArray<NSString *> *parts = self.addressParts;
+    
+    return ( parts.count == 6 && [self.address hasSuffix:@"/playbackPosition"] );
 }
 
 - (BOOL) isDisconnect
@@ -98,23 +123,71 @@
     return [self.address hasSuffix:@"/disconnect"];
 }
 
-- (BOOL) isReplyFromCue
+- (nullable NSString *) host
 {
-    // /reply/cue_id/1/action
-    return [self.address hasPrefix:@"/reply/cue_id"];
+    return self.OSCMessage.replySocket.host;
 }
 
-- (NSString *) cueID
+- (NSString *) address
 {
-    if ( [self isCueUpdate] )
+    return self.OSCMessage.addressPattern;
+}
+
+- (NSArray<NSString *> *) addressParts
+{
+    NSArray<NSString *> *parts = self.address.pathComponents;
+    return [parts subarrayWithRange:NSMakeRange( 1, parts.count - 1 )];
+}
+
+- (NSString *) replyAddress
+{
+    return ( self.isReply ? [self.address substringFromIndex:@"/reply".length] : self.address );
+}
+
+- (NSString *) addressWithoutWorkspace:(nullable NSString *)workspaceID
+{
+    NSString *address = self.replyAddress;
+    
+    if ( !workspaceID )
+        return address;
+    
+    NSString *workspacePrefix = [NSString stringWithFormat:@"/workspace/%@", workspaceID];
+    if ( workspaceID && [address hasPrefix:workspacePrefix] )
+        return [address substringFromIndex:workspacePrefix.length];
+    else
+        return address;
+}
+
+- (nullable id) response
+{
+    NSError *error = nil;
+    NSString *body = self.OSCMessage.arguments[0]; // QLab replies have one argument, which is a JSON string.
+    NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
+    
+    if ( error )
+    {
+        NSLog( @"error decoding JSON: %@, %@", error, self.OSCMessage.arguments );
+    }
+    
+    return dict[@"data"]; // The answer to a reply is stored as "data" in the JSON-encoded dictionary sent by QLab.
+}
+
+- (NSArray *) arguments
+{
+    return self.OSCMessage.arguments;
+}
+
+- (nullable NSString *) cueID
+{
+    if ( self.isCueUpdate )
     {
         return self.addressParts[4];
     }
-    else if ( [self isPlaybackPositionUpdate] )
+    else if ( self.isPlaybackPositionUpdate )
     {
-        return (self.arguments.count > 0) ? self.arguments[0] : nil;
+        return ( self.arguments.count > 0 ? self.arguments[0] : nil );
     }
-    else if ( [self isReplyFromCue] )
+    else if ( self.isReplyFromCue )
     {
         return self.addressParts[2];
     }
@@ -124,59 +197,6 @@
     }
 }
 
-- (NSString *) host
-{
-    return self.OSCMessage.replySocket.host;
-}
-
-- (NSArray *) arguments
-{
-    return self.OSCMessage.arguments;
-}
-
-- (NSString *) address
-{
-    return self.OSCMessage.addressPattern;
-}
-
-- (NSString *) replyAddress
-{
-    return (self.isReply) ? [self.address substringFromIndex:@"/reply".length] : self.address;
-}
-
-- (NSString *) addressWithoutWorkspace:(NSString *)workspaceID
-{
-    NSString *workspacePrefix = [NSString stringWithFormat:@"/workspace/%@", workspaceID];
-    NSString *address = self.replyAddress;
-
-    if ( [address hasPrefix:workspacePrefix] )
-    {
-        return [address substringFromIndex:workspacePrefix.length];
-    }
-    else
-    {
-        return address;
-    }
-}
-
-- (NSArray *) addressParts
-{
-    NSArray *parts = self.address.pathComponents;
-    return [parts subarrayWithRange:NSMakeRange( 1, parts.count - 1 )];
-}
-
-- (id) response
-{
-    NSError *error = nil;
-    NSString *body = self.OSCMessage.arguments[0]; // QLab replies have one argument, which is a JSON string.
-    NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
-
-    if ( error )
-    {
-        NSLog( @"error decoding JSON: %@, %@", error, self.OSCMessage.arguments );
-    }
-
-    return dict[@"data"]; // The answer to a reply is stored as "data" in the JSON-encoded dictionary sent by QLab.
-}
-
 @end
+
+NS_ASSUME_NONNULL_END

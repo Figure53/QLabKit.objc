@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9531" systemVersion="15C50" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9531"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -672,7 +674,7 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="sourceList" columnReordering="NO" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="581">
-                                                    <rect key="frame" x="0.0" y="0.0" width="167" height="0.0"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="167" height="551"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
                                                     <color key="backgroundColor" name="_sourceListBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -695,7 +697,7 @@
                                                                     <rect key="frame" x="1" y="1" width="164" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="592">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="592">
                                                                             <rect key="frame" x="0.0" y="0.0" width="164" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="593">
@@ -751,7 +753,7 @@
                                             </binding>
                                         </connections>
                                     </button>
-                                    <textField verticalHuggingPriority="750" id="598">
+                                    <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="598">
                                         <rect key="frame" x="9" y="523" width="489" height="17"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" placeholderString="Not Connected" id="599">
@@ -763,7 +765,7 @@
                                     <button verticalHuggingPriority="750" id="601">
                                         <rect key="frame" x="362" y="4" width="98" height="32"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
-                                        <buttonCell key="cell" type="push" title="disconnect" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="602">
+                                        <buttonCell key="cell" type="push" title="Disconnect" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="602">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
                                         </buttonCell>
@@ -796,11 +798,11 @@
                                         <rect key="frame" x="0.0" y="40" width="465" height="341"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <clipView key="contentView" id="erX-L1-QmX">
-                                            <rect key="frame" x="0.0" y="17" width="465" height="324"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="465" height="341"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="624" viewBased="YES" id="622">
-                                                    <rect key="frame" x="0.0" y="0.0" width="465.5" height="324"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="465" height="324"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -820,11 +822,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView identifier="MainCell" id="634">
-                                                                    <rect key="frame" x="1" y="1" width="81" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="82" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="635">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="81" height="17"/>
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="635">
+                                                                            <rect key="frame" x="0.0" y="0.0" width="82" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="1" id="636">
                                                                                 <font key="font" metaFont="system"/>
@@ -856,7 +858,7 @@
                                                                     <rect key="frame" x="85" y="1" width="378" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
-                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="639">
+                                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="639">
                                                                             <rect key="frame" x="0.0" y="0.0" width="378" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="640">
@@ -879,10 +881,9 @@
                                                     </connections>
                                                 </tableView>
                                             </subviews>
-                                            <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </clipView>
-                                        <scroller key="horizontalScroller" verticalHuggingPriority="750" horizontal="YES" id="623">
-                                            <rect key="frame" x="1" y="119" width="223" height="15"/>
+                                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="623">
+                                            <rect key="frame" x="0.0" y="325" width="465" height="16"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
                                         <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="625">
@@ -894,6 +895,22 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableHeaderView>
                                     </scrollView>
+                                    <button verticalHuggingPriority="750" id="kFo-QK-Wya">
+                                        <rect key="frame" x="259" y="4" width="103" height="32"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                                        <buttonCell key="cell" type="push" title="Update" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="6EZ-lC-j8L">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="update:" target="494" id="yeA-pN-6ga"/>
+                                            <binding destination="494" name="enabled" keyPath="self.workspace" id="aXY-l8-CQq">
+                                                <dictionary key="options">
+                                                    <string key="NSValueTransformerName">NSIsNotNil</string>
+                                                </dictionary>
+                                            </binding>
+                                        </connections>
+                                    </button>
                                 </subviews>
                             </customView>
                         </subviews>

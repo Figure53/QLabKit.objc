@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -26,24 +26,39 @@
 //
 
 #import "QLKBrowser.h"
+
 #import "QLKWorkspace.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define DEBUG_BROWSER 0
+
+#ifndef RELEASE
+#define DEBUG_BROWSER 1
+#endif
 
 
-@interface QLKBrowser ()
+NS_ASSUME_NONNULL_BEGIN
 
-@property (assign) BOOL running;
-@property (strong) NSNetServiceBrowser *browser;
-@property (strong) NSMutableArray *services;
-@property (strong) NSTimer *refreshTimer;
-@property (copy, atomic, readwrite) NSArray<QLKServer *> *servers;
+@interface QLKBrowser () {
+    NSMutableArray<QLKServer *> *_servers;
+}
 
-- (QLKServer *) serverForHost:(NSString *)host;
-- (QLKServer *) serverForNetService:(NSNetService *)netService;
-- (void) serverDidUpdateWorkspaces:(QLKServer *)server;
+@property (assign, readwrite)                   BOOL running;
+@property (nonatomic, strong, nullable)         NSNetServiceBrowser *domainsBrowser;
+@property (nonatomic, strong, nullable)         NSNetServiceBrowser *browser;
+@property (nonatomic, strong, nullable)         NSTimer *refreshTimer;
+
+@property (nonatomic, strong)                   NSMutableArray<NSNetService *> *netServices;
+
+- (void) _refreshAllWorkspaces:(nullable NSTimer *)theTimer;
+
+- (void) setNeedsNotifyDelegateBrowserDidUpdateServers;
+- (void) notifyDelegateBrowserDidUpdateServers;
+- (void) setNeedsBeginResolvingNetServices;
+- (void) beginResolvingNetServices;
+
+- (nullable QLKServer *) serverForHost:(NSString *)host;
+- (nullable QLKServer *) serverForNetService:(NSNetService *)netService;
 
 @end
 
@@ -57,55 +72,79 @@
     {
         _running = NO;
         _browser = nil;
-        _services = [[NSMutableArray alloc] init];
         _refreshTimer = nil;
-        _servers = @[];
+        
+        _netServices = [[NSMutableArray alloc] init];
+        _servers = [[NSMutableArray alloc] init];
+        
     }
     return self;
 }
 
 - (void) dealloc
 {
-    [self disableAutoRefresh];
-    [self.browser stop];
+    [self stop];
 }
+
+
+
+#pragma mark -
 
 - (void) start
 {
+#if DEBUG_BROWSER
+    if ( self.running )
+        NSLog( @"[browser] starting browser - already running" );
+    else
+        NSLog( @"[browser] starting browser" );
+#endif
+    
     if ( self.running )
         return;
     
-    self.running = YES;
+    // Create Bonjour browser to find available domains
+    self.domainsBrowser = [[NSNetServiceBrowser alloc] init];
+    self.domainsBrowser.delegate = self;
     
-#if DEBUG_BROWSER
-    NSLog( @"[browser] starting bonjour" );
-#endif
-    
-    // Create Bonjour browser to find QLab instances.
-    self.browser = [[NSNetServiceBrowser alloc] init];
-    self.browser.delegate = self;
-    [self.browser searchForServicesOfType:QLKBonjourTCPServiceType inDomain:QLKBonjourServiceDomain];
+    [self.domainsBrowser searchForBrowsableDomains];
 }
 
 - (void) stop
 {
 #if DEBUG_BROWSER
-    NSLog( @"[browser] stopping bonjour" );
+    NSLog( @"[browser] stopping browser" );
 #endif
     
-    // Stop bonjour
+    [self disableAutoRefresh];
+    
+    self.delegate = nil;
+    
+    // Stop bonjour browsers - delegate methods will perform cleanup
+    [self.domainsBrowser stop];
     [self.browser stop];
-    self.browser = nil;
     
-    // Remove all servers.
-    self.servers = @[];
-    
-    self.running = NO;
+    // Stop/remove all servers
+    for ( QLKServer *aServer in _servers )
+    {
+        [aServer stop];
+        aServer.delegate = nil;
+        aServer.netService = nil;
+    }
+    [_servers removeAllObjects];
 }
 
 - (void) refreshAllWorkspaces
 {
-    for ( QLKServer *server in self.servers )
+    [self _refreshAllWorkspaces:nil];
+}
+
+- (void) _refreshAllWorkspaces:(nullable NSTimer *)theTimer
+{
+    // Exit if method is being called by a timer and the timer has been cancelled
+    if ( theTimer && ( !self.refreshTimer || !theTimer.isValid ) )
+        return;
+    
+    for ( QLKServer *server in _servers )
     {
         [server refreshWorkspaces];
     }
@@ -117,9 +156,10 @@
     {
         self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:interval
                                                              target:self
-                                                           selector:@selector( refreshAllWorkspaces )
+                                                           selector:@selector(_refreshAllWorkspaces:)
                                                            userInfo:nil
                                                             repeats:YES];
+        self.refreshTimer.tolerance = ( interval * 0.1 );
     }
 }
 
@@ -129,22 +169,55 @@
     self.refreshTimer = nil;
 }
 
+
+
 #pragma mark -
 
-- (QLKServer *) serverForHost:(NSString *)host
+- (void) setNeedsNotifyDelegateBrowserDidUpdateServers
 {
-    for ( QLKServer *server in self.servers )
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(notifyDelegateBrowserDidUpdateServers) object:nil];
+    [self performSelector:@selector(notifyDelegateBrowserDidUpdateServers) withObject:nil afterDelay:0.5];
+}
+
+- (void) notifyDelegateBrowserDidUpdateServers
+{
+    [self.delegate browserDidUpdateServers:self];
+}
+
+- (void) setNeedsBeginResolvingNetServices
+{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(beginResolvingNetServices) object:nil];
+    [self performSelector:@selector(beginResolvingNetServices) withObject:nil afterDelay:0.5];
+}
+
+- (void) beginResolvingNetServices
+{
+    for ( NSNetService *aService in self.netServices )
+    {
+        if ( aService.addresses.count )
+            continue;
+        
+        [aService resolveWithTimeout:5.0f];
+    }
+}
+
+
+#pragma mark -
+
+- (nullable QLKServer *) serverForHost:(NSString *)host
+{
+    for ( QLKServer *server in _servers )
     {
         if ( [server.host isEqualToString:host] )
         {
             return server;
         }
     }
-
+    
     return nil;
 }
 
-- (QLKServer *) serverForNetService:(NSNetService *)netService
+- (nullable QLKServer *) serverForNetService:(NSNetService *)netService
 {
     for ( QLKServer *server in self.servers )
     {
@@ -153,101 +226,230 @@
             return server;
         }
     }
-
+    
     return nil;
 }
 
+
+
+#pragma mark - QLKServerDelegate
+
 - (void) serverDidUpdateWorkspaces:(QLKServer *)server
 {
-    dispatch_async( dispatch_get_main_queue(), ^
-    {
-        [self.delegate serverDidUpdateWorkspaces:server];
+    if ( !self.delegate )
+        return;
+    
+    __weak typeof(self) weakSelf = self;
+    dispatch_async( dispatch_get_main_queue(), ^{
+        
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if ( !strongSelf )
+            return;
+        
+        [strongSelf.delegate browserServerDidUpdateWorkspaces:server];
+        
     });
 }
 
+- (void) serverDidUpdateHostVersion:(QLKServer *)server
+{
+    if ( !self.delegate )
+        return;
+    
+    if ( [self.delegate respondsToSelector:@selector(browserServerDidUpdateHostVersion:)] == NO )
+        return;
+    
+    __weak typeof(self) weakSelf = self;
+    dispatch_async( dispatch_get_main_queue(), ^{
+        
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if ( !strongSelf )
+            return;
+        
+        [strongSelf.delegate browserServerDidUpdateHostVersion:server];
+        
+    });
+}
+
+
+
 #pragma mark - NSNetServiceBrowserDelegate
 
-- (void) netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
+- (void) netServiceBrowserWillSearch:(NSNetServiceBrowser *)browser
 {
 #if DEBUG_BROWSER
-    NSLog( @"netServiceBrowser:didFindService: %@", netService );
+    if ( browser == self.domainsBrowser )
+        NSLog( @"[browser] starting bonjour - browsable domains search" );
+    else if ( browser == self.browser )
+        NSLog( @"[browser] starting bonjour - \"%@\"", QLKBonjourServiceDomain );
+    else
+        NSLog( @"[browser] netServiceBrowserWillSearch: %@", browser );
 #endif
     
-    [self.services addObject:netService];
+    if ( browser == self.domainsBrowser )
+        self.running = YES;
+    
+    [self.delegate browserDidUpdateServers:self];
+}
+
+- (void) netServiceBrowserDidStopSearch:(NSNetServiceBrowser *)browser
+{
+#if DEBUG_BROWSER
+    if ( browser == self.domainsBrowser )
+        NSLog( @"[browser] stopping bonjour - browsable domains search" );
+    else if ( browser == self.browser )
+        NSLog( @"[browser] stopping bonjour - \"%@\"", QLKBonjourServiceDomain );
+    else
+        NSLog( @"[browser] netServiceBrowserDidStopSearch: %@", browser );
+#endif
+    
+    if ( browser == self.domainsBrowser )
+    {
+        self.running = NO;
+        
+        self.domainsBrowser.delegate = nil;
+        self.domainsBrowser = nil;
+    }
+    else if ( browser == self.browser )
+    {
+        self.browser.delegate = nil;
+        self.browser = nil;
+    }
+    
+    [self.delegate browserDidUpdateServers:self];
+}
+
+- (void) netServiceBrowser:(NSNetServiceBrowser *)browser didNotSearch:(NSDictionary<NSString *, NSNumber *> *)errorDict
+{
+#if DEBUG_BROWSER
+    NSLog( @"[browser] netServiceBrowser:didNotSearch:" );
+    for ( NSString *aError in errorDict )
+    {
+        NSLog( @"[browser] search error %@: %@, ", (NSNumber *)errorDict[aError], aError );
+    }
+#endif
+}
+
+- (void) netServiceBrowser:(NSNetServiceBrowser *)browser didFindDomain:(NSString *)domainString moreComing:(BOOL)moreComing
+{
+#if DEBUG_BROWSER
+    NSLog( @"[browser] netServiceBrowser:didFindDomain: \"%@\" moreComing: %@", domainString, ( moreComing ? @"YES" : @"NO" ) );
+#endif
+    
+    // currently for debugging information only - if we find more domains than "local." exist, then we will need to alter this to create an NSNetServiceBrowser for each domain
+    if ( !self.browser && [domainString isEqualToString:QLKBonjourServiceDomain] )
+    {
+        self.browser = [[NSNetServiceBrowser alloc] init];
+        self.browser.delegate = self;
+        
+        [self.browser searchForServicesOfType:QLKBonjourTCPServiceType inDomain:QLKBonjourServiceDomain];
+    }
+}
+
+- (void) netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)netService moreComing:(BOOL)moreComing
+{
+#if DEBUG_BROWSER
+    NSLog( @"[browser] netServiceBrowser:didFindService: \"%@\" moreComing: %@", netService, ( moreComing ? @"YES" : @"NO" ) );
+#endif
+    
     netService.delegate = self;
-    [netService resolveWithTimeout:5.0f];
+    [self.netServices addObject:netService];
+    
+    // multiple calls cancel previous requests to ensure service resolving only begins once (i.e. if moreComing == YES)
+    [self setNeedsBeginResolvingNetServices];
 }
 
 - (void) netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didRemoveService:(NSNetService *)netService moreComing:(BOOL)moreComing
 {
 #if DEBUG_BROWSER
-    NSLog( @"netServiceBrowser:didRemoveService: %@", netService );
+    NSLog( @"[browser] netServiceBrowser:didRemoveService: %@ moreComing: %@", netService, ( moreComing ? @"YES" : @"NO" ) );
 #endif
     
     QLKServer *server = [self serverForNetService:netService];
-	
-	NSMutableArray *mutableServers = [self.servers mutableCopy];
-    [mutableServers removeObject:server];
-	self.servers = mutableServers;
+    if ( !server )
+        return;
     
-    dispatch_async( dispatch_get_main_queue(), ^
-    {
-        [self.delegate browserDidUpdateServers:self];
-    });
+    [server stop];
+    server.delegate = nil;
+    server.netService = nil;
+    [_servers removeObject:server];
+    
+    // multiple calls cancel previous requests to ensure delegate is only notified once (i.e. if moreComing == YES)
+    [self setNeedsNotifyDelegateBrowserDidUpdateServers];
 }
+
+
 
 #pragma mark - NSNetServiceDelegate
 
 - (void) netServiceDidResolveAddress:(NSNetService *)netService
 {
 #if DEBUG_BROWSER
-    NSLog( @"netServiceDidResolveAddress: %@", netService );
+    NSLog( @"[browser] netServiceDidResolveAddress: %@", netService );
 #endif
     
-    NSString *ip = nil;
+    NSString *host = netService.hostName;
     
-    for ( NSData *address in netService.addresses )
+    // Fallback on IP only if we do not have a hostName to use
+    // This may never happen though, since the docs seem to say that hostName and addresses both become non-nil at the same time
+    if ( !host || host.length == 0 )
     {
-        ip = [self IPAddressFromData:address];
-        if ( ip )
-            break;
-    }
-    
-    if ( !ip )
-    {
-        // This should never happen - we just resolved an address
-        // Only possible if somehow there were no addresses
-        return;
+        for ( NSData *address in netService.addresses )
+        {
+            host = [self IPAddressFromData:address];
+            if ( host )
+                break;
+        }
+        
+        if ( !host )
+        {
+            // This should never happen - we just resolved an address
+            // Only possible if somehow there were no addresses
+            return;
+        }
     }
     
     NSInteger port = netService.port;
-    QLKServer *server = [[QLKServer alloc] initWithHost:ip port:port];
+    QLKServer *server = [[QLKServer alloc] initWithHost:host port:port];
     server.name = netService.name;
-    server.browser = self;
+    server.delegate = self;
     server.netService = netService;
     
     // Once resolved, we can remove the net service from our local records.
     // (The QLKServer will still hold on to it, though.)
-    [self.services removeObject:netService];
+    netService.delegate = nil;
+    [self.netServices removeObject:netService];
     
 #if DEBUG_BROWSER
     NSLog( @"[browser] adding server: %@", server );
 #endif
     
-    self.servers = [self.servers arrayByAddingObject:server];
+    [_servers addObject:server];
     
-    dispatch_async( dispatch_get_main_queue(), ^
-    {
-        [self.delegate browserDidUpdateServers:self];
+    __weak typeof(self) weakSelf = self;
+    dispatch_async( dispatch_get_main_queue(), ^{
+        
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if ( !strongSelf )
+            return;
+        
+        [strongSelf.delegate browserDidUpdateServers:strongSelf];
+        
     });
     
     [server refreshWorkspaces];
 }
 
-- (void) netService:(NSNetService *)netService didNotResolve:(NSDictionary *)error
+- (void) netService:(NSNetService *)netService didNotResolve:(NSDictionary<NSString *, NSNumber *> *)error
 {
-    NSLog( @"Error: Failed to resolve service: %@ - %@", netService, error );
+    [netService stop];
+    netService.delegate = nil;
+    [self.netServices removeObject:netService];
+    
+    NSLog( @"[browser] Error: Failed to resolve service: %@ - %@", netService, error );
 }
+
+
 
 #pragma mark -
 
@@ -278,3 +480,5 @@
 }
 
 @end
+
+NS_ASSUME_NONNULL_END

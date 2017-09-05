@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2014 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,38 +25,46 @@
 //  THE SOFTWARE.
 //
 
-
 #import "QLKServer.h"
+
 #import "QLKBrowser.h"
 #import "QLKClient.h"
 #import "QLKMessage.h"
 #import "QLKWorkspace.h"
 
 
-@interface QLKBrowser (QLKServerAccess)
+NS_ASSUME_NONNULL_BEGIN
 
-- (void) serverDidUpdateWorkspaces:(QLKServer *)server;
+@interface QLKServer () {
+    NSString *_hostVersion;
+}
 
-@end
+@property (nonatomic, strong)               QLKClient *client;
+@property (nonatomic, strong, nullable)     NSTimer *refreshTimer;
+@property (atomic, copy, readwrite)         NSArray<QLKWorkspace *> *workspaces;
 
-
-@interface QLKServer ()
-
-@property (strong, nonatomic) QLKClient *client;
-@property (strong) NSTimer *refreshTimer;
-@property (copy, atomic, readwrite) NSArray<QLKWorkspace *> *workspaces;
-
-- (void) updateWorkspaces:(NSArray *)workspaces;
+- (void) updateWorkspaces:(NSArray<NSDictionary *> *)workspaceDicts;
 
 @end
+
 
 @implementation QLKServer
 
-- (instancetype) init NS_UNAVAILABLE {
+- (instancetype) init NS_UNAVAILABLE
+{
     return nil;
 }
 
 - (instancetype) initWithHost:(NSString *)host port:(NSInteger)port
+{
+    // Create a private client that we'll use for querying the list of workspaces on the QLab server.
+    // (Usually these clients are associated with a specific workspace, but not in this case.)
+    QLKClient *client = [[QLKClient alloc] initWithHost:host port:port];
+    client.useTCP = YES;
+    return [self initWithHost:host port:port client:client];
+}
+
+- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port client:(QLKClient *)client
 {
     self = [super init];
     if ( self )
@@ -67,22 +75,17 @@
         _host = host;
         _port = port;
         _name = host;
-        _browser = nil;
         _netService = nil;
         _workspaces = @[];
         
-        // Create a private client that we'll use for querying the list of workspaces on the QLab server.
-        // (Usually these clients are associated with a specific workspace, but not in this case.)
-        self.client = [[QLKClient alloc] initWithHost:host port:port];
-        self.client.useTCP = YES;
+        self.client = client;
     }
     return self;
 }
 
 - (void) dealloc
 {
-    [self disableAutoRefresh];
-    [self.client disconnect];
+    [self stop];
 }
 
 - (NSString *) description
@@ -95,21 +98,57 @@
     return self.client.isConnected;
 }
 
+- (nullable NSString *) hostVersion
+{
+    if ( !_hostVersion )
+    {
+        __weak typeof(self) weakSelf = self;
+        [self.client sendMessagesWithArguments:nil toAddress:@"/version" workspace:NO block:^(id data) {
+            
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if ( !strongSelf )
+                return;
+            
+            if ( [data isKindOfClass:[NSString class]] )
+            {
+                strongSelf->_hostVersion = data;
+            
+                if ( [strongSelf.delegate respondsToSelector:@selector(serverDidUpdateHostVersion:)] )
+                    [strongSelf.delegate serverDidUpdateHostVersion:strongSelf];
+            }
+        }];
+    }
+    
+    return _hostVersion;
+}
+
+
 #pragma mark - Workspaces
 
-- (void) updateWorkspaces:(NSArray *)workspaces
+- (void) updateWorkspaces:(NSArray<NSDictionary *> *)workspaceDicts
 {
-    NSMutableArray *newWorkspaces = [NSMutableArray array];
-    
-    for ( NSDictionary *dict in workspaces )
+    NSMutableArray<QLKWorkspace *> *newWorkspaces = [NSMutableArray array];
+    for ( NSDictionary<NSString *, id> *aWorkspaceDict in workspaceDicts )
     {
-        QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:self];
-        [newWorkspaces addObject:workspace];
+        NSString *uniqueID = aWorkspaceDict[QLKOSCUIDKey];
+        if ( !uniqueID )
+            continue;
+        
+        QLKWorkspace *existingWorkspace = [self workspaceWithID:(NSString * _Nonnull)uniqueID];
+        if ( existingWorkspace )
+        {
+            [newWorkspaces addObject:existingWorkspace];
+            [existingWorkspace updateWithDictionary:aWorkspaceDict]; // just update `name` and `hasPasscode`
+        }
+        else
+        {
+            QLKWorkspace *workspace = [self newWorkspaceWithDictionary:aWorkspaceDict];
+            [newWorkspaces addObject:workspace];
+        }
     }
     
     self.workspaces = newWorkspaces;
     
-    [self.browser serverDidUpdateWorkspaces:self];
     [self.delegate serverDidUpdateWorkspaces:self];
 }
 
@@ -124,13 +163,22 @@
         }
     }
     
-    [self.client sendMessagesWithArguments:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
-    {
-        [self updateWorkspaces:data];
+    __weak typeof(self) weakSelf = self;
+    [self.client sendMessagesWithArguments:nil toAddress:@"/workspaces" workspace:NO block:^(id data) {
+        
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if ( !strongSelf )
+            return;
+        
+        if ( [data isKindOfClass:[NSArray class]] == NO )
+            return;
+        
+        [strongSelf updateWorkspaces:(NSArray *)data];
+        
     }];
 }
 
-- (void) refreshWorkspacesWithCompletion:(void (^)(NSArray<QLKWorkspace *> *workspaces))block
+- (void) refreshWorkspacesWithCompletion:(nullable void (^)(NSArray<QLKWorkspace *> *workspaces))completion
 {
     if ( !self.client.isConnected )
     {
@@ -140,13 +188,22 @@
             return;
         }
     }
-
-    [self.client sendMessagesWithArguments:nil toAddress:@"/workspaces" workspace:NO block:^(NSArray *data)
-    {
-        [self updateWorkspaces:data];
+    
+    __weak typeof(self) weakSelf = self;
+    [self.client sendMessagesWithArguments:nil toAddress:@"/workspaces" workspace:NO block:^(id data) {
         
-        if ( block )
-            block( self.workspaces );
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if ( !strongSelf )
+            return;
+        
+        if ( [data isKindOfClass:[NSArray class]] == NO )
+            return;
+        
+        [strongSelf updateWorkspaces:(NSArray *)data];
+        
+        if ( completion )
+            completion( strongSelf.workspaces );
+        
     }];
 }
 
@@ -156,10 +213,29 @@
     {
         self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:interval
                                                              target:self
-                                                           selector:@selector( refreshWorkspaces )
+                                                           selector:@selector(refreshWorkspaces)
                                                            userInfo:nil
                                                             repeats:YES];
     }
+}
+
+- (QLKWorkspace *) newWorkspaceWithDictionary:(NSDictionary<NSString *, id> *)dict
+{
+    // subclasses can override to customize QLKWorkspace returned, if desired
+    QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:self];
+    return workspace;
+}
+
+- (nullable QLKWorkspace *) workspaceWithID:(NSString *)uniqueID
+{
+    for ( QLKWorkspace *aWorkspace in self.workspaces )
+    {
+        if ( [aWorkspace.uniqueID isEqualToString:uniqueID] )
+            return aWorkspace;
+    }
+    
+    // else
+    return nil;
 }
 
 - (void) disableAutoRefresh
@@ -168,14 +244,23 @@
     self.refreshTimer = nil;
 }
 
+- (void) stop
+{
+    [self disableAutoRefresh];
+    [self.client disconnect];
+    self.workspaces = @[];
+}
+
 - (void) sendOscMessage:(F53OSCMessage *)message
 {
     [self sendOscMessage:message block:nil];
 }
 
-- (void) sendOscMessage:(F53OSCMessage *)message block:(QLKMessageHandlerBlock)block
+- (void) sendOscMessage:(F53OSCMessage *)message block:(nullable QLKMessageHandlerBlock)block
 {
     [self.client sendOscMessage:message block:block];
 }
 
 @end
+
+NS_ASSUME_NONNULL_END

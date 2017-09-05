@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,11 @@
 
 #import "QLKColor.h"
 
+
 static NSSet *_colors = nil;
+
+
+NS_ASSUME_NONNULL_BEGIN
 
 @implementation QLKColor
 
@@ -36,14 +40,24 @@ static NSSet *_colors = nil;
     _colors = [NSSet setWithObjects:@"red", @"orange", @"blue", @"lightblue", @"yellow", @"green", @"purple", nil];
 }
 
-- (instancetype) initWithCoder:(NSCoder *)decoder
+- (nullable instancetype) initWithCoder:(NSCoder *)decoder
 {
     self = [super init];
     if ( self )
     {
         _name = [decoder decodeObjectForKey:QLKOSCNameKey];
-        _startColor = [decoder decodeObjectForKey:@"startColor"];
-        _endColor = [decoder decodeObjectForKey:@"endColor"];
+        _color = [decoder decodeObjectForKey:@"color"];
+        _darkColor = [decoder decodeObjectForKey:@"darkColor"];
+        
+        // compatibility with QLabKit.objc 0.0.2
+        if ( [decoder containsValueForKey:@"startColor"] )
+        {
+            _color = [decoder decodeObjectForKey:@"startColor"];
+        }
+        if ( [decoder containsValueForKey:@"endColor"] )
+        {
+            _darkColor = [decoder decodeObjectForKey:@"endColor"];
+        }
     }
     return self;
 }
@@ -53,8 +67,8 @@ static NSSet *_colors = nil;
     if ( coder.allowsKeyedCoding )
     {
         [coder encodeObject:_name forKey:QLKOSCNameKey];
-        [coder encodeObject:_startColor forKey:@"startColor"];
-        [coder encodeObject:_endColor forKey:@"endColor"];
+        [coder encodeObject:_color forKey:@"color"];
+        [coder encodeObject:_darkColor forKey:@"darkColor"];
     }
 }
 
@@ -69,6 +83,18 @@ static NSSet *_colors = nil;
     return [NSString stringWithFormat:@"QLKColor: %@", self.name];
 }
 
+- (nullable QLKColorClass *) startColor
+{
+    return _color;
+}
+
+- (nullable QLKColorClass *) endColor
+{
+    return _darkColor;
+}
+
+
+
 #pragma mark - Convenience class methods for predefined colors
 
 + (NSSet *) colors
@@ -79,10 +105,14 @@ static NSSet *_colors = nil;
 + (QLKColor *) defaultColor
 {
     QLKColor *color = [[QLKColor alloc] init];
-    color.name = @"none";
-    color.startColor = [self.class colorWithWhite:0.25 alpha:1.0];
-    color.endColor = [self.class colorWithWhite:0.22 alpha:1.0];
-    
+    color.name = @"default";
+#if TARGET_OS_IPHONE
+    color.color = [UIColor colorWithRed:0.63f green:0.61f blue:0.66f alpha:1.0f];
+    color.darkColor = [UIColor colorWithWhite:0.37f alpha:1.0f];
+#else
+    color.color = [NSColor colorWithCalibratedHue:0.71 saturation:0.1 brightness:0.61 alpha:1];
+    color.darkColor = [NSColor colorWithCalibratedHue:0.71 saturation:.12 brightness:0.53 alpha:1];
+#endif
     return color;
 }
 
@@ -90,29 +120,13 @@ static NSSet *_colors = nil;
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"red";
-    color.startColor = [self.class colorWithRed:0.945 green:0.482 blue:0.482 alpha:1.000];
-    color.endColor = [self.class colorWithRed:0.776 green:0.314 blue:0.314 alpha:1.000];
-    
-    return color;
-}
-
-+ (QLKColor *) blueColor
-{
-    QLKColor *color = [[QLKColor alloc] init];
-    color.name = @"blue";
-    color.startColor = [self.class colorWithRed:0.467 green:0.6 blue:0.737 alpha:1.000];
-    color.endColor = [self.class colorWithRed:0.282 green:0.416 blue:0.553 alpha:1.000];
-    
-    return color;
-}
-
-+ (QLKColor *) lightblueColor
-{
-    QLKColor *color = [[QLKColor alloc] init];
-    color.name = @"lightblue";
-    color.startColor = [self.class colorWithRed:0.710 green:0.835 blue:0.914 alpha:1.000];
-    color.endColor = [self.class colorWithRed:0.541 green:0.667 blue:0.745 alpha:1.000];
-    
+#if TARGET_OS_IPHONE
+    color.color = [UIColor colorWithRed:1.0f green:0.31f blue:0.28f alpha:1.0f];
+    color.darkColor = [UIColor colorWithRed:0.92f green:0.2f blue:0.16f alpha:1.0f];
+#else
+    color.color = [NSColor colorWithCalibratedHue:0.02 saturation:0.89 brightness:1 alpha:1];
+    color.darkColor = [NSColor colorWithCalibratedHue:0.02 saturation:1 brightness:0.83 alpha:1];
+#endif
     return color;
 }
 
@@ -120,9 +134,13 @@ static NSSet *_colors = nil;
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"orange";
-    color.startColor = [self.class colorWithRed:0.929 green:0.737 blue:0.365 alpha:1.000];
-    color.endColor = [self.class colorWithRed:0.765 green:0.573 blue:0.200 alpha:1.000];
-    
+#if TARGET_OS_IPHONE
+    color.color = [UIColor colorWithRed:1.0f green:0.64f blue:0.15f alpha:1.0f];
+    color.darkColor = [UIColor colorWithRed:1.0f green:0.5f blue:0.13f alpha:1.0f];
+#else
+    color.color = [NSColor colorWithCalibratedHue:0.1 saturation:1 brightness:1 alpha:1];
+    color.darkColor = [NSColor colorWithCalibratedHue:0.08 saturation:1 brightness:0.93 alpha:1];
+#endif
     return color;
 }
 
@@ -130,9 +148,13 @@ static NSSet *_colors = nil;
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"yellow";
-    color.startColor = [self.class colorWithRed:0.969 green:0.973 blue:0.678 alpha:1.000];
-    color.endColor = [self.class colorWithRed:0.804 green:0.808 blue:0.514 alpha:1.000];
-    
+#if TARGET_OS_IPHONE
+    color.color = [UIColor colorWithHue:55.0/360.0 saturation:1 brightness:1 alpha:1];
+    color.darkColor = [UIColor colorWithHue:55.0/360.0 saturation:1 brightness:0.98 alpha:1];
+#else
+    color.color = [NSColor colorWithCalibratedHue:0.15 saturation:1 brightness:1 alpha:1];
+    color.darkColor = [NSColor colorWithCalibratedHue:0.15 saturation:1 brightness:0.98 alpha:1];
+#endif
     return color;
 }
 
@@ -140,9 +162,27 @@ static NSSet *_colors = nil;
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"green";
-    color.startColor = [self.class colorWithRed:0.655 green:0.796 blue:0.616 alpha:1.000];
-    color.endColor = [self.class colorWithRed:0.486 green:0.627 blue:0.447 alpha:1.000];
+#if TARGET_OS_IPHONE
+    color.color = [UIColor colorWithRed:0.0f green:0.81f blue:0.23f alpha:1.0f];
+    color.darkColor = [UIColor colorWithRed:0.0f green:0.73f blue:0.12f alpha:1.0f];
+#else
+    color.color = [NSColor colorWithCalibratedHue:0.32 saturation:0.84 brightness:0.78 alpha:1];
+    color.darkColor = [NSColor colorWithCalibratedHue:0.25 saturation:1 brightness:0.59 alpha:1];
+#endif
+    return color;
+}
 
++ (QLKColor *) blueColor
+{
+    QLKColor *color = [[QLKColor alloc] init];
+    color.name = @"blue";
+#if TARGET_OS_IPHONE
+    color.color = [UIColor colorWithRed:0.33f green:0.46f blue:0.87f alpha:1.0f];
+    color.darkColor = [UIColor colorWithRed:0.22f green:0.38f blue:0.83f alpha:1.0f];
+#else
+    color.color = [NSColor colorWithCalibratedHue:0.62 saturation:0.72 brightness:0.9 alpha:1];
+    color.darkColor = [NSColor colorWithCalibratedHue:0.62 saturation:0.9 brightness:0.79 alpha:1];
+#endif
     return color;
 }
 
@@ -150,29 +190,41 @@ static NSSet *_colors = nil;
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"purple";
-    color.startColor = [self.class colorWithRed:0.863 green:0.612 blue:0.910 alpha:1.000];
-    color.endColor = [self.class colorWithRed:0.694 green:0.443 blue:0.741 alpha:1.000];
-
+#if TARGET_OS_IPHONE
+    color.color = [UIColor colorWithRed:0.65f green:0.2f blue:0.74f alpha:1.0f];
+    color.darkColor = [UIColor colorWithRed:0.53f green:0.17f blue:0.65f alpha:1.0f];
+#else
+    color.color = [NSColor colorWithCalibratedHue:0.83 saturation:0.46 brightness:0.71 alpha:1];
+    color.darkColor = [NSColor colorWithCalibratedHue:0.82 saturation:0.58 brightness:0.56 alpha:1];
+#endif
     return color;
 }
 
-+ (QLKColor *) colorWithName:(NSString *)name
-{	
-    QLKColor *color;
-
++ (nullable QLKColor *) colorWithName:(NSString *)name
+{
+    QLKColor *color = nil;
+    
     if ( [_colors containsObject:name.lowercaseString] )
     {
         color = [QLKColor performSelector:NSSelectorFromString([NSString stringWithFormat:@"%@Color", name.lowercaseString])];
     }
-    else
-    {
-        color = [QLKColor defaultColor];
-    }
-      
+    
     return color;
 }
 
-#pragma mark - Colors
+
+
+#pragma mark - Deprecated
+
++ (QLKColor *) lightblueColor
+{
+    QLKColor *color = [[QLKColor alloc] init];
+    color.name = @"lightblue";
+    color.color = [self.class colorWithRed:0.710 green:0.835 blue:0.914 alpha:1.000];
+    color.darkColor = [self.class colorWithRed:0.541 green:0.667 blue:0.745 alpha:1.000];
+    
+    return color;
+}
 
 + (QLKColorClass *) panelColor
 {
@@ -183,8 +235,6 @@ static NSSet *_colors = nil;
 {
     return [self.class colorWithRed:0.150 green:0.150 blue:0.150 alpha:1];
 }
-
-#pragma mark - Helper
 
 + (QLKColorClass *) colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha
 {
@@ -205,3 +255,5 @@ static NSSet *_colors = nil;
 }
 
 @end
+
+NS_ASSUME_NONNULL_END

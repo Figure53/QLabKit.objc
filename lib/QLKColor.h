@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,32 +25,41 @@
 //  THE SOFTWARE.
 //
 
-
 @import Foundation;
+
 #import "QLKDefines.h"
+
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface QLKColor : NSObject <NSCoding>
 
-@property (strong, nonatomic) NSString *name;
-@property (strong, nonatomic) QLKColorClass *startColor;
-@property (strong, nonatomic) QLKColorClass *endColor;
+@property (strong, nonatomic, nullable)             NSString *name;
+@property (strong, nonatomic, nullable)             QLKColorClass *color;
+@property (strong, nonatomic, nullable)             QLKColorClass *darkColor;
 
 + (NSSet *) colors;
 + (QLKColor *) defaultColor;
 + (QLKColor *) redColor;
 + (QLKColor *) orangeColor;
-+ (QLKColor *) lightblueColor;
-+ (QLKColor *) blueColor;
 + (QLKColor *) yellowColor;
 + (QLKColor *) greenColor;
++ (QLKColor *) blueColor;
 + (QLKColor *) purpleColor;
-+ (QLKColor *) colorWithName:(NSString *)name;
++ (nullable QLKColor *) colorWithName:(NSString *)name;
 - (BOOL) isEqualToColor:(QLKColor *)color;
 
-+ (QLKColorClass *) panelColor;
-+ (QLKColorClass *) navBarColor;
 
-+ (QLKColorClass *) colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha;
-+ (QLKColorClass *) colorWithWhite:(CGFloat)white alpha:(CGFloat)alpha;
+// Deprecated in 0.0.3 - leaving for compatibility with QLabKit.objc 0.0.2
+@property (strong, nonatomic, readonly, nullable)   QLKColorClass *startColor DEPRECATED_MSG_ATTRIBUTE("Use lightColor instead");  // returns lightColor
+@property (strong, nonatomic, readonly, nullable)   QLKColorClass *endColor DEPRECATED_MSG_ATTRIBUTE("Use darkColor instead");    // returns darkColor
+
++ (QLKColor *) lightblueColor DEPRECATED_ATTRIBUTE;
++ (QLKColorClass *) panelColor DEPRECATED_ATTRIBUTE;
++ (QLKColorClass *) navBarColor DEPRECATED_ATTRIBUTE;
++ (QLKColorClass *) colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha DEPRECATED_ATTRIBUTE;
++ (QLKColorClass *) colorWithWhite:(CGFloat)white alpha:(CGFloat)alpha DEPRECATED_ATTRIBUTE;
 
 @end
+
+NS_ASSUME_NONNULL_END

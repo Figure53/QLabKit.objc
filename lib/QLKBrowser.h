@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -29,29 +29,20 @@
 #import "QLKDefines.h"
 #import "QLKServer.h"
 
+@class QLKBrowser;
+@protocol QLKBrowserDelegate;
+
+
 NS_ASSUME_NONNULL_BEGIN
 
-@class QLKBrowser;
+@interface QLKBrowser : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, QLKServerDelegate>
 
+@property (nonatomic, weak, nullable)               id<QLKBrowserDelegate> delegate;
 
-@protocol QLKBrowserDelegate <NSObject>
-
-// A server was added or removed.
-- (void) browserDidUpdateServers:(QLKBrowser *)browser;
-
-// A server updated its workspaces.
-- (void) serverDidUpdateWorkspaces:(QLKServer *)server;
-
-@end
-
-
-@interface QLKBrowser : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate>
-
-// delegate object implementing QLKBrowserDelegate protocol
-@property (unsafe_unretained, nonatomic, nullable) id<QLKBrowserDelegate> delegate;
+@property (assign, readonly)                        BOOL running;
 
 // array of QLKServer objects
-@property (copy, atomic, readonly) NSArray<QLKServer *> *servers;
+@property (copy, atomic, readonly)                  NSArray<QLKServer *> *servers;
 
 // Start server discovery.
 - (void) start;
@@ -67,6 +58,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Stop auto refresh of workspaces.
 - (void) disableAutoRefresh;
+
+@end
+
+
+@protocol QLKBrowserDelegate <NSObject>
+
+// A server was added or removed.
+- (void) browserDidUpdateServers:(QLKBrowser *)browser;
+
+// A server updated its workspaces.
+- (void) browserServerDidUpdateWorkspaces:(QLKServer *)server;
+
+@optional
+
+// A server updated its host version.
+- (void) browserServerDidUpdateHostVersion:(QLKServer *)server;
 
 @end
 
