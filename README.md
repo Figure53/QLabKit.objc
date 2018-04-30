@@ -10,6 +10,7 @@ All the files for the library are in the `lib` folder. Copy all the files from t
 
 QLabKit can also be installed on iOS using CocoaPods by adding the following to your podfile:
 ``` ruby
+pod 'F53OSC', :git => 'https://github.com/Figure53/F53OSC.git', :commit => 'd895b2e7a1b5bcf07c0f7d69483ece8f847219b2'  # v1.0.2
 pod 'QLabKit', :git => 'https://github.com/Figure53/QLabKit.objc.git'
 ```
 
