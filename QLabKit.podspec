@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
   
   s.source_files = 'lib/*.{h,m}'
   s.exclude_files = 'lib/F53OSC/*'
-  s.dependency 'F53OSC', '~> 1.0.2'
+  s.dependency 'F53OSC', '1.0.2'
   s.dependency 'CocoaLumberjack', '~> 2.2.0'
   
   s.frameworks  = 'Security', 'GLKit'
