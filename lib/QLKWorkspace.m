@@ -917,6 +917,11 @@ NS_ASSUME_NONNULL_BEGIN
     [self.client sendMessageWithArgument:object toAddress:address block:block];
 }
 
+- (void) sendApplicationMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block
+{
+    [self.client sendMessagesWithArguments:arguments toAddress:address workspace:NO block:block];
+}
+
 - (NSString *) addressForCue:(QLKCue *)cue action:(NSString *)action
 {
     return [NSString stringWithFormat:@"/cue_id/%@/%@", [cue propertyForKey:QLKOSCUIDKey], action];

@@ -177,6 +177,7 @@ extern NSString * const QLKWorkspaceConnectionErrorNotification;
 // Lower level API
 - (void) sendMessage:(nullable id)object toAddress:(NSString *)address;
 - (void) sendMessage:(nullable id)object toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block;
+- (void) sendApplicationMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block;
 
 // Helper for sending messages to this workspace: /workspace/<workspace_id>
 @property (nonatomic, readonly, copy)               NSString *workspacePrefix;
