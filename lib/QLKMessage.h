@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (QLKMessage *) messageWithOSCMessage:(F53OSCMessage *)message;
 
-- (instancetype) initWithOSCMessage:(F53OSCMessage *)message NS_DESIGNATED_INITIALIZER;
+- (instancetype) initWithOSCMessage:(F53OSCMessage *)message;
 
 // Identifying the different types of messages.
 @property (nonatomic, getter=isReply, readonly)                     BOOL reply;
@@ -44,8 +44,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, getter=isUpdate, readonly)                    BOOL update;
 @property (nonatomic, getter=isWorkspaceUpdate, readonly)           BOOL workspaceUpdate;
 @property (nonatomic, getter=isWorkspaceSettingsUpdate, readonly)   BOOL workspaceSettingsUpdate;
+@property (nonatomic, getter=isLightDashboardUpdate, readonly)      BOOL lightDashboardUpdate;
 @property (nonatomic, getter=isCueUpdate, readonly)                 BOOL cueUpdate;
 @property (nonatomic, getter=isPlaybackPositionUpdate, readonly)    BOOL playbackPositionUpdate;
+@property (nonatomic, getter=isPreferencesUpdate, readonly)         BOOL preferencesUpdate;
 @property (nonatomic, getter=isDisconnect, readonly)                BOOL disconnect;
 
 // Host the message came from, almost always will be the IP address.
@@ -71,6 +73,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Cue ID for this message, parsed out depending on what kind of message it is.
 @property (nonatomic, readonly, copy, nullable)     NSString *cueID;
+
+@end
+
+
+@interface QLKMessage (DisallowedInits)
+
+- (instancetype) init  __attribute__((unavailable("Use -initWithOSCMessage::")));
 
 @end
 

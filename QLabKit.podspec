@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'QLabKit'
-  s.version      = '0.0.3'
+  s.version      = '0.0.4'
   s.summary      = 'An Objective C library for controlling QLab using the OSC API introduced in QLab 3.'
   s.homepage     = 'https://github.com/Figure53/QLabKit.objc'
   s.description  = <<-DESC
@@ -29,8 +29,8 @@ Pod::Spec.new do |s|
   
   s.source_files = 'lib/*.{h,m}'
   s.exclude_files = 'lib/F53OSC/*'
-  s.dependency 'F53OSC', '1.0.2'
-  s.dependency 'CocoaLumberjack', '~> 2.2.0'
+  s.dependency 'F53OSC', '~> 1.0.5'
+  s.dependency 'CocoaLumberjack', '~> 3.4.0'
   
   s.frameworks  = 'Security', 'GLKit'
   s.requires_arc = true

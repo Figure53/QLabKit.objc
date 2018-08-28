@@ -10,7 +10,7 @@ All the files for the library are in the `lib` folder. Copy all the files from t
 
 QLabKit can also be installed on iOS using CocoaPods by adding the following to your podfile:
 ``` ruby
-pod 'F53OSC', :git => 'https://github.com/Figure53/F53OSC.git', :commit => 'd895b2e7a1b5bcf07c0f7d69483ece8f847219b2'  # v1.0.2
+pod 'F53OSC', :git => 'https://github.com/Figure53/F53OSC.git'
 pod 'QLabKit', :git => 'https://github.com/Figure53/QLabKit.objc.git'
 ```
 
@@ -104,6 +104,46 @@ NSString *address = [NSString stringWithFormat:@"/workspace/%@/cue_id/%@/name", 
 
 There is also working demo project that shows how you might hook all of this together to find servers on the network, show their workspaces, connect to a workspace, and finally fetch and display all the cues. Open `QLabKit.xcodeproj` and run the `QLabKitDemo` project to learn more.
 
+## Migrating from 0.0.3 to 0.0.4
+
+QLabKit 0.0.4 requires macOS 10.9+ or iOS 8.4+.
+
+### QLKCue
+* Fixes the class method `cueTypeIsAudio:` so that it now correctly returns `NO` for the following cue types: Fade, Camera, Text/Titles.
+* Fixes `panicCue:` so that the `QLKOSCIsPanickingKey` property is only updated when connected to QLab 4.0 or later (which is the minimum QLab version that supports the `/isPanicking` OSC method).
+* Adds convenience getters `isOverridden`, `isBroken`, `isTailingOut`, and `isPanicking` which also take into account the property values of child cues in Group, Cue List, and Cue Cart cues.
+* When using `propertyForKey:` to get the quaternion of a Video or Fade cue, the value is no longer transformed to NSValue and is now returned as an array of NSNumbers (representing the X, Y, Z, and W components of the quaternion). The convenience property `quaternion` remains unchanged and gets/sets a `GLKQuaternion` struct, and the new convenience setter `setQuaternion:tellQLab:` also accepts a `GLKQuaternion` struct.
+
+### QLKColor
+* Colors and colorspaces are now more consistent between iOS and macOS.
+* The `name` property and the class method `+[QLKColor colorWithName:]` now return an empty QLKColor object for undefined color names. Subclasses or categories can override the `name` property to define additional colors.
+
+### QLKClient
+* Fixes an issue where replies from individual OSC getter methods (i.e. calls from `cue:valueForKey:block:`) were not being processed.
+* The internal F53OSCClient used by QLKClient now performs its TCP/UDP communication with QLab on a background thread. F53OSCClient ensures that its F53OSCClientDelegate methods continue to be called on the main thread. However, be aware that custom implementations of GCDAsyncSocketDelegate or GCDAsyncUdpSocketDelegate methods in any subclasses of QLKClient or F53OSCClient will now be called on a background thread and must dispatch back to the main thread when necessary.
+* Adds QLKClientDelegate methods:
+  * `workspaceDisconnected` (required) which is now called when a QLKClient receives an OSC `/update/workspace/{id}/disconnect` message from QLab. This replaces the previous behavior in which `clientConnectionErrorOccurred` was called. This new delegate method now makes it possible for a client app to distinguish between the QLab workspace proactively notifying the client it should disconnect (e.g. because the QLab workspace was closed) and some other issue with the network connection. Connection errors continue to trigger a call to `clientConnectionErrorOccurred`.
+  * `clientShouldDisconnectOnError` (optional) - If the delegate implements this method and returns `NO`, the QLKClient will no longer immediately disconnect after a connection error is reported by its internal F53OSCClient. Instead, the delegate is responsible for disconnecting and tearing down the client at some point in the future. If this method returns `YES` or is not implemented, the QLKClient will behave as before and immediately call `disconnect` in response to a connection error.
+  * `lightDashboardUpdated:` (optional) - When connected to QLab 4.2 or later, this notifies the delegate when the state of the Light Dashboard has updated.
+  * `preferencesUpdated:` (optional) - When connected to QLab 4.2 or later, this notifies the delegate when certain application preferences in QLab are updated, namely `liveFadePreview`. To respond to changes made to workspace-level settings, continue to use `workspaceSettingsUpdated:`.
+
+### QLKWorkspace
+* QLKWorkspace now posts a `QLKWorkspaceDidDisconnectNotification` only after receiving an affirmative `/disconnect` update message from QLab. QLKWorkspace also no longer posts a redundant `QLKWorkspaceDidDisconnectNotification` when disconnecting itself from QLab. All other connection errors, e.g. failed attempts to connect due to an incorrect OSC passcode or other network problems, post a `QLKWorkspaceConnectionErrorNotification` so that observers can evaluate whether to attempt to reconnect or not.
+* The `connect` method is deprecated because it does not support connecting to workspaces with an OSC passcode. Instead, use `connectWithPasscode:completion:` and pass `nil` for the passcode parameter to connect to a workspace whose `hasPasscode` property is `NO`.
+* The method `connectWithPasscode:completion:` now caches the passcode in the workspace only upon a successful connection.
+* Adds a property `attemptToReconnect` which QLKWorkspace uses in its implementation of the new QLKClientDelegate method `clientShouldDisconnectOnError`. After receiving a connection error notification, QLKWorkspace uses the value of the `attemptToReconnect` property to determine whether to attempt to reestablish a connection to the current workspace or to disconnect immediately.
+* The methods `startHeartbeat` and `stopHeartbeat` are now public and can be used to actively monitor the network connection. When the heartbeat is running, a network timeout will cause the workspace to post a `QLKWorkspaceConnectionErrorNotification`.
+* Adds two new methods `deferFetchingPropertiesForCue:` and `resumeFetchingPropertiesForCue:` which can be used to reduce network traffic and significantly improve performance when connected to large workspaces. Selective use of these methods allows a workspace to consolidate update requests on a cue-by-cue basis, enabling a client app to send requests for data only when it is actually needed (e.g. when a cue is about to become visible in the UI). When a workspace is set to defer fetching the properties of a given cue, all QLKWorkspace methods prefixed with `fetch` will cache the property key(s) from any request for that cue instead of sending an OSC message to QLab. When the workspace later is set to resume fetching the properties for that cue, a single `/valuesForKeys` message will be sent to QLab requesting values for all previously-cached property keys, and all `fetch` methods will once again transmit OSC requests for that cue immediately when called.
+* Adds a property `defaultDeferFetchingPropertiesForNewCues`. Set this property to `YES` to cause the workspace to defer fetching properties for all new cues immediately upon creation. For example, this can be used to avoid flooding the network with OSC update requests when first connecting to QLab. The default for this property is `NO`, meaning new cues created by the workspace will not defer fetching properties (the "resume" behavior).
+* Adds a `QLKWorkspaceDidUpdateLightDashboardNotification` which is posted by the QLKWorkspace implementation of QLKClientDelegate method `lightDashboardUpdated:` when connected to QLab 4.2 or later.
+* Adds a `QLKQLabDidUpdatePreferencesNotification` which is posted by the QLKWorkspace implementation of QLKClientDelegate method `preferencesUpdated:` when connected to QLab 4.2 or later.
+* The methods `fetchChildrenForCue:block:` and `fetchAudioLevelsForCue:block:` are deprecated because their `block` parameters are not compatible with the new deferred property fetching mechanism. Instead, request these values using `cue:valueForKey:block:` with the keys `children` and `sliderLevels`, respectively.
+* The values of the following NSString constants are updated to follow the convention of the value matching the name. Any code that directly accesses the value of one of these constants, e.g. comparing to another string using `isEqual:` or `isEqualToString:`, should update to use the new string values:
+  - `QLKWorkspaceDidConnectNotification`
+  - `QLKWorkspaceDidDisconnectNotification`
+  - `QLKWorkspaceConnectionErrorNotification`
+
+
 ## Migrating from 0.0.2 to 0.0.3
 
 QLabKit 0.0.3 requires macOS 10.9+ or iOS 8.4+.
@@ -155,6 +195,6 @@ QLabKit 0.0.3 requires macOS 10.9+ or iOS 8.4+.
 
 ## License
 
-QLabKit © copyright 2014-2017 Figure 53, LLC.
+QLabKit © copyright 2014-2018 Figure 53, LLC.
 
 QLabKit is licensed under the MIT license.

@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -37,11 +37,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface QLKServer () {
     NSString *_hostVersion;
+    NSArray<QLKWorkspace *> *_workspaces;
 }
 
-@property (nonatomic, strong)               QLKClient *client;
+@property (nonatomic, strong, readwrite)    QLKClient *client;
 @property (nonatomic, strong, nullable)     NSTimer *refreshTimer;
-@property (atomic, copy, readwrite)         NSArray<QLKWorkspace *> *workspaces;
 
 - (void) updateWorkspaces:(NSArray<NSDictionary *> *)workspaceDicts;
 
@@ -49,11 +49,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 @implementation QLKServer
-
-- (instancetype) init NS_UNAVAILABLE
-{
-    return nil;
-}
 
 - (instancetype) initWithHost:(NSString *)host port:(NSInteger)port
 {
@@ -125,12 +120,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Workspaces
 
+- (NSArray<QLKWorkspace *> *) workspaces
+{
+    return [NSArray arrayWithArray:_workspaces];
+}
+
 - (void) updateWorkspaces:(NSArray<NSDictionary *> *)workspaceDicts
 {
     NSMutableArray<QLKWorkspace *> *newWorkspaces = [NSMutableArray array];
-    for ( NSDictionary<NSString *, id> *aWorkspaceDict in workspaceDicts )
+    for ( NSDictionary<NSString *, NSObject<NSCopying> *> *aWorkspaceDict in workspaceDicts )
     {
-        NSString *uniqueID = aWorkspaceDict[QLKOSCUIDKey];
+        NSString *uniqueID = (NSString *)aWorkspaceDict[QLKOSCUIDKey];
         if ( !uniqueID )
             continue;
         
@@ -147,20 +147,17 @@ NS_ASSUME_NONNULL_BEGIN
         }
     }
     
-    self.workspaces = newWorkspaces;
+    _workspaces = newWorkspaces;
     
     [self.delegate serverDidUpdateWorkspaces:self];
 }
 
 - (void) refreshWorkspaces
 {
-    if ( !self.client.isConnected )
+    if ( !self.client.isConnected && ![self.client connect] )
     {
-        if ( ![self.client connect] )
-        {
-            NSLog( @"Error: QLKServer unable to connect to QLab server: %@:%ld", self.host, (long)self.port );
-            return;
-        }
+        NSLog( @"Error: QLKServer unable to connect to QLab server: %@:%ld", self.host, (long)self.port );
+        return;
     }
     
     __weak typeof(self) weakSelf = self;
@@ -180,13 +177,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void) refreshWorkspacesWithCompletion:(nullable void (^)(NSArray<QLKWorkspace *> *workspaces))completion
 {
-    if ( !self.client.isConnected )
+    if ( !self.client.isConnected && ![self.client connect] )
     {
-        if ( ![self.client connect] )
-        {
-            NSLog( @"Error: QLKServer unable to connect to QLab server: %@:%ld", self.host, (long)self.port );
-            return;
-        }
+        NSLog( @"Error: QLKServer unable to connect to QLab server: %@:%ld", self.host, (long)self.port );
+        return;
     }
     
     __weak typeof(self) weakSelf = self;
@@ -219,7 +213,7 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
-- (QLKWorkspace *) newWorkspaceWithDictionary:(NSDictionary<NSString *, id> *)dict
+- (QLKWorkspace *) newWorkspaceWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict
 {
     // subclasses can override to customize QLKWorkspace returned, if desired
     QLKWorkspace *workspace = [[QLKWorkspace alloc] initWithDictionary:dict server:self];
@@ -248,7 +242,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     [self disableAutoRefresh];
     [self.client disconnect];
-    self.workspaces = @[];
+    _workspaces = @[];
 }
 
 - (void) sendOscMessage:(F53OSCMessage *)message

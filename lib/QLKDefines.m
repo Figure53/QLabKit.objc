@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2011-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2011-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -84,6 +84,7 @@ NSString * const QLKOSCNumberKey = @"number";
 NSString * const QLKOSCNotesKey = @"notes";
 NSString * const QLKOSCFileTargetKey = @"fileTarget";
 NSString * const QLKOSCCueTargetNumberKey = @"cueTargetNumber";
+NSString * const QLKOSCCurrentCueTargetKey = @"currentCueTarget";
 NSString * const QLKOSCColorNameKey = @"colorName";
 NSString * const QLKOSCFlaggedKey = @"flagged";
 NSString * const QLKOSCArmedKey = @"armed";

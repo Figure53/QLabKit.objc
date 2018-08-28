@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,6 @@ NS_ASSUME_NONNULL_BEGIN
     F53OSCClient *_OSCClient;
 }
 
-@property (nonatomic, strong, readonly)         F53OSCClient *OSCClient; // lazy-init; subclasses can override getter to provide custom F53OSCClient subclass
 @property (nonatomic, strong, readonly)         NSMutableDictionary<NSString *, QLKMessageHandlerBlock> *callbacks;
 @property (nonatomic, strong, readonly)         NSString *workspacePrefix;
 
@@ -60,18 +59,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation QLKClient
 
-- (instancetype) init NS_UNAVAILABLE
-{
-    return nil;
-}
-
 - (instancetype) initWithHost:(NSString *)host port:(NSInteger)port
 {
     self = [super init];
     if ( self )
     {
         self.OSCClient.host = host;
-        self.OSCClient.port = port;
+        if ( port >= 0 )
+            self.OSCClient.port = port;
         self.OSCClient.useTcp = YES;
         self.OSCClient.delegate = self;
         
@@ -91,13 +86,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark -
 
-- (F53OSCClient *) OSCClient
+- (nullable F53OSCClient *) OSCClient
 {
-    // subclasses of QLKClient may override this method to instantiate a custom subclass of F53OSCClient
+    // NOTE: subclasses may wish to override this getter, so for that reason we mark it `nullable`
+    // - even though the lazy init below means this *particular* implementation always returns a nonnull value
+    
+    // subclasses can do the following to provide their own custom subclass of F53OSCClient:
+    // 1) declare a private ivar in the QLKClient subclass with the F53OSCClient subclass type
+    // 2) override this getter method and return the F53OSCClient ivar
+    // 3) after calling `initWithHost:port:` on super in the QLKClient subclass init method, create an instance of the F53OSCClient subclass and assign it to the private ivar
     
     if ( !_OSCClient )
     {
         _OSCClient = [[F53OSCClient alloc] init];
+        _OSCClient.socketDelegateQueue = dispatch_queue_create( "com.figure53.QLabKit.F53OSCClient.socket", DISPATCH_QUEUE_SERIAL );
     }
     return _OSCClient;
 }
@@ -214,57 +216,116 @@ NS_ASSUME_NONNULL_BEGIN
             // this check is sufficient for determining whether new info is arriving
             if ( [data isKindOfClass:[NSDictionary class]] )
             {
-                [self.delegate cueUpdated:message.cueID withProperties:(NSDictionary *)data];
+                // replies from /valuesWithKeys contain already-formed data dictionaries
+                
+                __weak typeof(self.delegate) delegate = self.delegate;
+                dispatch_async( dispatch_get_main_queue(), ^{
+                    [delegate cueUpdated:message.cueID withProperties:(NSDictionary *)data];
+                });
+            }
+            else if ( message.addressParts.lastObject &&
+                     ( [data isKindOfClass:[NSNumber class]] || [data isKindOfClass:[NSString class]] ) )
+            {
+                // replies from property getters contain just the value, so we need to form the dictionary
+                NSDictionary *properties = @{ message.addressParts.lastObject : data };
+                
+                __weak typeof(self.delegate) delegate = self.delegate;
+                dispatch_async( dispatch_get_main_queue(), ^{
+                    [delegate cueUpdated:message.cueID withProperties:properties];
+                });
             }
         }
         
-        NSString *relativeAddress = [message addressWithoutWorkspace:self.delegate.workspaceID];
-        QLKMessageHandlerBlock block = self.callbacks[relativeAddress];
-        if ( block )
-        {
-            __weak typeof(self) weakSelf = self;
-            dispatch_async( dispatch_get_main_queue(), ^{
-                
-                __strong typeof(weakSelf) strongSelf = weakSelf;
-                if ( !strongSelf )
-                    return;
-                
-                block( data );
-                
-            });
+        __weak typeof(self) weakSelf = self;
+        dispatch_async( dispatch_get_main_queue(), ^{
             
-            // Remove handler for address (which should be non-null but checking to be safe)
-            if ( relativeAddress )
-                [self.callbacks removeObjectForKey:relativeAddress];
-        }
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if ( !strongSelf )
+                return;
+            
+            NSString *relativeAddress = [message addressWithoutWorkspace:strongSelf.delegate.workspaceID];
+            QLKMessageHandlerBlock block = strongSelf.callbacks[relativeAddress];
+            if ( !block )
+                return;
+            
+            // Remove handler for address
+            [strongSelf.callbacks removeObjectForKey:relativeAddress];
+            
+            block( data );
+            
+        });
     }
     else if ( message.isUpdate )
     {
         if ( message.isCueUpdate )
         {
-            [self.delegate cueNeedsUpdate:message.cueID];
+            __weak typeof(self.delegate) delegate = self.delegate;
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [delegate cueNeedsUpdate:message.cueID];
+            });
         }
         else if ( message.isPlaybackPositionUpdate )
         {
             NSArray<NSString *> *parts = message.addressParts; // ( parts.count == 6 ) validated by `isPlaybackPositionUpdate`
             NSString *cueListID = parts[4];
-            [self.delegate cueListUpdated:cueListID withPlaybackPositionID:message.cueID];
+            
+            __weak typeof(self.delegate) delegate = self.delegate;
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [delegate cueListUpdated:cueListID withPlaybackPositionID:message.cueID];
+            });
         }
         else if ( message.isWorkspaceUpdate )
         {
-            [self.delegate workspaceUpdated];
+            __weak typeof(self.delegate) delegate = self.delegate;
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [delegate workspaceUpdated];
+            });
         }
         else if ( message.isWorkspaceSettingsUpdate )
         {
             NSString *settingsType = message.addressParts.lastObject;
             if ( !settingsType )
                 return;
-            [self.delegate workspaceSettingsUpdated:settingsType];
+            
+            __weak typeof(self.delegate) delegate = self.delegate;
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [delegate workspaceSettingsUpdated:settingsType];
+            });
+        }
+        else if ( message.isLightDashboardUpdate )
+        {
+            // NOTE: Dashboard update messages are sent by QLab 4.2 and newer
+            if ( [self.delegate respondsToSelector:@selector(lightDashboardUpdated)] == NO )
+                return;
+            
+            __weak typeof(self.delegate) delegate = self.delegate;
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [delegate lightDashboardUpdated];
+            });
+        }
+        else if ( message.isPreferencesUpdate )
+        {
+            // NOTE: QLab app preference update messages are sent by QLab 4.2 and newer
+            if ( [self.delegate respondsToSelector:@selector(preferencesUpdated:)] == NO )
+                return;
+            
+            NSString *key = message.addressParts.lastObject;
+            if ( !key )
+                return;
+            
+            __weak typeof(self.delegate) delegate = self.delegate;
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [delegate preferencesUpdated:key];
+            });
         }
         else if ( message.isDisconnect )
         {
             NSLog( @"[client] disconnect message received: %@", message.address );
-            [self.delegate clientConnectionErrorOccurred];
+            
+            __weak typeof(self.delegate) delegate = self.delegate;
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [delegate workspaceDisconnected];
+            });
         }
         else
         {
@@ -277,9 +338,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - F53OSCPacketDestination
 
-- (void) takeMessage:(F53OSCMessage *)message
+- (void) takeMessage:(nullable F53OSCMessage *)message
 {
-    [self processMessage:[QLKMessage messageWithOSCMessage:message]];
+    if ( !message )
+        return;
+    
+    // called on the self.OSCClient.socketDelegateQueue thread
+    [self processMessage:[QLKMessage messageWithOSCMessage:(F53OSCMessage * _Nonnull)message]];
 }
 
 
@@ -293,7 +358,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) clientDidDisconnect:(F53OSCClient *)client
 {
     NSLog( @"[client] clientDidDisconnect: %@", client );
+    
     [self.delegate clientConnectionErrorOccurred];
+    
+    // if delegate replies with NO, do nothing further
+    // - delegate will be responsible for disconnecting and destroying this client
+    if ( [self.delegate respondsToSelector:@selector(clientShouldDisconnectOnError)] &&
+        [self.delegate clientShouldDisconnectOnError] == NO )
+    {
+        return;
+    }
+    
+    [self disconnect];
 }
 
 @end

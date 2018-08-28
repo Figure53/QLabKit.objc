@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -38,9 +38,11 @@ NS_ASSUME_NONNULL_BEGIN
 // Notifications sent by workspaces
 extern NSString * const QLKWorkspaceDidUpdateNotification;
 extern NSString * const QLKWorkspaceDidUpdateSettingsNotification;
+extern NSString * const QLKWorkspaceDidUpdateLightDashboardNotification;
 extern NSString * const QLKWorkspaceDidConnectNotification;
 extern NSString * const QLKWorkspaceDidDisconnectNotification;
 extern NSString * const QLKWorkspaceConnectionErrorNotification;
+extern NSString * const QLKQLabDidUpdatePreferencesNotification;
 
 @class QLKServer, QLKCue;
 
@@ -51,9 +53,16 @@ extern NSString * const QLKWorkspaceConnectionErrorNotification;
 @property (nonatomic, readonly)     NSInteger minorVersion;
 @property (nonatomic, readonly)     NSInteger patchVersion;
 
++ (instancetype) versionWithString:(NSString *)versionString;
 - (instancetype) initWithString:(NSString *)versionString NS_DESIGNATED_INITIALIZER;
 
 @property (nonatomic, readonly, copy) NSString *stringValue;
+
+- (NSComparisonResult) compare:(QLKQLabWorkspaceVersion *)otherVersion;
+
+- (BOOL) isOlderThanVersion:(NSString *)version;
+- (BOOL) isEqualToVersion:(NSString *)version;
+- (BOOL) isNewerThanVersion:(NSString *)version;
 
 @end
 
@@ -94,7 +103,11 @@ extern NSString * const QLKWorkspaceConnectionErrorNotification;
 @property (strong, nonatomic, nullable)             NSString *passcode;
 
 // Whether we currently have a connection
-@property (nonatomic, readonly)                     BOOL connected;
+@property (atomic, readonly)                        BOOL connected;
+
+// Whether we should wait to disconnect upon receiving a connection error from the client. Default is NO
+// When set to YES, this workspace will prevent the client from disconnecting upon receiving a client connection error. This workspace is then responsible for disconnecting/destroying the client as needed.
+@property (nonatomic)                               BOOL attemptToReconnect;
 
 // When unknown, default value is equivalent to version 3.0.0
 @property (nonatomic, strong, readonly)             QLKQLabWorkspaceVersion *workspaceQLabVersion;
@@ -103,23 +116,28 @@ extern NSString * const QLKWorkspaceConnectionErrorNotification;
 
 @property (nonatomic)                               BOOL defaultSendUpdatesOSC;
 
+// When set to YES, each new QLKCue object is immediately set to defer fetching cue properties (by sending the cue's workspace object a `deferFetchingPropertiesForCue:` after init). Default is NO.
+@property (atomic)                                  BOOL defaultDeferFetchingPropertiesForNewCues;
+
+@property (nonatomic, strong, readonly)             dispatch_queue_t cuePropertiesQueue;
+
+
 // workspace with QLKClient automatically configured to use the QLKServer `host` and `port` values
-- (instancetype) initWithDictionary:(NSDictionary<NSString *, id> *)dict server:(QLKServer *)server;
+- (instancetype) initWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict server:(QLKServer *)server;
 
 // workspace with a given QLKClient (e.g. a customized subclass)
-- (instancetype) initWithDictionary:(NSDictionary<NSString *, id> *)dict server:(QLKServer *)server client:(QLKClient *)client;
+- (instancetype) initWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict server:(QLKServer *)server client:(QLKClient *)client;
 
 // update transient values from a dictionary (currently only the `name` and `hasPasscode` values are allowed to be changed after initial init). Returns YES if any value changed.
-- (BOOL) updateWithDictionary:(NSDictionary<NSString *, id> *)dict;
+- (BOOL) updateWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict;
 
 - (BOOL) isQLabWorkspaceVersionAtLeastVersion:(QLKQLabWorkspaceVersion *)version;
 
-- (void) connect;
 - (void) connectWithPasscode:(nullable NSString *)passcode completion:(nullable QLKMessageHandlerBlock)completion;
 - (void) finishConnection;
+- (void) reconnect;
 - (void) disconnect;
 - (void) temporarilyDisconnect;
-- (void) reconnect;
 
 - (nullable QLKCue *) cueWithID:(NSString *)uid;
 - (nullable QLKCue *) cueWithNumber:(NSString *)number;
@@ -143,6 +161,8 @@ extern NSString * const QLKWorkspaceConnectionErrorNotification;
 - (void) stopAll;
 - (void) panicAll;
 
+- (void) startHeartbeat;
+- (void) stopHeartbeat;
 
 - (void) startCue:(QLKCue *)cue;
 - (void) stopCue:(QLKCue *)cue;
@@ -157,22 +177,25 @@ extern NSString * const QLKWorkspaceConnectionErrorNotification;
 - (void) previewCue:(QLKCue *)cue;
 - (void) panicCue:(QLKCue *)cue;
 
+// NOTE: these methods bypass the defer/resume fetching mechanism and always immediately retrieve values
+- (void) cue:(QLKCue *)cue valueForKey:(NSString *)key block:(nullable QLKMessageHandlerBlock)block;
 - (void) cue:(QLKCue *)cue valuesForKeys:(NSArray<NSString *> *)keys;
 - (void) cue:(QLKCue *)cue valuesForKeys:(NSArray<NSString *> *)keys block:(nullable QLKMessageHandlerBlock)block;
-- (void) cue:(QLKCue *)cue valueForKey:(NSString *)key block:(nullable QLKMessageHandlerBlock)block;
-
 - (void) cue:(QLKCue *)cue updatePropertySend:(nullable id)value forKey:(NSString *)key;
 - (void) cue:(QLKCue *)cue updatePropertiesSend:(nullable NSArray *)values forKey:(NSString *)key;
 - (void) updateAllCuePropertiesSendOSC;
+- (void) runningOrPausedCuesWithBlock:(nullable QLKMessageHandlerBlock)block;
 
+// NOTE: these methods defer fetching values according to the defer/resumeFetchingProperties status of the cue
 - (void) fetchDefaultCueListPropertiesForCue:(QLKCue *)cue; // requests same properties returned by /cueLists method
 - (void) fetchBasicPropertiesForCue:(QLKCue *)cue;
-- (void) fetchChildrenForCue:(QLKCue *)cue block:(nullable QLKMessageHandlerBlock)block;
 - (void) fetchNotesForCue:(QLKCue *)cue;
-- (void) fetchAudioLevelsForCue:(QLKCue *)cue block:(nullable QLKMessageHandlerBlock)block;
 - (void) fetchDisplayAndGeometryForCue:(QLKCue *)cue;
 - (void) fetchPropertiesForCue:(QLKCue *)cue keys:(NSArray<NSString *> *)keys includeChildren:(BOOL)includeChildren;
-- (void) runningOrPausedCuesWithBlock:(nullable QLKMessageHandlerBlock)block;
+
+- (void) deferFetchingPropertiesForCue:(QLKCue *)cue;
+- (void) resumeFetchingPropertiesForCue:(QLKCue *)cue;
+
 
 // Lower level API
 - (void) sendMessage:(nullable id)object toAddress:(NSString *)address;
@@ -189,13 +212,11 @@ extern NSString * const QLKWorkspaceConnectionErrorNotification;
 - (NSString *) addressForWildcardNumber:(NSString *)number action:(NSString *)action;
 
 
-// Renamed - unavailable
-- (void) cue:(QLKCue *)cue valueForKey:(NSString *)key completion:(nullable QLKMessageHandlerBlock)block DEPRECATED_MSG_ATTRIBUTE("renamed to cue:valueForKey:block:");
-- (nullable QLKCue *) cueWithId:(NSString *)uid DEPRECATED_MSG_ATTRIBUTE("renamed to cueWithID:");
-- (void) fetchCueListsWithCompletion:(nullable QLKMessageHandlerBlock)block DEPRECATED_MSG_ATTRIBUTE("renamed to fetchCueListsWithBlock:");
-- (void) fetchPlaybackPositionForCue:(QLKCue *)cue completion:(nullable QLKMessageHandlerBlock)block DEPRECATED_MSG_ATTRIBUTE("renamed to fetchPlaybackPositionForCue:block:");
-- (void) fetchChildrenForCue:(QLKCue *)cue completion:(nullable QLKMessageHandlerBlock)block DEPRECATED_MSG_ATTRIBUTE("renamed to fetchChildrenForCue:block:");
-- (void) fetchAudioLevelsForCue:(QLKCue *)cue completion:(nullable QLKMessageHandlerBlock)block DEPRECATED_MSG_ATTRIBUTE("renamed to fetchAudioLevelsForCue:block:");
+
+// Deprecated in 0.0.4 - leaving for compatibility with QLabKit.objc 0.0.3
+- (void) connect DEPRECATED_MSG_ATTRIBUTE("Use -connectWithPasscode:completion: instead");
+- (void) fetchChildrenForCue:(QLKCue *)cue block:(nullable QLKMessageHandlerBlock)block DEPRECATED_MSG_ATTRIBUTE("Use -cue:valueForKey:block: with key @\"children\" instead");
+- (void) fetchAudioLevelsForCue:(QLKCue *)cue block:(nullable QLKMessageHandlerBlock)block DEPRECATED_MSG_ATTRIBUTE("Use -cue:valueForKey:block: with key @\"sliderLevels\" instead");
 
 @end
 

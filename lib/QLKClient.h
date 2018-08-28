@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -39,9 +39,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface QLKClient : NSObject <F53OSCPacketDestination, F53OSCClientDelegate>
 
-- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port NS_DESIGNATED_INITIALIZER;
+- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port;
 
 @property (nonatomic, weak, nullable)               id<QLKClientDelegate> delegate;
+@property (nonatomic, strong, nullable, readonly)   F53OSCClient *OSCClient;
 @property (nonatomic)                               BOOL useTCP;
 @property (nonatomic, readonly)                     BOOL isConnected;
 
@@ -67,10 +68,27 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void) workspaceUpdated;
 - (void) workspaceSettingsUpdated:(NSString *)settingsType;
+- (void) workspaceDisconnected;
 - (void) cueNeedsUpdate:(NSString *)cueID;
-- (void) cueUpdated:(NSString *)cueID withProperties:(NSDictionary<NSString *, id> *)properties;
+- (void) cueUpdated:(NSString *)cueID withProperties:(NSDictionary<NSString *, NSObject<NSCopying> *> *)properties;
 - (void) cueListUpdated:(NSString *)cueListID withPlaybackPositionID:(nullable NSString *)cueID;
 - (void) clientConnectionErrorOccurred;
+
+@optional
+// upon encountering a connection error, if delegate returns YES (or method is not implemented), client will immediately send `clientConnectionErrorOccurred`
+// if delegate returns NO, delegate is responsible for disconnecting/destroying this client when appropriate
+- (BOOL) clientShouldDisconnectOnError;
+
+// NOTE: these update messages are sent only when connected to QLab 4.2+
+- (void) lightDashboardUpdated;
+- (void) preferencesUpdated:(NSString *)key;
+
+@end
+
+
+@interface QLKClient (DisallowedInits)
+
+- (instancetype) init  __attribute__((unavailable("Use -initWithHost:port:")));
 
 @end
 

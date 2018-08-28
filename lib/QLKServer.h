@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype) initWithHost:(NSString *)host port:(NSInteger)port;
 
 // Create a server with the host, port, and custom QLKClient instance to connect.
-- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port client:(QLKClient *)client NS_DESIGNATED_INITIALIZER;
+- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port client:(QLKClient *)client;
 
 @property (nonatomic, weak, nullable)               id<QLKServerDelegate> delegate;
 
@@ -65,12 +65,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly, nullable)   NSString *hostVersion;
 
 // Array of QLKWorkspace objects that belong to this server.
-@property (atomic, copy, readonly)                  NSArray<QLKWorkspace *> *workspaces;
+@property (nonatomic, copy, readonly)               NSArray<QLKWorkspace *> *workspaces;
+
+@property (nonatomic, strong, readonly)             QLKClient *client;
 
 @property (nonatomic, getter=isConnected, readonly) BOOL connected;
 
 - (nullable QLKWorkspace *) workspaceWithID:(NSString *)uniqueID;
-- (QLKWorkspace *) newWorkspaceWithDictionary:(NSDictionary<NSString *, id> *)dict; // subclasses can override to customize QLKWorkspace created if desired
+- (QLKWorkspace *) newWorkspaceWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict; // subclasses can override to customize QLKWorkspace created if desired
 
 - (void) refreshWorkspaces;
 - (void) refreshWorkspacesWithCompletion:(nullable void (^)(NSArray<QLKWorkspace *> *workspaces))completion;
@@ -91,6 +93,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @optional
 - (void) serverDidUpdateHostVersion:(QLKServer *)server;
+
+@end
+
+
+@interface QLKServer (DisallowedInits)
+
+- (instancetype) init  __attribute__((unavailable("Use -initWithHost:port:client: or -initWithHost:port:")));
 
 @end
 

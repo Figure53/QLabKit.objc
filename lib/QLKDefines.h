@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2011-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2011-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -106,6 +106,7 @@ extern NSString * const QLKOSCNumberKey;
 extern NSString * const QLKOSCNotesKey;
 extern NSString * const QLKOSCFileTargetKey;
 extern NSString * const QLKOSCCueTargetNumberKey;
+extern NSString * const QLKOSCCurrentCueTargetKey; // returns cue_id
 extern NSString * const QLKOSCColorNameKey;
 extern NSString * const QLKOSCFlaggedKey;
 extern NSString * const QLKOSCArmedKey;

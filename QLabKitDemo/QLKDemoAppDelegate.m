@@ -1,10 +1,10 @@
 //
-//  QLKAppDelegate.m
+//  QLKDemoAppDelegate.m
 //  QLabKitDemo
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 //  THE SOFTWARE.
 //
 
-#import "QLKAppDelegate.h"
+#import "QLKDemoAppDelegate.h"
 #import "QLabKit.h"
 
 #define REFRESH_INTERVAL        3 // seconds
@@ -36,7 +36,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface QLKAppDelegate ()
+@interface QLKDemoAppDelegate ()
 
 @property (strong) QLKBrowser *browser;
 @property (strong) NSMutableArray *rows;
@@ -46,7 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 
-@implementation QLKAppDelegate
+@implementation QLKDemoAppDelegate
 
 - (void) applicationDidFinishLaunching:(NSNotification *)notification
 {

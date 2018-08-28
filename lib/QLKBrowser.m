@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -39,14 +39,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface QLKBrowser () {
-    NSMutableArray<QLKServer *> *_servers;
-}
+@interface QLKBrowser ()
 
 @property (assign, readwrite)                   BOOL running;
-@property (nonatomic, strong, nullable)         NSNetServiceBrowser *domainsBrowser;
-@property (nonatomic, strong, nullable)         NSNetServiceBrowser *browser;
+@property (nonatomic, strong, nullable)         NSNetServiceBrowser *netServiceDomainsBrowser;
+@property (nonatomic, strong, nullable)         NSNetServiceBrowser *netServiceTCPBrowser;
 @property (nonatomic, strong, nullable)         NSTimer *refreshTimer;
+@property (nonatomic, strong)                   NSMutableArray<QLKServer *> *mutableServers;
 
 @property (nonatomic, strong)                   NSMutableArray<NSNetService *> *netServices;
 
@@ -70,13 +69,13 @@ NS_ASSUME_NONNULL_BEGIN
     self = [super init];
     if ( self )
     {
-        _running = NO;
-        _browser = nil;
-        _refreshTimer = nil;
+        self.running = NO;
+        self.netServiceTCPBrowser = nil;
         
-        _netServices = [[NSMutableArray alloc] init];
-        _servers = [[NSMutableArray alloc] init];
+        self.refreshTimer = nil;
         
+        self.netServices = [NSMutableArray arrayWithCapacity:0];
+        self.mutableServers = [NSMutableArray arrayWithCapacity:0];
     }
     return self;
 }
@@ -84,6 +83,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) dealloc
 {
     [self stop];
+}
+
+
+
+#pragma mark - custom getters setters
+
+- (NSArray<QLKServer *> *) servers
+{
+    return [NSArray arrayWithArray:self.mutableServers];
 }
 
 
@@ -103,10 +111,10 @@ NS_ASSUME_NONNULL_BEGIN
         return;
     
     // Create Bonjour browser to find available domains
-    self.domainsBrowser = [[NSNetServiceBrowser alloc] init];
-    self.domainsBrowser.delegate = self;
+    self.netServiceDomainsBrowser = [[NSNetServiceBrowser alloc] init];
+    self.netServiceDomainsBrowser.delegate = self;
     
-    [self.domainsBrowser searchForBrowsableDomains];
+    [self.netServiceDomainsBrowser searchForBrowsableDomains];
 }
 
 - (void) stop
@@ -120,17 +128,17 @@ NS_ASSUME_NONNULL_BEGIN
     self.delegate = nil;
     
     // Stop bonjour browsers - delegate methods will perform cleanup
-    [self.domainsBrowser stop];
-    [self.browser stop];
+    [self.netServiceDomainsBrowser stop];
+    [self.netServiceTCPBrowser stop];
     
     // Stop/remove all servers
-    for ( QLKServer *aServer in _servers )
+    for ( QLKServer *aServer in self.servers )
     {
         [aServer stop];
         aServer.delegate = nil;
         aServer.netService = nil;
     }
-    [_servers removeAllObjects];
+    [self.mutableServers removeAllObjects];
 }
 
 - (void) refreshAllWorkspaces
@@ -144,7 +152,7 @@ NS_ASSUME_NONNULL_BEGIN
     if ( theTimer && ( !self.refreshTimer || !theTimer.isValid ) )
         return;
     
-    for ( QLKServer *server in _servers )
+    for ( QLKServer *server in self.servers )
     {
         [server refreshWorkspaces];
     }
@@ -171,7 +179,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 
-#pragma mark -
+#pragma mark - private
 
 - (void) setNeedsNotifyDelegateBrowserDidUpdateServers
 {
@@ -192,21 +200,25 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void) beginResolvingNetServices
 {
-    for ( NSNetService *aService in self.netServices )
+    // NOTE: if resolveWithTimeout: resolves immediately, netServiceDidResolveAddress: will mutate the `netServices` array
+    // - so here we must enumerate a copy of that collection to avoid a crash
+    NSArray<NSNetService *> *netServices = [self.netServices copy];
+    for ( NSNetService *aService in netServices )
     {
         if ( aService.addresses.count )
             continue;
         
-        [aService resolveWithTimeout:5.0f];
+        [aService resolveWithTimeout:5.0];
     }
 }
+
 
 
 #pragma mark -
 
 - (nullable QLKServer *) serverForHost:(NSString *)host
 {
-    for ( QLKServer *server in _servers )
+    for ( QLKServer *server in self.servers )
     {
         if ( [server.host isEqualToString:host] )
         {
@@ -278,15 +290,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) netServiceBrowserWillSearch:(NSNetServiceBrowser *)browser
 {
 #if DEBUG_BROWSER
-    if ( browser == self.domainsBrowser )
+    if ( browser == self.netServiceDomainsBrowser )
         NSLog( @"[browser] starting bonjour - browsable domains search" );
-    else if ( browser == self.browser )
-        NSLog( @"[browser] starting bonjour - \"%@\"", QLKBonjourServiceDomain );
+    else if ( browser == self.netServiceTCPBrowser )
+        NSLog( @"[browser] starting bonjour (TCP) - \"%@\"", QLKBonjourServiceDomain );
     else
         NSLog( @"[browser] netServiceBrowserWillSearch: %@", browser );
 #endif
     
-    if ( browser == self.domainsBrowser )
+    if ( browser == self.netServiceDomainsBrowser )
         self.running = YES;
     
     [self.delegate browserDidUpdateServers:self];
@@ -295,25 +307,25 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) netServiceBrowserDidStopSearch:(NSNetServiceBrowser *)browser
 {
 #if DEBUG_BROWSER
-    if ( browser == self.domainsBrowser )
+    if ( browser == self.netServiceDomainsBrowser )
         NSLog( @"[browser] stopping bonjour - browsable domains search" );
-    else if ( browser == self.browser )
-        NSLog( @"[browser] stopping bonjour - \"%@\"", QLKBonjourServiceDomain );
+    else if ( browser == self.netServiceTCPBrowser )
+        NSLog( @"[browser] stopping bonjour (TCP) - \"%@\"", QLKBonjourServiceDomain );
     else
         NSLog( @"[browser] netServiceBrowserDidStopSearch: %@", browser );
 #endif
     
-    if ( browser == self.domainsBrowser )
+    if ( browser == self.netServiceDomainsBrowser )
     {
         self.running = NO;
         
-        self.domainsBrowser.delegate = nil;
-        self.domainsBrowser = nil;
+        self.netServiceDomainsBrowser.delegate = nil;
+        self.netServiceDomainsBrowser = nil;
     }
-    else if ( browser == self.browser )
+    else if ( browser == self.netServiceTCPBrowser )
     {
-        self.browser.delegate = nil;
-        self.browser = nil;
+        self.netServiceTCPBrowser.delegate = nil;
+        self.netServiceTCPBrowser = nil;
     }
     
     [self.delegate browserDidUpdateServers:self];
@@ -336,13 +348,12 @@ NS_ASSUME_NONNULL_BEGIN
     NSLog( @"[browser] netServiceBrowser:didFindDomain: \"%@\" moreComing: %@", domainString, ( moreComing ? @"YES" : @"NO" ) );
 #endif
     
-    // currently for debugging information only - if we find more domains than "local." exist, then we will need to alter this to create an NSNetServiceBrowser for each domain
-    if ( !self.browser && [domainString isEqualToString:QLKBonjourServiceDomain] )
+    if ( !self.netServiceTCPBrowser && [domainString isEqualToString:QLKBonjourServiceDomain] )
     {
-        self.browser = [[NSNetServiceBrowser alloc] init];
-        self.browser.delegate = self;
+        self.netServiceTCPBrowser = [[NSNetServiceBrowser alloc] init];
+        self.netServiceTCPBrowser.delegate = self;
         
-        [self.browser searchForServicesOfType:QLKBonjourTCPServiceType inDomain:QLKBonjourServiceDomain];
+        [self.netServiceTCPBrowser searchForServicesOfType:QLKBonjourTCPServiceType inDomain:QLKBonjourServiceDomain];
     }
 }
 
@@ -372,7 +383,7 @@ NS_ASSUME_NONNULL_BEGIN
     [server stop];
     server.delegate = nil;
     server.netService = nil;
-    [_servers removeObject:server];
+    [self.mutableServers removeObject:server];
     
     // multiple calls cancel previous requests to ensure delegate is only notified once (i.e. if moreComing == YES)
     [self setNeedsNotifyDelegateBrowserDidUpdateServers];
@@ -387,6 +398,9 @@ NS_ASSUME_NONNULL_BEGIN
 #if DEBUG_BROWSER
     NSLog( @"[browser] netServiceDidResolveAddress: %@", netService );
 #endif
+    NSInteger port = netService.port;
+    if ( port < 0 ) // -1 = not resolved
+        return;
     
     NSString *host = netService.hostName;
     
@@ -409,7 +423,6 @@ NS_ASSUME_NONNULL_BEGIN
         }
     }
     
-    NSInteger port = netService.port;
     QLKServer *server = [[QLKServer alloc] initWithHost:host port:port];
     server.name = netService.name;
     server.delegate = self;
@@ -424,7 +437,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSLog( @"[browser] adding server: %@", server );
 #endif
     
-    [_servers addObject:server];
+    [self.mutableServers addObject:server];
     
     __weak typeof(self) weakSelf = self;
     dispatch_async( dispatch_get_main_queue(), ^{

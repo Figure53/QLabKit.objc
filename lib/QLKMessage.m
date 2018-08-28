@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -44,11 +44,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (QLKMessage *) messageWithOSCMessage:(F53OSCMessage *)message
 {
     return [[QLKMessage alloc] initWithOSCMessage:message];
-}
-
-- (instancetype) init NS_UNAVAILABLE
-{
-    return nil;
 }
 
 - (instancetype) initWithOSCMessage:(F53OSCMessage *)message
@@ -102,6 +97,14 @@ NS_ASSUME_NONNULL_BEGIN
     return ( parts.count == 5 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"settings"] );
 }
 
+- (BOOL) isLightDashboardUpdate
+{
+    // /update/workspace/{workspace_id}/dashboard
+    NSArray<NSString *> *parts = self.addressParts;
+    
+    return ( parts.count == 4 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"dashboard"] );
+}
+
 - (BOOL) isCueUpdate
 {
     // /update/workspace/{workspace_id}/cue_id/{cue_id}
@@ -118,9 +121,20 @@ NS_ASSUME_NONNULL_BEGIN
     return ( parts.count == 6 && [self.address hasSuffix:@"/playbackPosition"] );
 }
 
+- (BOOL) isPreferencesUpdate
+{
+    // /update/preferences/{preferences_key}
+    NSArray<NSString *> *parts = self.addressParts;
+    
+    return ( parts.count == 3 && [parts[1] isEqualToString:@"preferences"] );
+}
+
 - (BOOL) isDisconnect
 {
-    return [self.address hasSuffix:@"/disconnect"];
+    // /update/workspace/{workspace_id}/disconnect
+    NSArray<NSString *> *parts = self.addressParts;
+    
+    return ( parts.count == 4 && [parts[3] isEqualToString:@"disconnect"] );
 }
 
 - (nullable NSString *) host

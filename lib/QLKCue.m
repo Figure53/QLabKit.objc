@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -30,30 +30,36 @@
 #import "QLKColor.h"
 
 
+#if DEBUG
+#define DEBUG_DEALLOC   0
+#endif
+
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface QLKCue () {
-    NSUInteger _sortIndex;
-    NSArray<QLKCue *> *_childCuesSorted;
-    
-    QLKImage *_icon;
-    BOOL _isAudio;
-    BOOL _isVideo;
-    BOOL _isGroup;
-    BOOL _isCueList;
-    BOOL _isCueCart;
-    
-    //unsigned long _random;     //debug
+#if DEBUG_DEALLOC
+    unsigned long _randomIdentifier; //debug
+#endif
 }
 
+@property (strong, atomic, readwrite, nullable) QLKImage *icon;
+@property (atomic, getter=isAudio, readwrite)   BOOL audio;
+@property (atomic, getter=isVideo, readwrite)   BOOL video;
+@property (atomic, getter=isGroup, readwrite)   BOOL group;
+@property (atomic, getter=isCueList, readwrite) BOOL cueList;
+@property (atomic, getter=isCueCart, readwrite) BOOL cueCart;
+
 @property (nonatomic, weak, readwrite, nullable)    QLKWorkspace *workspace;
-@property (nonatomic, strong, readonly)             NSMutableDictionary<NSString *, id> *cueData;
-@property (nonatomic, strong, readonly)             NSMapTable<NSString *, QLKCue *> *childCuesUIDMap;
+@property (atomic, strong, readonly)                NSMutableDictionary<NSString *, id> *cueData;
+@property (atomic, strong, readonly)                NSMutableArray<QLKCue *> *childCues;
+@property (atomic, strong, readonly)                NSMapTable<NSString *, QLKCue *> *childCuesUIDMap;
 
-@property (nonatomic, strong, readonly)             dispatch_queue_t dataQueue;
-@property (nonatomic, strong, readonly)             dispatch_queue_t childPropertiesQueue;
+@property (atomic)                                  BOOL needsSortChildCues;
+@property (atomic)                                  BOOL needsNotifyCueUpdated;
 
-- (NSArray<QLKCue *> *) _arrayWithSortedChildCues:(NSArray<QLKCue *> *)childCues;
+@property (atomic, strong, readonly)                dispatch_queue_t dataQueue; // concurrent queue unique to this cue
+@property (atomic, weak, readonly)                  dispatch_queue_t cuePropertiesQueue; // cached pointer to shared workspace serial queue
 
 @end
 
@@ -65,7 +71,9 @@ NS_ASSUME_NONNULL_BEGIN
     self = [super init];
     if ( self )
     {
-        _cueData = [NSMutableDictionary dictionaryWithCapacity:30]; // total possible keys is closer to 65, but 30 allows for most commonly used keys -- just so we aren't initially overallocating for keys more rarely used
+        // total possible keys is closer to 65, but 30 allows for most commonly used keys
+        // - no need to initially overallocate capacity for rarely-used keys
+        _cueData = [NSMutableDictionary dictionaryWithCapacity:30];
         [_cueData setValuesForKeysWithDictionary:@{
                                                    QLKOSCFlaggedKey : @NO,
                                                    QLKOSCArmedKey : @YES,
@@ -83,15 +91,16 @@ NS_ASSUME_NONNULL_BEGIN
                                                    QLKOSCIsOverriddenKey : @NO,
                                                    QLKOSCContinueModeKey : @0,
                                                    }];
-        _childCuesUIDMap = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsWeakMemory valueOptions:NSPointerFunctionsWeakMemory capacity:0]; // only Group cues will have children, so default to 0 capacity
-        _childCuesSorted = @[];
+        _childCues = [NSMutableArray arrayWithCapacity:0];
+        _childCuesUIDMap = [NSMapTable weakToWeakObjectsMapTable];
         
         _dataQueue = dispatch_queue_create( "com.figure53.QLabKit.QLKCue.dataQueue", DISPATCH_QUEUE_CONCURRENT );
-        _childPropertiesQueue = dispatch_queue_create( "com.figure53.QLabKit.QLKCue.childPropertiesQueue", DISPATCH_QUEUE_SERIAL );
     }
     
-    //_random = arc4random_uniform(999999999);  //debug
-    //NSLog( @"init    %lu", _random );         //debug
+#if DEBUG_DEALLOC
+    _randomIdentifier = arc4random_uniform(999999999);  //debug
+    NSLog( @"init    %lu", _randomIdentifier );         //debug
+#endif
     
     return self;
 }
@@ -106,21 +115,65 @@ NS_ASSUME_NONNULL_BEGIN
     return self;
 }
 
-- (instancetype) initWithDictionary:(NSDictionary<NSString *, id> *)dict workspace:(QLKWorkspace *)workspace
+- (instancetype) initWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict workspace:(QLKWorkspace *)workspace
 {
-    self = [self init];
+    self = [self initWithWorkspace:workspace];
     if ( self )
     {
-        self.workspace = workspace;
-        [self updatePropertiesWithDictionary:dict];
+        // if this cue has child cues, populate with new cues up-front so that
+        // - 1) we can apply the workspace `defaultDeferFetchingPropertiesForNewCues` if any, and
+        // - 2) the cue list has at least *some* cue data to display before `updatePropertiesWithDictionary:notify:` goes to background threads
+        NSObject<NSCopying> *childCues = dict[QLKOSCCuesKey];
+        if ( [childCues isKindOfClass:[NSArray class]] )
+        {
+            for ( NSDictionary<NSString *, NSObject<NSCopying> *> *aChildDict in ((NSArray *)childCues) )
+            {
+                NSString *uid = (NSString *)aChildDict[QLKOSCUIDKey];
+                if ( !uid )
+                    continue;
+                
+                NSMutableDictionary *newChildDict = [NSMutableDictionary dictionaryWithCapacity:8];
+                newChildDict[QLKOSCUIDKey] = uid;
+                
+                if ( aChildDict[QLKOSCArmedKey] )
+                    newChildDict[QLKOSCArmedKey]     = aChildDict[QLKOSCArmedKey];
+                if ( aChildDict[QLKOSCColorNameKey] )
+                    newChildDict[QLKOSCColorNameKey] = aChildDict[QLKOSCColorNameKey];
+                if ( aChildDict[QLKOSCFlaggedKey] )
+                    newChildDict[QLKOSCFlaggedKey]   = aChildDict[QLKOSCFlaggedKey];
+                if ( aChildDict[QLKOSCListNameKey] )
+                    newChildDict[QLKOSCListNameKey]  = aChildDict[QLKOSCListNameKey];
+                if ( aChildDict[QLKOSCNameKey] )
+                    newChildDict[QLKOSCNameKey]      = aChildDict[QLKOSCNameKey];
+                if ( aChildDict[QLKOSCNumberKey] )
+                    newChildDict[QLKOSCNumberKey]    = aChildDict[QLKOSCNumberKey];
+                if ( aChildDict[QLKOSCTypeKey] )
+                    newChildDict[QLKOSCTypeKey]      = aChildDict[QLKOSCTypeKey];
+                if ( aChildDict[QLKOSCUIDKey] )
+                    newChildDict[QLKOSCUIDKey]       = aChildDict[QLKOSCUIDKey];
+                
+                QLKCue *child = [[QLKCue alloc] initWithDictionary:newChildDict
+                                                         workspace:workspace];
+                
+                if ( workspace.defaultDeferFetchingPropertiesForNewCues )
+                    [workspace deferFetchingPropertiesForCue:child];
+                
+                [self.childCues addObject:child];
+                [self.childCuesUIDMap setObject:child forKey:uid];
+            }
+        }
+        
+        [self updatePropertiesWithDictionary:dict notify:NO];
     }
     return self;
 }
 
-//- (void) dealloc
-//{
-//    NSLog( @"dealloc %lu", _random );   //debug
-//}
+- (void) dealloc
+{
+#if DEBUG_DEALLOC
+    NSLog( @"dealloc %lu", _randomIdentifier ); //debug
+#endif
+}
 
 - (NSString *) description
 {
@@ -153,30 +206,36 @@ NS_ASSUME_NONNULL_BEGIN
     return self.uid.hash;
 }
 
-- (BOOL) isEqualToCue:(QLKCue *)cue
-{
-    return ( cue.uid && [self.uid isEqualToString:(NSString * _Nonnull)cue.uid] );
-}
-
-NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
+- (NSComparisonResult) compare:(QLKCue *)otherCue
 {
     // Sort Function
-    NSUInteger cue1Index = ((QLKCue *)id1).sortIndex;
-    NSUInteger cue2Index = ((QLKCue *)id2).sortIndex;
+    NSUInteger thisIndex = self.sortIndex;
+    NSUInteger otherIndex = otherCue.sortIndex;
     
-    if ( cue1Index < cue2Index )
+    if ( thisIndex < otherIndex )
         return NSOrderedAscending;
-    else if ( cue1Index > cue2Index )
+    else if ( thisIndex > otherIndex )
         return NSOrderedDescending;
     else
         return NSOrderedSame;
 }
 
-- (NSArray<QLKCue *> *) _arrayWithSortedChildCues:(NSArray<QLKCue *> *)childCues
+- (BOOL) isEqualToCue:(QLKCue *)cue
 {
-    NSData *hint = childCues.sortedArrayHint;
-    NSArray *sortedCues = [childCues sortedArrayUsingFunction:SortCuesBySortIndex context:nil hint:hint];
-    return sortedCues;
+    return ( cue.uid && [self.uid isEqualToString:(NSString * _Nonnull)cue.uid] );
+}
+
+- (void) setWorkspace:(nullable QLKWorkspace *)workspace
+{
+    if ( _workspace != workspace )
+    {
+        [self willChangeValueForKey:@"workspace"];
+        
+        _workspace = workspace;
+        _cuePropertiesQueue = _workspace.cuePropertiesQueue;
+        
+        [self didChangeValueForKey:@"workspace"];
+    }
 }
 
 - (void) addChildCue:(QLKCue *)cue
@@ -193,12 +252,10 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     __weak typeof(self) weakSelf = self;
     dispatch_barrier_async( self.dataQueue, ^{
         
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if ( !strongSelf )
-            return;
-        
-        [strongSelf.childCuesUIDMap setObject:cue forKey:uid];
-        strongSelf->_childCuesSorted = [strongSelf _arrayWithSortedChildCues:strongSelf.childCuesUIDMap.objectEnumerator.allObjects];
+        [weakSelf.childCues addObject:cue];
+        [weakSelf.childCuesUIDMap setObject:cue forKey:uid];
+        [weakSelf.childCues sortUsingSelector:@selector(compare:)];
+        weakSelf.needsSortChildCues = NO;
         
     });
 }
@@ -213,12 +270,8 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     __weak typeof(self) weakSelf = self;
     dispatch_barrier_async( self.dataQueue, ^{
         
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if ( !strongSelf )
-            return;
-        
-        [strongSelf.childCuesUIDMap removeObjectForKey:uid];
-        strongSelf->_childCuesSorted = [strongSelf _arrayWithSortedChildCues:strongSelf.childCuesUIDMap.objectEnumerator.allObjects];
+        [weakSelf.childCues removeObject:cue];
+        [weakSelf.childCuesUIDMap removeObjectForKey:uid];
         
     });
 }
@@ -228,12 +281,8 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     __weak typeof(self) weakSelf = self;
     dispatch_barrier_async( self.dataQueue, ^{
         
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if ( !strongSelf )
-            return;
-        
-        [strongSelf.childCuesUIDMap removeAllObjects];
-        strongSelf->_childCuesSorted = @[];
+        [weakSelf.childCues removeAllObjects];
+        [weakSelf.childCuesUIDMap removeAllObjects];
         
     });
 }
@@ -243,15 +292,15 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     __weak typeof(self) weakSelf = self;
     dispatch_barrier_async( self.dataQueue, ^{
         
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if ( !strongSelf )
-            return;
-        
         for ( NSString *aUid in uids )
         {
-            [strongSelf.childCuesUIDMap removeObjectForKey:aUid];
+            QLKCue *cue = [weakSelf.childCuesUIDMap objectForKey:aUid];
+            if ( !cue )
+                continue;
+            
+            [weakSelf.childCues removeObject:cue];
+            [weakSelf.childCuesUIDMap removeObjectForKey:aUid];
         }
-        strongSelf->_childCuesSorted = [strongSelf _arrayWithSortedChildCues:strongSelf.childCuesUIDMap.objectEnumerator.allObjects];
         
     });
 }
@@ -281,10 +330,7 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     if ( [type isEqualToString:QLKCueTypeMic] )
         return YES;
     
-    if ( [type isEqualToString:QLKCueTypeFade] )
-        return YES;
-    
-    if ( [QLKCue cueTypeIsVideo:type] )
+    if ( [type isEqualToString:QLKCueTypeVideo] )
         return YES;
     
     return NO;
@@ -337,6 +383,12 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     return NO;
 }
 
++ (NSArray<NSString *> *) fadeModeTitles
+{
+    return @[ NSLocalizedString( @"Absolute Fade", @"Fade mode type 0 (Absolute)" ),
+              NSLocalizedString( @"Relative Fade", @"Fade mode type 1 (Relative)" ) ];
+}
+
 
 
 #pragma mark - KVC-compliance
@@ -354,38 +406,6 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
 
 
 #pragma mark - Convenience Accessors
-
-- (NSUInteger) sortIndex
-{
-    __block NSUInteger sortIndex = 0;
-    dispatch_sync( self.dataQueue, ^{
-        sortIndex = _sortIndex;
-    });
-    return sortIndex;
-}
-
-- (void) setSortIndex:(NSUInteger)sortIndex
-{
-    dispatch_barrier_async( self.dataQueue, ^{
-        _sortIndex = sortIndex;
-    });
-}
-
-- (nullable QLKImage *) icon
-{
-    __block QLKImage *icon = nil;
-    __weak typeof(self) weakSelf = self;
-    dispatch_sync( self.dataQueue, ^{
-        
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if ( !strongSelf )
-            return;
-        
-        icon = strongSelf->_icon;
-        
-    });
-    return icon;
-}
 
 - (NSArray<QLKCue *> *) cues
 {
@@ -441,6 +461,38 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     return [[self propertyForKey:QLKOSCFlaggedKey] boolValue];
 }
 
+- (BOOL) isOverridden
+{
+    // NOTE: /isOverridden requires QLab 4.0+, but update notifications for workspace settings "overrides" requires QLab 4.2+
+    if ( self.workspace.connectedToQLab3 || [self.workspace.workspaceQLabVersion isOlderThanVersion:@"4.2.0"] )
+        return NO;
+    
+    if ( [[self propertyForKey:QLKOSCIsOverriddenKey] boolValue] )
+        return YES;
+    
+    for ( QLKCue *cue in self.cues )
+    {
+        if ( cue.overridden )
+            return YES;
+    }
+    
+    return NO;
+}
+
+- (BOOL) isBroken
+{
+    if ( [[self propertyForKey:QLKOSCIsBrokenKey] boolValue] )
+        return YES;
+    
+    for ( QLKCue *cue in self.cues )
+    {
+        if ( cue.broken )
+            return YES;
+    }
+    
+    return NO;
+}
+
 - (BOOL) isRunning
 {
     if ( [[self propertyForKey:QLKOSCIsRunningKey] boolValue] )
@@ -449,6 +501,42 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     for ( QLKCue *cue in self.cues )
     {
         if ( cue.running )
+            return YES;
+    }
+    
+    return NO;
+}
+
+- (BOOL) isTailingOut
+{
+    // NOTE: /isTailingOut requires QLab 4.0+
+    if ( self.workspace.connectedToQLab3 )
+        return NO;
+    
+    if ( [[self propertyForKey:QLKOSCIsTailingOutKey] boolValue] )
+        return YES;
+    
+    for ( QLKCue *cue in self.cues )
+    {
+        if ( cue.isTailingOut )
+            return YES;
+    }
+    
+    return NO;
+}
+
+- (BOOL) isPanicking
+{
+    // NOTE: /isPanicking requires QLab 4.0+
+    if ( self.workspace.connectedToQLab3 )
+        return NO;
+    
+    if ( [[self propertyForKey:QLKOSCIsPanickingKey] boolValue] )
+        return YES;
+    
+    for ( QLKCue *cue in self.cues )
+    {
+        if ( cue.isPanicking )
             return YES;
     }
     
@@ -499,6 +587,32 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
         return [[self propertyForKey:QLKOSCDurationKey] doubleValue];
 }
 
+- (nullable NSString *) audioFadeModeName
+{
+    if ( [self.type isEqualToString:QLKCueTypeFade] )
+    {
+        QLKCueFadeMode mode = [[self propertyForKey:@"mode"] unsignedIntegerValue];
+        if ( mode <= QLKCueFadeModeRelative )
+            return [[self class] fadeModeTitles][mode];
+    }
+    
+    // else
+    return nil;
+}
+
+- (nullable NSString *) geoFadeModeName
+{
+    if ( [self.type isEqualToString:QLKCueTypeFade] )
+    {
+        QLKCueFadeMode mode = [[self propertyForKey:@"geoMode"] unsignedIntegerValue];
+        if ( mode <= QLKCueFadeModeRelative )
+            return [[self class] fadeModeTitles][mode];
+    }
+    
+    // else
+    return nil;
+}
+
 - (nullable NSString *) surfaceName
 {
     return [self propertyForKey:@"surfaceName"];
@@ -516,24 +630,37 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
 
 - (GLKQuaternion) quaternion
 {
-    NSValue *quaternionValue = [self propertyForKey:QLKOSCQuaternionKey];
+    GLKQuaternion quaternion = GLKQuaternionIdentity;
     
-    GLKQuaternion quaternion;
-    [quaternionValue getValue:&quaternion];
+    NSArray<NSNumber *> *quaternionComponents = [self propertyForKey:QLKOSCQuaternionKey];
+    if ( quaternionComponents.count == 4 )
+    {
+        quaternion = GLKQuaternionMake( quaternionComponents[0].floatValue,
+                                       quaternionComponents[1].floatValue,
+                                       quaternionComponents[2].floatValue,
+                                       quaternionComponents[3].floatValue );
+    }
     
     return quaternion;
+}
+
+- (void) setQuaternion:(GLKQuaternion)quaternion tellQLab:(BOOL)osc
+{
+    // store quaternion data the same way QLab provides it - as 4-part array with the x,y,z,w values
+    NSArray<NSNumber *> *quaternionComponents = @[ @(quaternion.x), @(quaternion.y), @(quaternion.z), @(quaternion.w) ];
+    [self setProperty:quaternionComponents forKey:QLKOSCQuaternionKey tellQLab:osc];
 }
 
 - (CGSize) surfaceSize
 {
     id surfaceSize = [self propertyForKey:QLKOSCSurfaceSizeKey];
-    return CGSizeMake( [surfaceSize[@"width"] floatValue], [surfaceSize[@"height"] floatValue] ) ;
+    return CGSizeMake( [surfaceSize[@"width"] doubleValue], [surfaceSize[@"height"] doubleValue] ) ;
 }
 
 - (CGSize) cueSize
 {
     id cueSize = [self propertyForKey:QLKOSCCueSizeKey];
-    return CGSizeMake( [cueSize[@"width"] floatValue], [cueSize[@"height"] floatValue] );
+    return CGSizeMake( [cueSize[@"width"] doubleValue], [cueSize[@"height"] doubleValue] );
 }
 
 - (NSArray<NSString *> *) availableSurfaceNames
@@ -555,56 +682,14 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
 - (NSArray<NSString *> *) propertyKeys
 {
     __block NSArray *propertyKeys = nil;
-    __weak typeof(_cueData) weakCueData = self.cueData;
     dispatch_sync( self.dataQueue, ^{
-        propertyKeys = weakCueData.allKeys;
+        propertyKeys = self.cueData.allKeys;
     });
+    
+    if ( !propertyKeys )
+        propertyKeys = @[];
+    
     return propertyKeys;
-}
-
-- (BOOL) isAudio
-{
-    __block BOOL isAudio = NO;
-    dispatch_sync( self.dataQueue, ^{
-        isAudio = _isAudio;
-    });
-    return isAudio;
-}
-
-- (BOOL) isVideo
-{
-    __block BOOL isVideo = NO;
-    dispatch_sync( self.dataQueue, ^{
-        isVideo = _isVideo;
-    });
-    return isVideo;
-}
-
-- (BOOL) isGroup
-{
-    __block BOOL isGroup = NO;
-    dispatch_sync( self.dataQueue, ^{
-        isGroup = _isGroup;
-    });
-    return isGroup;
-}
-
-- (BOOL) isCueList
-{
-    __block BOOL isCueList = NO;
-    dispatch_sync( self.dataQueue, ^{
-        isCueList = _isCueList;
-    });
-    return isCueList;
-}
-
-- (BOOL) isCueCart
-{
-    __block BOOL isCueCart = NO;
-    dispatch_sync( self.dataQueue, ^{
-        isCueCart = _isCueCart;
-    });
-    return isCueCart;
 }
 
 - (BOOL) hasChildren
@@ -620,6 +705,27 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
 - (nullable QLKCue *) lastCue
 {
     return self.cues.lastObject;
+}
+
+- (void) setIgnoreUpdates:(BOOL)ignoreUpdates
+{
+    if ( _ignoreUpdates != ignoreUpdates )
+    {
+        [self willChangeValueForKey:@"ignoreUpdates"];
+        _ignoreUpdates = ignoreUpdates;
+        [self didChangeValueForKey:@"ignoreUpdates"];
+        
+        // if setting to NO, fire another "needs update" notification to allow client to sync local state with QLab
+        if ( !_ignoreUpdates )
+        {
+            NSNotification *notification = [NSNotification notificationWithName:QLKCueNeedsUpdateNotification
+                                                                         object:self];
+            [[NSNotificationQueue defaultQueue] enqueueNotification:notification
+                                                       postingStyle:NSPostWhenIdle
+                                                       coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
+                                                           forModes:@[ NSRunLoopCommonModes ]];
+        }
+    }
 }
 
 // mutators
@@ -676,7 +782,7 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
 
 // Basic properties
 
-- (BOOL) updatePropertiesWithDictionary:(NSDictionary<NSString *, id> *)dict
+- (BOOL) updatePropertiesWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict
 {
 #if DEBUG
     //NSLog(@"updateProperties: %@", dict);
@@ -684,7 +790,7 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     return [self updatePropertiesWithDictionary:dict notify:YES];
 }
 
-- (BOOL) updatePropertiesWithDictionary:(NSDictionary<NSString *, id> *)dict notify:(BOOL)notify
+- (BOOL) updatePropertiesWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict notify:(BOOL)notify
 {
 #if DEBUG
 //    NSLog(@"updateProperties: %@ notify: %@", dict, notify ? @"YES" : @"NO" );
@@ -698,7 +804,7 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     // update values in cue, if needed
     for ( NSString *key in dict )
     {
-        id value = dict[key];
+        NSObject<NSCopying> *value = dict[key];
         
         if ( [key isEqualToString:QLKOSCCuesKey] )
         {
@@ -715,24 +821,39 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
         }
     }
     
-    if ( notify && cueUpdated )
-    {
-        __weak typeof(self) weakSelf = self;
-        dispatch_async( dispatch_get_main_queue(), ^{
-            
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            if ( !strongSelf )
-                return;
-            
-            NSNotification *notification = [NSNotification notificationWithName:QLKCueUpdatedNotification object:strongSelf userInfo:nil];
-            [[NSNotificationQueue defaultQueue] enqueueNotification:notification
-                                                       postingStyle:NSPostASAP
-                                                       coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
-                                                           forModes:nil];
-        });
-    }
+    if ( !cueUpdated )
+        return NO;
     
-    return cueUpdated;
+    if ( notify )
+        [self enqueueCueUpdatedNotification];
+    
+    return YES;
+}
+
+- (void) enqueueCueUpdatedNotification
+{
+    __weak typeof(self) weakSelf = self;
+    dispatch_block_t block = ^{
+        
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if ( !strongSelf )
+            return;
+        
+        // reset internal flag
+        strongSelf.needsNotifyCueUpdated = NO;
+        
+        NSNotification *notification = [NSNotification notificationWithName:QLKCueUpdatedNotification object:strongSelf userInfo:nil];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:notification
+                                                   postingStyle:NSPostASAP
+                                                   coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
+                                                       forModes:@[ NSRunLoopCommonModes ]];
+        
+    };
+    
+    if ( [NSThread currentThread].isMainThread )
+        block();
+    else
+        dispatch_async( dispatch_get_main_queue(), block );
 }
 
 - (void) updateChildCuesWithPropertiesArray:(NSArray<NSDictionary *> *)data removeUnused:(BOOL)removeUnused
@@ -740,126 +861,103 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     // `data` contains an array of dictionary items, one item per cue in the group cue, meaning it can have 100s of entries, esp. when the group cue is a cue list of a large workspace
     // - so we process child cue updates on a separate queue to avoid blocking the main thread
     // because all of this processing happens in the background, it's not possible to return a BOOL from this update method like we do in `updatePropertiesWithDictionary:notify:`
-    // - instead, we track whether any cues were updated and avoid unnecessary array sorting or posting QLKCueUpdatedNotification whenever possible
+    // - instead, we track whether any child cues were updated and whether the sort order of child cues needs updating. After scheduling all update blocks on cuePropertiesQueue, we then do a final update on the same serial queue checking the `needsSortChildCues` and `needsNotifyCueUpdated` flags.
     
-    __block BOOL cuesUpdated = NO;
-    
-    NSMutableArray<NSString *> *previousUids = nil;
-    if ( removeUnused )
-        previousUids = [NSMutableArray arrayWithArray:[self allChildCueUids]];
-    
-    __block BOOL needsSortChildCues = NO;
-    __block NSUInteger index = 0;
-    for ( NSDictionary<NSString *, id> *dict in data )
-    {
-        NSString *uid = dict[QLKOSCUIDKey];
-        if ( !uid )
-            continue;
-        
-        if ( removeUnused )
-            [previousUids removeObject:uid];
-        
-        // NOTE: childPropertiesQueue is a serial queue, so index will be incremented correctly
-        __weak typeof(self) weakSelf = self;
-        dispatch_async( self.childPropertiesQueue, ^{
-            
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            if ( !strongSelf )
-                return;
-            
-            if ( !strongSelf.workspace.connected )
-                return;
-            
-            @autoreleasepool
-            {
-                // if we have a child matching this UID, then update; otherwise, insert.
-                // if the cue is no longer there, then it is lost locally too.
-                QLKCue *child = [strongSelf cueWithID:uid includeChildren:NO];
-                if ( child )
-                {
-                    BOOL didUpdateProperties = [child updatePropertiesWithDictionary:dict];
-                    if ( didUpdateProperties )
-                        cuesUpdated = YES;
-                    
-                    // mark for a re-sort if the order of this cue within the parent group has changed
-                    if ( child.sortIndex != index )
-                    {
-                        needsSortChildCues = YES;
-                        cuesUpdated = YES;
-                        child.sortIndex = index;
-                    }
-                }
-                else
-                {
-                    child = [[QLKCue alloc] initWithDictionary:dict workspace:strongSelf.workspace];
-                    child.sortIndex = index;
-                    [strongSelf addChildCue:child withID:uid];
-                    
-                    needsSortChildCues = NO; // addChildCue:withID: updates _childCuesSorted so we can reset the flag
-                    cuesUpdated = YES;
-                    
-                    // NOTE: we queue the enqueing of these notifications on the same serial queue to ensure they are sent after we finish processing this dictionary.
-                    // - this way, the responses from the notifications we send do not block the main queue until after we finish adding any new child cues
-                    dispatch_async( strongSelf.childPropertiesQueue, ^{
-                        
-                        // NSNotifications should be sent on the main thread
-                        dispatch_async( dispatch_get_main_queue(), ^{
-                            NSNotification *notification = [NSNotification notificationWithName:QLKCueNeedsUpdateNotification
-                                                                                         object:child];
-                            [[NSNotificationQueue defaultQueue] enqueueNotification:notification
-                                                                       postingStyle:NSPostASAP
-                                                                       coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
-                                                                           forModes:nil];
-                        });
-                        
-                    });
-                }
-            }
-            index++;
-        });
-    }
+    if ( !self.workspace.connected )
+        return;
     
     __weak typeof(self) weakSelf = self;
-    dispatch_async( self.childPropertiesQueue, ^{
+    dispatch_async( self.cuePropertiesQueue, ^{
         
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if ( !strongSelf )
             return;
         
-        // NOTE: this must be done after all blocks above have completed
-        // - childPropertiesQueue is a serial queue, so this is safe
+        NSMutableArray<NSString *> *previousUids = nil;
+        if ( removeUnused )
+            previousUids = [NSMutableArray arrayWithArray:[strongSelf allChildCueUids]];
+        
+        NSUInteger index = 0;
+        for ( NSDictionary<NSString *, NSObject<NSCopying> *> *dict in data )
+        {
+            NSString *uid = (NSString *)dict[QLKOSCUIDKey];
+            if ( !uid )
+                continue;
+            
+            if ( removeUnused )
+                [previousUids removeObject:uid];
+            
+            // if we have a child matching this UID, then update; otherwise, insert.
+            // if the cue is no longer there, then it is lost locally too.
+            QLKCue *child = [strongSelf cueWithID:uid includeChildren:NO];
+            if ( child )
+            {
+                BOOL didUpdateProperties = [child updatePropertiesWithDictionary:dict];
+                if ( didUpdateProperties )
+                    strongSelf.needsNotifyCueUpdated = YES;
+                
+                // mark for a re-sort if the order of this cue within the parent group has changed
+                if ( child.sortIndex != index )
+                {
+                    child.sortIndex = index;
+                    
+                    strongSelf.needsSortChildCues = YES;
+                    strongSelf.needsNotifyCueUpdated = YES;
+                }
+            }
+            else
+            {
+                child = [[QLKCue alloc] initWithDictionary:dict workspace:strongSelf.workspace];
+                child.sortIndex = index;
+                [strongSelf addChildCue:child withID:uid]; // NOTE: resets needsSortChildCues to NO
+                
+                if ( strongSelf.workspace.defaultDeferFetchingPropertiesForNewCues )
+                    [strongSelf.workspace deferFetchingPropertiesForCue:child];
+                
+                strongSelf.needsNotifyCueUpdated = YES;
+                
+                // NOTE: we serialize the enqueing of these "needs update" notifications to ensure they not posted until after we finish processing this dictionary.
+                // - this way, we do not have to deal with the followup responses the notifications might trigger until after we have finished adding all of these new child cues first.
+                dispatch_async( strongSelf.cuePropertiesQueue, ^{
+                    
+                    // NSNotifications should be sent on the main thread
+                    dispatch_async( dispatch_get_main_queue(), ^{
+                        
+                        NSNotification *notification = [NSNotification notificationWithName:QLKCueNeedsUpdateNotification
+                                                                                     object:child];
+                        [[NSNotificationQueue defaultQueue] enqueueNotification:notification
+                                                                   postingStyle:NSPostASAP
+                                                                   coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
+                                                                       forModes:@[ NSRunLoopCommonModes ]];
+                        
+                    });
+                    
+                });
+            }
+            
+            index++;
+        }
+        
         if ( previousUids.count )
         {
             [strongSelf removeChildCuesWithIDs:previousUids];
-            needsSortChildCues = NO; // removeChildCuesWithIDs: updates _childCuesSorted so we can reset the flag
-            cuesUpdated = YES;
+            [strongSelf enqueueCueUpdatedNotification];
         }
-       
-        if ( needsSortChildCues )
+        
+        if ( strongSelf.needsSortChildCues )
         {
-            __weak typeof(self) weakSelf2 = strongSelf;
-            dispatch_sync( strongSelf.dataQueue, ^{
+            dispatch_barrier_async( strongSelf.dataQueue, ^{
                 
-                __strong typeof(weakSelf2) strongSelf2 = weakSelf2;
-                if ( !strongSelf2 )
-                    return;
+                [weakSelf.childCues sortUsingSelector:@selector(compare:)];
+                weakSelf.needsSortChildCues = NO;
                 
-                strongSelf2->_childCuesSorted = [strongSelf2 _arrayWithSortedChildCues:strongSelf2.childCuesUIDMap.objectEnumerator.allObjects];
+                [weakSelf enqueueCueUpdatedNotification];
                 
             });
         }
         
-        if ( cuesUpdated )
-        {
-            dispatch_async( dispatch_get_main_queue(), ^{
-                NSNotification *notification = [NSNotification notificationWithName:QLKCueUpdatedNotification object:strongSelf userInfo:nil];
-                [[NSNotificationQueue defaultQueue] enqueueNotification:notification
-                                                           postingStyle:NSPostASAP
-                                                           coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
-                                                               forModes:nil];
-            });
-        }
-
+        if ( strongSelf.needsNotifyCueUpdated )
+            [strongSelf enqueueCueUpdatedNotification];
         
     });
 }
@@ -871,10 +969,13 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
 - (NSArray<NSString *> *) allChildCueUids
 {
     __block NSArray *allChildCueUids = nil;
-    __weak typeof(_childCuesUIDMap) weakChildCuesUIDMap = self.childCuesUIDMap;
     dispatch_sync( self.dataQueue, ^{
-        allChildCueUids = weakChildCuesUIDMap.keyEnumerator.allObjects;
+        allChildCueUids = self.childCuesUIDMap.keyEnumerator.allObjects;
     });
+    
+    if ( !allChildCueUids )
+        allChildCueUids = @[];
+    
     return allChildCueUids;
 }
 
@@ -896,9 +997,8 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
 - (nullable QLKCue *) cueWithID:(NSString *)uid includeChildren:(BOOL)includeChildren
 {
     __block QLKCue *cue = nil;
-    __weak typeof(_childCuesUIDMap) weakChildCuesUIDMap = self.childCuesUIDMap;
     dispatch_sync( self.dataQueue, ^{
-        cue = [weakChildCuesUIDMap objectForKey:uid];
+        cue = [self.childCuesUIDMap objectForKey:uid];
     });
     
     if ( cue )
@@ -908,12 +1008,12 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
         return nil;
     
     NSArray<QLKCue *> *cues = self.cues;
-    for ( QLKCue *cue in cues )
+    for ( QLKCue *aCue in cues )
     {
-        if ( !cue.isGroup )
+        if ( !aCue.isGroup )
             continue;
         
-        QLKCue *childCue = [cue cueWithID:uid includeChildren:includeChildren];
+        QLKCue *childCue = [aCue cueWithID:uid includeChildren:includeChildren];
         if ( childCue )
             return childCue;
     }
@@ -945,24 +1045,39 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
 - (nullable id) propertyForKey:(NSString *)key
 {
     // retrieve the value
-    if ( [key isEqualToString:@"surfaceName"] )
+    if ( [key isEqualToString:QLKOSCCuesKey] )
+    {
+        __block NSArray *cues = nil;
+        dispatch_sync( self.dataQueue, ^{
+            cues = [self.childCues copy];
+        });
+        return cues;
+    }
+    else if ( [key isEqualToString:@"color"] )
+    {
+        __block NSString *colorName = nil;
+        dispatch_sync( self.dataQueue, ^{
+            colorName = self.cueData[QLKOSCColorNameKey];
+        });
+        if ( !colorName )
+            return nil;
+        
+        return [QLKColor colorWithName:colorName];
+    }
+    else if ( [key isEqualToString:@"surfaceName"] )
     {
         __block NSArray *surfaceList = nil;
         __block NSNumber *surfaceID = nil;
-        __weak typeof(_cueData) weakCueData = self.cueData;
         dispatch_sync( self.dataQueue, ^{
-            surfaceList = weakCueData[QLKOSCSurfaceListKey];
-            surfaceID = weakCueData[QLKOSCSurfaceIDKey];
+            surfaceList = self.cueData[QLKOSCSurfaceListKey];
+            surfaceID = self.cueData[QLKOSCSurfaceIDKey];
         });
         if ( surfaceList.count == 0 )
             return nil;
-        if ( !surfaceID )
+        if ( surfaceID == nil )
             return nil;
         
-        __block NSArray *surfaces = nil;
-        dispatch_sync( self.dataQueue, ^{
-            surfaces = [surfaceList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"surfaceID == %@", @( surfaceID.integerValue )]];
-        });
+        NSArray *surfaces = [surfaceList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"surfaceID == %@", @( surfaceID.integerValue )]];
         if ( surfaces.count <= 0 )
             return nil;
         
@@ -972,72 +1087,26 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     {
         __block NSArray *patchList = nil;
         __block NSNumber *patch = nil;
-        __weak typeof(_cueData) weakCueData = self.cueData;
         dispatch_sync( self.dataQueue, ^{
-            patchList = weakCueData[QLKOSCPatchListKey];
-            patch = weakCueData[QLKOSCPatchKey];
+            patchList = self.cueData[QLKOSCPatchListKey];
+            patch = self.cueData[QLKOSCPatchKey];
         });
         if ( patchList.count == 0 )
             return nil;
-        if ( !patch )
+        if ( patch == nil )
             return nil;
         
-        __block NSArray *patches = nil;
-        dispatch_sync( self.dataQueue, ^{
-            patches = [patchList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"patchNumber == %@", @( patch.integerValue )]];
-        });
+        NSArray *patches = [patchList filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"patchNumber == %@", @( patch.integerValue )]];
         if ( patches.count <= 0 )
             return nil;
         
         return patches.firstObject;
     }
-    else if ( [key isEqualToString:@"color"] )
-    {
-        __block NSString *colorName = nil;
-        __weak typeof(_cueData) weakCueData = self.cueData;
-        dispatch_sync( self.dataQueue, ^{
-            colorName = weakCueData[QLKOSCColorNameKey];
-        });
-        if ( !colorName )
-            return nil;
-        
-        return [QLKColor colorWithName:colorName];
-    }
-    else if ( [key isEqualToString:QLKOSCQuaternionKey] )
-    {
-        GLKQuaternion quaternion = GLKQuaternionIdentity;
-        
-        __block NSArray<NSNumber *> *quaternionComponents = nil;
-        __weak typeof(_cueData) weakCueData = self.cueData;
-        dispatch_sync( self.dataQueue, ^{
-            quaternionComponents = weakCueData[key];
-        });
-        
-        if ( quaternionComponents )
-        {
-            quaternion = GLKQuaternionMake( (quaternionComponents[0]).floatValue,
-                                           (quaternionComponents[1]).floatValue,
-                                           (quaternionComponents[2]).floatValue,
-                                           (quaternionComponents[3]).floatValue );
-        }
-        
-        return [NSValue valueWithBytes:&quaternion objCType:@encode( GLKQuaternion )];
-    }
-    else if ( [key isEqualToString:QLKOSCCuesKey] )
-    {
-        __block NSArray *cues = nil;
-        __weak typeof(_childCuesSorted) weakChildCuesSorted = _childCuesSorted;
-        dispatch_sync( self.dataQueue, ^{
-            cues = weakChildCuesSorted;
-        });
-        return cues;
-    }
     else
     {
         __block id property = nil;
-        __weak typeof(_cueData) weakCueData = self.cueData;
         dispatch_sync( self.dataQueue, ^{
-            property = weakCueData[key];
+            property = self.cueData[key];
         });
         return property;
     }
@@ -1052,11 +1121,11 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
 
 - (BOOL) setProperty:(nullable id)value forKey:(NSString *)key tellQLab:(BOOL)osc
 {
+    
     // exit if the value is unchanged
     __block id existingValue = nil;
-    __weak typeof(_cueData) weakCueData = self.cueData;
     dispatch_sync( self.dataQueue, ^{
-        existingValue = weakCueData[key];
+        existingValue = self.cueData[key];
     });
     if ( existingValue == value )
         return NO;
@@ -1077,13 +1146,13 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
     }
     
     
-    // update the value
+    // update with new value
     if ( [key isEqualToString:QLKOSCCuesKey] )
     {
         if ( [value isKindOfClass:[NSArray class]] == NO )
             return NO;
         
-        NSMapTable *newChildCuesUIDMap = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsWeakMemory valueOptions:NSPointerFunctionsWeakMemory capacity:((NSArray *)value).count];
+        NSMapTable *newChildCuesUIDMap = [NSMapTable weakToWeakObjectsMapTable];
         
         NSUInteger index = 0;
         NSString *uid = nil;
@@ -1099,30 +1168,29 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
             index++;
         }
         
-        if ( [NSThread currentThread].isMainThread )
+        __weak typeof(self) weakSelf = self;
+        BOOL isMainThread = [NSThread currentThread].isMainThread;
+        if ( isMainThread )
             [self willChangeValueForKey:key];
         else
-            dispatch_sync( dispatch_get_main_queue(), ^{
-                [self willChangeValueForKey:key];
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [weakSelf willChangeValueForKey:key];
             });
         
-        __weak typeof(self) weakSelf = self;
-        dispatch_sync( self.dataQueue, ^{
+        // NOTE: using sync here guarantees the value is updated before didChangeValueForKey: is called
+        // - dispatch(_*)_sync() also does not copy or retain the block so no weakSelf is needed
+        dispatch_barrier_sync( self.dataQueue, ^{
             
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            if ( !strongSelf )
-                return;
-            
-            strongSelf->_childCuesUIDMap = newChildCuesUIDMap;
-            strongSelf->_childCuesSorted = (NSArray *)value;
+            self->_childCues = [(NSArray *)value mutableCopy];
+            self->_childCuesUIDMap = newChildCuesUIDMap;
             
         });
         
-        if ( [NSThread currentThread].isMainThread )
+        if ( isMainThread )
             [self didChangeValueForKey:key];
         else
-            dispatch_sync( dispatch_get_main_queue(), ^{
-                [self didChangeValueForKey:key];
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [weakSelf didChangeValueForKey:key];
             });
     }
     else if ( [key isEqualToString:QLKOSCPlaybackPositionIdKey] )
@@ -1138,51 +1206,78 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
             value = nil;
         
         
-        dispatch_sync( self.dataQueue, ^{
+        __weak typeof(self) weakSelf = self;
+        BOOL isMainThread = [NSThread currentThread].isMainThread;
+        if ( isMainThread )
+            [self willChangeValueForKey:key];
+        else
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [weakSelf willChangeValueForKey:key];
+            });
+        
+        // NOTE: using sync here guarantees the value is updated before didChangeValueForKey: is called
+        // - dispatch(_*)_sync() also does not copy or retain the block so no weakSelf is needed
+        dispatch_barrier_sync( self.dataQueue, ^{
+            
             if ( value )
-                weakCueData[key] = value;
+                self.cueData[key] = value;
             else
-                [weakCueData removeObjectForKey:key];
+                [self.cueData removeObjectForKey:key];
+            
         });
         
-        
-        dispatch_block_t notifyBlock = ^{
-            NSNotification *notification = [NSNotification notificationWithName:QLKCueListDidChangePlaybackPositionIDNotification object:self userInfo:nil];
+        dispatch_block_t didChangeBlock = ^{
+            
+            [weakSelf didChangeValueForKey:key];
+            
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if ( !strongSelf )
+                return;
+            
+            NSNotification *notification = [NSNotification notificationWithName:QLKCueListDidChangePlaybackPositionIDNotification object:strongSelf userInfo:nil];
             [[NSNotificationQueue defaultQueue] enqueueNotification:notification
                                                        postingStyle:NSPostASAP
                                                        coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
-                                                           forModes:nil];
+                                                           forModes:@[ NSRunLoopCommonModes ]];
+            
         };
-        if ( [NSThread currentThread].isMainThread )
-            notifyBlock();
+        
+        if ( isMainThread )
+            didChangeBlock();
         else
-            dispatch_async( dispatch_get_main_queue(), notifyBlock );
+            dispatch_async( dispatch_get_main_queue(), didChangeBlock );
     }
     else
     {
-        if ( [NSThread currentThread].isMainThread )
+        __weak typeof(self) weakSelf = self;
+        BOOL isMainThread = [NSThread currentThread].isMainThread;
+        if ( isMainThread )
             [self willChangeValueForKey:key];
         else
-            dispatch_sync( dispatch_get_main_queue(), ^{
-                [self willChangeValueForKey:key];
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [weakSelf willChangeValueForKey:key];
             });
         
-        dispatch_sync( self.dataQueue, ^{
+        // NOTE: using sync here guarantees the value is updated before didChangeValueForKey: is called
+        // - dispatch(_*)_sync() also does not copy or retain the block so no weakSelf is needed
+        dispatch_barrier_sync( self.dataQueue, ^{
+            
             if ( value )
-                weakCueData[key] = value;
+                self.cueData[key] = value;
             else
-                [weakCueData removeObjectForKey:key];
+                [self.cueData removeObjectForKey:key];
+            
         });
         
-        if ( [NSThread currentThread].isMainThread )
+        if ( isMainThread )
             [self didChangeValueForKey:key];
         else
-            dispatch_sync( dispatch_get_main_queue(), ^{
-                [self didChangeValueForKey:key];
+            dispatch_async( dispatch_get_main_queue(), ^{
+                [weakSelf didChangeValueForKey:key];
             });
     }
     
-    // update cached vars
+    // update cached properties
     if ( [key isEqualToString:QLKOSCTypeKey] )
     {
         QLKImage *icon = nil;
@@ -1202,19 +1297,24 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
             isCueCart = [[self class] cueTypeIsCueCart:(NSString *)value];
         }
         
-        dispatch_barrier_async( self.dataQueue, ^{
-            _icon = icon;
-            _isAudio = isAudio;
-            _isVideo = isVideo;
-            _isGroup = isGroup;
-            _isCueList = isCueList;
-            _isCueCart = isCueCart;
-        });
+        // NOTE: we don't need to synchronize using the dataQueue to set values here
+        // - we get thread-safety on these simple data types by using atomic operations for these properties
+        self.icon = icon;
+        self.audio = isAudio;
+        self.video = isVideo;
+        self.group = isGroup;
+        self.cueList = isCueList;
+        self.cueCart = isCueCart;
     }
     
     // send network update
     if ( osc )
     {
+        // if playbackPositionID value is nil, transmit "none" to QLab to unset playhead - NOTE: requires QLab 4.2 or later
+        if ( !value && [key isEqualToString:QLKOSCPlaybackPositionIdKey] && [self.workspace.workspaceQLabVersion isOlderThanVersion:@"4.2.0"] == NO )
+            value = @"none";
+        
+        
         __weak typeof(self) weakSelf = self;
         dispatch_async( dispatch_get_main_queue(), ^{
             
@@ -1223,6 +1323,7 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
                 return;
             
             [strongSelf.workspace cue:strongSelf updatePropertySend:value forKey:key];
+            
         });
     }
     
@@ -1330,68 +1431,6 @@ NSInteger SortCuesBySortIndex( id id1, id id2, void *context )
 - (void) panic
 {
     [self.workspace panicCue:self];
-}
-
-
-
-#pragma mark - deprecated
-
-- (NSString *) iconFile
-{
-    return [NSString stringWithFormat:@"%@.png", [QLKCue iconForType:self.type]];
-}
-
-- (nullable QLKCue *) cueWithId:(NSString *)cueId
-{
-    return [self cueWithID:cueId];
-}
-
-- (void) pushUpProperty:(id)value forKey:(NSString *)key
-{
-    [self setProperty:value
-               forKey:key
-             tellQLab:YES];
-}
-
-- (void) triggerPushDownPropertyForKey:(NSString *)key
-{
-    __weak typeof(self) weakSelf = self;
-    [self.workspace cue:self
-            valueForKey:key
-                  block:^(id data) {
-                      
-                      __strong typeof(weakSelf) strongSelf = weakSelf;
-                      if ( !strongSelf )
-                          return;
-                      
-//                      if ( ![data isEqual:[strongSelf propertyForKey:propertyKey]] )
-                      
-                      [strongSelf pushDownProperty:data
-                                            forKey:key];
-                      
-                  }];
-}
-
-- (void) pushDownProperty:(id)value forKey:(NSString *)key
-{
-    if ( !key ) {
-#if DEBUG
-        NSLog(@"You can't set property on nil key.");
-#endif
-        return;
-    }
-    id old_data = [self propertyForKey:key];
-    
-    [self setProperty:value
-               forKey:key
-             tellQLab:NO];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"QLKCueHasNewDataNotification"
-                                                        object:@{ @"workspaceName" : ( self.workspace.name ? self.workspace.name : [NSNull null] ),
-                                                                 @"cueNumber" : ( self.number ? self.number : [NSNull null] ),
-                                                                 @"propertyKey" : ( key ? key : [NSNull null] ),
-                                                                 @"oldData" : ( old_data ? old_data : [NSNull null] ),
-                                                                 @"newData" : ( value ? value : [NSNull null] ) }];
 }
 
 @end
