@@ -19,7 +19,7 @@ pod 'QLabKit', :git => 'https://github.com/Figure53/QLabKit.objc.git'
 There are four primary classes you will use for talking to QLab:
 
 - `QLKBrowser` - automatically discover QLab instances on the network
-- `QLKServer` - represents and individual QLab server with a name, host, and port
+- `QLKServer` - represents an individual QLab server with a name, host, and port
 - `QLKWorkspace` - a single workspace on a server
 - `QLKCue` - a simplified representation of a cue. A cue list cue is also represented as a cue
 
