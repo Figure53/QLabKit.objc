@@ -72,7 +72,7 @@ extern NSString * const QLKQLabDidUpdatePreferencesNotification;
 // Name of this workspace
 @property (copy, nonatomic, readonly)               NSString *name;
 
-// Name without the ".cues" extension, for cleaner presentation
+// Name without the ".cues" or ".qlab4" extension, for cleaner presentation
 @property (copy, nonatomic, readonly)               NSString *nameWithoutPathExtension;
 
 // A unique internal ID
