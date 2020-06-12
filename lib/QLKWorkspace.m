@@ -305,7 +305,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSString *) nameWithoutPathExtension
 {
-    if ( [self.name.lowercaseString.pathExtension isEqualToString:@"cues"] )
+    if ( [self.name.lowercaseString.pathExtension isEqualToString:@"cues"]  ||
+         [self.name.lowercaseString.pathExtension isEqualToString:@"qlab4"])
         return self.name.stringByDeletingPathExtension;
     else
         return self.name;
