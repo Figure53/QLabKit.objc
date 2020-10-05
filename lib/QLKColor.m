@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2020 Figure 53 LLC, http://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@
 #import "QLKColor.h"
 
 
-static NSSet *_colors = nil;
+static NSSet<NSString *> *_colors = nil;
 
 
 NS_ASSUME_NONNULL_BEGIN
@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (void) initialize
 {
-    _colors = [NSSet setWithObjects:@"red", @"orange", @"blue", @"lightblue", @"yellow", @"green", @"purple", nil];
+    _colors = [NSSet setWithObjects:@"red", @"orange", @"yellow", @"green", @"blue", @"purple", nil];
 }
 
 - (instancetype) init
@@ -118,7 +118,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Convenience class methods for predefined colors
 
-+ (NSSet *) colors
++ (NSSet<NSString *> *) colors
 {
     return _colors;
 }
@@ -186,7 +186,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (QLKColor *) indigoColor
 {
     QLKColor *color = [[QLKColor alloc] init];
-    color.name = @"purple";
+    color.name = @"indigo";
     color.lightColor    = [QLKColorClass colorWithHue:0.666 saturation:0.45 brightness:0.7 alpha:1];    // #3F388C
     color.color         = [QLKColorClass colorWithHue:0.681 saturation:0.45 brightness:0.6 alpha:1];    // #5A5499
     color.darkColor     = [QLKColorClass colorWithHue:0.681 saturation:0.6 brightness:0.55 alpha:1];    // #6262B3
