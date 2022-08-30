@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2020 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2020 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -33,45 +33,45 @@ static NSSet<NSString *> *_colors = nil;
 
 NS_ASSUME_NONNULL_BEGIN
 
-#define DEFAULT_NAME    @"- unknown -"
+#define DEFAULT_NAME @"- unknown -"
 
 @implementation QLKColor
 
-+ (void) initialize
++ (void)initialize
 {
     _colors = [NSSet setWithObjects:@"red", @"orange", @"yellow", @"green", @"blue", @"purple", nil];
 }
 
-- (instancetype) init
+- (instancetype)init
 {
     self = [super init];
-    if ( self )
+    if (self)
     {
         _name = DEFAULT_NAME;
     }
     return self;
 }
 
-- (nullable instancetype) initWithCoder:(NSCoder *)decoder
+- (nullable instancetype)initWithCoder:(NSCoder *)decoder
 {
     self = [super init];
-    if ( self )
+    if (self)
     {
         id name = [decoder decodeObjectForKey:QLKOSCNameKey];
-        if ( !name || [name isKindOfClass:[NSString class]] == NO )
+        if (!name || [name isKindOfClass:[NSString class]] == NO)
             return nil;
-        
-        _name = (NSString * _Nonnull)name;
+
+        _name = (NSString *_Nonnull)name;
         _color = [decoder decodeObjectForKey:@"color"];
         _lightColor = [decoder decodeObjectForKey:@"lightColor"];
         _darkColor = [decoder decodeObjectForKey:@"darkColor"];
-        
+
         // compatibility with QLabKit.objc 0.0.2
-        if ( [decoder containsValueForKey:@"startColor"] )
+        if ([decoder containsValueForKey:@"startColor"])
         {
             _color = [decoder decodeObjectForKey:@"startColor"];
         }
-        if ( [decoder containsValueForKey:@"endColor"] )
+        if ([decoder containsValueForKey:@"endColor"])
         {
             _darkColor = [decoder decodeObjectForKey:@"endColor"];
         }
@@ -79,9 +79,9 @@ NS_ASSUME_NONNULL_BEGIN
     return self;
 }
 
-- (void) encodeWithCoder:(NSCoder *)coder
+- (void)encodeWithCoder:(NSCoder *)coder
 {
-    if ( coder.allowsKeyedCoding )
+    if (coder.allowsKeyedCoding)
     {
         [coder encodeObject:_name forKey:QLKOSCNameKey];
         [coder encodeObject:_color forKey:@"color"];
@@ -90,23 +90,23 @@ NS_ASSUME_NONNULL_BEGIN
     }
 }
 
-- (BOOL) isEqualToColor:(QLKColor *)color
+- (BOOL)isEqualToColor:(QLKColor *)color
 {
     // Simplified comparison since we know the colors are limited
-    return ( [self.name isEqualToString:color.name] );
+    return ([self.name isEqualToString:color.name]);
 }
 
-- (NSString *) description
+- (NSString *)description
 {
     return [NSString stringWithFormat:@"QLKColor: %@", self.name];
 }
 
-- (void) setName:(NSString *)name
+- (void)setName:(NSString *)name
 {
-    if ( [name isEqualToString:DEFAULT_NAME] )
+    if ([name isEqualToString:DEFAULT_NAME])
         return;
-    
-    if ( _name != name )
+
+    if (_name != name)
     {
         [self willChangeValueForKey:@"name"];
         _name = name;
@@ -115,107 +115,106 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 
-
 #pragma mark - Convenience class methods for predefined colors
 
-+ (NSSet<NSString *> *) colors
++ (NSSet<NSString *> *)colors
 {
     return _colors;
 }
 
-+ (QLKColor *) defaultColor
++ (QLKColor *)defaultColor
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"default";
-    color.lightColor    = [QLKColorClass colorWithHue:0.722 saturation:0.05 brightness:0.7 alpha:1];    // #ACAAB2
-    color.color         = [QLKColorClass colorWithHue:0.722 saturation:0.1 brightness:0.6 alpha:1];     // #8F8A99
-    color.darkColor     = [QLKColorClass colorWithHue:0.722 saturation:0.1 brightness:0.5 alpha:1];     // #77737F
+    color.lightColor = [QLKColorClass colorWithHue:0.722 saturation:0.05 brightness:0.7 alpha:1]; // #ACAAB2
+    color.color = [QLKColorClass colorWithHue:0.722 saturation:0.1 brightness:0.6 alpha:1];       // #8F8A99
+    color.darkColor = [QLKColorClass colorWithHue:0.722 saturation:0.1 brightness:0.5 alpha:1];   // #77737F
     return color;
 }
 
-+ (QLKColor *) redColor
++ (QLKColor *)redColor
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"red";
-    color.lightColor    = [QLKColorClass colorWithHue:0.028 saturation:0.8 brightness:1 alpha:1];       // #FC563C
-    color.color         = [QLKColorClass colorWithHue:0.0 saturation:0.8 brightness:1 alpha:1];         // #FC363B
-    color.darkColor     = [QLKColorClass colorWithHue:0.0 saturation:0.9 brightness:0.9 alpha:1];       // #E31C24
+    color.lightColor = [QLKColorClass colorWithHue:0.028 saturation:0.8 brightness:1 alpha:1]; // #FC563C
+    color.color = [QLKColorClass colorWithHue:0.0 saturation:0.8 brightness:1 alpha:1];        // #FC363B
+    color.darkColor = [QLKColorClass colorWithHue:0.0 saturation:0.9 brightness:0.9 alpha:1];  // #E31C24
     return color;
 }
 
-+ (QLKColor *) orangeColor
++ (QLKColor *)orangeColor
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"orange";
-    color.lightColor    = [QLKColorClass colorWithHue:0.11 saturation:1 brightness:1 alpha:1];          // #FFAA00
-    color.color         = [QLKColorClass colorWithHue:0.097 saturation:1 brightness:1 alpha:1];         // #FF9500
-    color.darkColor     = [QLKColorClass colorWithHue:0.07 saturation:1 brightness:1 alpha:1];          // #FF6A00
+    color.lightColor = [QLKColorClass colorWithHue:0.11 saturation:1 brightness:1 alpha:1]; // #FFAA00
+    color.color = [QLKColorClass colorWithHue:0.097 saturation:1 brightness:1 alpha:1];     // #FF9500
+    color.darkColor = [QLKColorClass colorWithHue:0.07 saturation:1 brightness:1 alpha:1];  // #FF6A00
     return color;
 }
 
-+ (QLKColor *) yellowColor
++ (QLKColor *)yellowColor
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"yellow";
-    color.lightColor    = [QLKColorClass colorWithHue:0.153 saturation:0.5 brightness:1 alpha:1];       // #FFF480
-    color.color         = [QLKColorClass colorWithHue:0.153 saturation:0.9 brightness:0.97 alpha:1];    // #F7E519
-    color.darkColor     = [QLKColorClass colorWithHue:0.139 saturation:1 brightness:1 alpha:1];         // #FFD500
+    color.lightColor = [QLKColorClass colorWithHue:0.153 saturation:0.5 brightness:1 alpha:1]; // #FFF480
+    color.color = [QLKColorClass colorWithHue:0.153 saturation:0.9 brightness:0.97 alpha:1];   // #F7E519
+    color.darkColor = [QLKColorClass colorWithHue:0.139 saturation:1 brightness:1 alpha:1];    // #FFD500
     return color;
 }
 
-+ (QLKColor *) greenColor
++ (QLKColor *)greenColor
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"green";
-    color.lightColor    = [QLKColorClass colorWithHue:0.362 saturation:0.9 brightness:0.9 alpha:1];     // #17E639
-    color.color         = [QLKColorClass colorWithHue:0.362 saturation:1 brightness:0.8 alpha:1];       // #00CC22
-    color.darkColor     = [QLKColorClass colorWithHue:0.334 saturation:1 brightness:0.7 alpha:1];       // #00B300
+    color.lightColor = [QLKColorClass colorWithHue:0.362 saturation:0.9 brightness:0.9 alpha:1]; // #17E639
+    color.color = [QLKColorClass colorWithHue:0.362 saturation:1 brightness:0.8 alpha:1];        // #00CC22
+    color.darkColor = [QLKColorClass colorWithHue:0.334 saturation:1 brightness:0.7 alpha:1];    // #00B300
     return color;
 }
 
-+ (QLKColor *) blueColor
++ (QLKColor *)blueColor
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"blue";
-    color.lightColor    = [QLKColorClass colorWithHue:0.639 saturation:0.6 brightness:0.9 alpha:1];     // #5C73E6
-    color.color         = [QLKColorClass colorWithHue:0.639 saturation:0.7 brightness:0.85 alpha:1];    // #415AD9
-    color.darkColor     = [QLKColorClass colorWithHue:0.639 saturation:0.8 brightness:0.8 alpha:1];     // #2944CC
+    color.lightColor = [QLKColorClass colorWithHue:0.639 saturation:0.6 brightness:0.9 alpha:1]; // #5C73E6
+    color.color = [QLKColorClass colorWithHue:0.639 saturation:0.7 brightness:0.85 alpha:1];     // #415AD9
+    color.darkColor = [QLKColorClass colorWithHue:0.639 saturation:0.8 brightness:0.8 alpha:1];  // #2944CC
     return color;
 }
 
-+ (QLKColor *) indigoColor
++ (QLKColor *)indigoColor
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"indigo";
-    color.lightColor    = [QLKColorClass colorWithHue:0.666 saturation:0.45 brightness:0.7 alpha:1];    // #3F388C
-    color.color         = [QLKColorClass colorWithHue:0.681 saturation:0.45 brightness:0.6 alpha:1];    // #5A5499
-    color.darkColor     = [QLKColorClass colorWithHue:0.681 saturation:0.6 brightness:0.55 alpha:1];    // #6262B3
+    color.lightColor = [QLKColorClass colorWithHue:0.666 saturation:0.45 brightness:0.7 alpha:1]; // #3F388C
+    color.color = [QLKColorClass colorWithHue:0.681 saturation:0.45 brightness:0.6 alpha:1];      // #5A5499
+    color.darkColor = [QLKColorClass colorWithHue:0.681 saturation:0.6 brightness:0.55 alpha:1];  // #6262B3
     return color;
 }
 
-+ (QLKColor *) purpleColor
++ (QLKColor *)purpleColor
 {
     QLKColor *color = [[QLKColor alloc] init];
     color.name = @"purple";
-    color.lightColor    = [QLKColorClass colorWithHue:0.806 saturation:1 brightness:0.85 alpha:1];      // #B500D9
-    color.color         = [QLKColorClass colorWithHue:0.806 saturation:1 brightness:0.7 alpha:1];       // #9500B3
-    color.darkColor     = [QLKColorClass colorWithHue:0.792 saturation:1 brightness:0.6 alpha:1];       // #730099
+    color.lightColor = [QLKColorClass colorWithHue:0.806 saturation:1 brightness:0.85 alpha:1]; // #B500D9
+    color.color = [QLKColorClass colorWithHue:0.806 saturation:1 brightness:0.7 alpha:1];       // #9500B3
+    color.darkColor = [QLKColorClass colorWithHue:0.792 saturation:1 brightness:0.6 alpha:1];   // #730099
     return color;
 }
 
-+ (QLKColor *) colorWithName:(NSString *)name
++ (QLKColor *)colorWithName:(NSString *)name
 {
     QLKColor *color = nil;
-    
-    if ( [_colors containsObject:name.lowercaseString] )
+
+    if ([_colors containsObject:name.lowercaseString])
         color = [QLKColor performSelector:NSSelectorFromString([NSString stringWithFormat:@"%@Color", name.lowercaseString])];
-    
-    if ( !color )
+
+    if (!color)
     {
         color = [[QLKColor alloc] init];
         color.name = name;
     }
-    
+
     return color;
 }
 

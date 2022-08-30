@@ -1,12 +1,12 @@
 # QLabKit
 
-QLabKit is an Objective-C library for controlling QLab over the OSC API in QLab 3 or later. QLabKit requires macOS 10.9+ or iOS 8.4+.
+QLabKit is an Objective-C library for controlling QLab over the OSC API in QLab 3 or later. QLabKit requires macOS 11+ or iOS 14+.
 
 **NOTE:** This library is under active development and the API may change.
 
 ## Installation
 
-All the files for the library are in the `lib` folder. Copy all the files from that folder into your project. Make sure you also include the code in the `F53OSC` folder which is a submodule. You'll also need to link against `Security.framework` and `GLKit.framework`. All files in QLabKit and F53OSC use ARC.
+All the files for the library are in the `lib` folder. Copy all the files from that folder into your project. Make sure you also include the code in the `F53OSC` folder which is a submodule. You'll also need to link against `Security.framework`. All files in QLabKit and F53OSC use ARC.
 
 QLabKit can also be installed on iOS using CocoaPods by adding the following to your podfile:
 ``` ruby
@@ -29,7 +29,7 @@ There are other classes in QLabKit that these classes rely on that you need not 
 
 The first thing you need to do is to get a `QLKWorkspace` instance to communicate with a single workspace from QLab. You can get this in one of two ways:
 
-### Automatic
+### Automatic Discovery
 
 QLab advertises itself using Bonjour. This allows for the automatic discovery of all QLab machines on the same local network. The `QLKBrowser` class handles this for you like so:
 
@@ -60,7 +60,19 @@ Implement the required `QLKBrowserDelegate` methods. The browser has a `servers`
 }
 ```
 
-### Manual
+NOTE: As of iOS 14, your app must be granted permission by the user to connect to devices on the local network. To enable this, your Info.plist must include the `NSLocalNetworkUsageDescription` key with a description of your app's network usage and the `NSBonjourServices` key with the QLab Bonjour service value `_qlab._tcp`. For example:
+
+``` xml
+<key>NSLocalNetworkUsageDescription</key>
+<string>Some descriptive text explaining your app's reason to connect to the local network.</string>
+<key>NSBonjourServices</key>
+<array>
+    <string>_qlab._tcp</string>
+</array>
+
+```
+
+### Manual Discovery
 
 If you don't want to automatically discover QLab, you can also do it manually by first creating a server:
 
@@ -84,7 +96,8 @@ Once you have a workspace, you can send commands to and get data from QLab. The 
 QLKWorkspace *workspace; // assume this exists as a result of one of the earlier methods
 
 // Connect to workspace
-[workspace connect];
+NSString *passcode = ...
+[workspace connectWithPasscode:passcode completion:nil];
 
 // Tell workspace to GO
 [workspace go];
@@ -103,6 +116,43 @@ NSString *address = [NSString stringWithFormat:@"/workspace/%@/cue_id/%@/name", 
 ```
 
 There is also working demo project that shows how you might hook all of this together to find servers on the network, show their workspaces, connect to a workspace, and finally fetch and display all the cues. Open `QLabKit.xcodeproj` and run the `QLabKitDemo` project to learn more.
+
+## Migrating from 0.0.4 to 0.0.5
+
+QLabKit 0.0.5 requires macOS 11+ or iOS 15+.
+
+### New
+* Adds support for connecting to QLab v5. See `-[QLKWorkspace connectWithPasscode:completion:]` and the QLab OSC dictionary for more.
+* Adds support for unified code formatting of QLabKit source code using clang-format.
+
+### Removed Dependencies
+* GLKit.framework is no longer a required dependency (deprecated by Apple in macOS 10.15 and iOS 13). Use new type `QLKQuaternion` to replace `GLKQuaternion`.
+* CocoaLumberjack is no longer added as a dependency when building with CocoaPods. It is unneeded since the socket classes that include CocoaLumberjack `DDLog.h` have logging disabled by default.
+
+### QLKDefines
+* `QLKMessageHandlerBlock` is replaced with `QLKMessageReplyBlock`, which adds a `status` parameter. Note that the `data` parameter is now properly annotated as nullable.
+* The string values of certain video geometry keys are updated for compatibility with QLab v5.0 and later. For legacy values when connecting to QLab v3 or v4, use the constants that begin with `QLKOSCV4*`. QLKCue.h includes compatibility macros for synonomous keys across multiple versions of QLab.
+
+### QLKClientDelegate
+* Delegate methods are renamed to include the `QLKClient` object as a parameter.
+* Adds `shouldEncryptConnectionsForClient:` to optionally enable an encrypted OSC connection when connected to QLab v5.0 and later.
+
+### QLKCue
+* Adds `liveColor` convenience getter to fetch the v5 live cue color.
+* Adds `auditionPreview` convenience method. Requires QLab v5.0 or later.
+* The QLKImage property `icon` is replaced with NSString `iconName`. This avoids loading an image for each QLKCue object created. Instead, a string suitable for passing to `imageNamed:` is cached, and the image is only loaded when the image file is needed. As such, the #define `QLKImage` is no longer needed and is removed.
+* The `userInfo` dictionary for the `QLKCueListDidChangePlaybackPositionIDNotification` now includes the unique ID(s) of the old and/or new playback position cues. The `NSKeyValueChangeOldKey` entry, if present, contains the `uniqueID` string of the previous playback position cue. The `NSKeyValueChangeNewKey` entry, if present, contains the `uniqueID` string of the current playback position cue.
+* Patches in QLab 5 are greatly expanded. They have more descriptive patch list OSC getter names (i.e. not just `/patchList`) and are now methods of the respective settings that manage a given patch type. As such, the `patchName` getter and `@"patchDescription"` helper inside `propertyForKey:` no longer cover enough cases to be useful and have been removed. Going forward when connecting to QLab 5, get the patch index or patch unique ID from the cue and cross-reference with the patch list fetched from the appropriate settings. For backward compatibility with QLab 3 and 4, get both the patch index and patch list from the cue and cross-reference with each other.
+
+### QLKVersionNumber
+* Adds a new class and NSString category used to compare version number strings.
+* The `compare:` method of this class compares the "build" number of each version if needed. Use the `QLKVersionNumber` method `compare:ignoreBuild:` to optionally ignore the build number when comparing two versions.
+* The `QLKQLabWorkspaceVersion` class is deprecated and will be removed in a future release in favor of using `QLKVersionNumber`.
+
+### QLKWorkspace
+* Adds `auditionGo` and `auditionPreviewCue:` convenience methods. Both require QLab v5.0 or later.
+* When connected to QLab v4 and later, calling `fetchDisplayAndGeometryForCue:` no longer fetches properties related to the list of workspace video outputs or properties of a given output. Instead, the workspace populates its `videoOutputsList` property with the reply payload from `/settings/video/stages` (v5.0+) or `/settings/video/surfaces` (v4.x). This avoids duplicate and/or stale data from being stored in all video cues. Pass a cue `surfaceID ` to new QLKWorkpace method `stageID` to `stageDictForStageID:` (v5.0+) or `surfaceDictForSurfaceID:` (v4.x) to get a dictionary of values for that video output ID. The `videoOutputsList` array is kept up-to-date by the workspace in response to Video settings update notifications.
+* The helper method `addressForWildcardNumber:action:` is deprecated because it is unused in QLabKit and only generates `/cue/*`-prefixed addresses, whereas wildcards can be also be used in addresses with the `/cue_id/*` prefix.
 
 ## Migrating from 0.0.3 to 0.0.4
 
@@ -195,6 +245,6 @@ QLabKit 0.0.3 requires macOS 10.9+ or iOS 8.4+.
 
 ## License
 
-QLabKit © copyright 2014-2018 Figure 53, LLC.
+QLabKit © copyright 2014-2022 Figure 53, LLC.
 
 QLabKit is licensed under the MIT license.

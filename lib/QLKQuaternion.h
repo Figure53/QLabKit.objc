@@ -1,10 +1,10 @@
 //
-//  QLabKit.h
+//  QLKQuaternion.h
 //  QLabKit
 //
-//  Created by Zach Waugh on 7/9/13.
+//  Created by Brent Lord on 8/23/20.
 //
-//  Copyright (c) 2013-2019 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2020 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,13 +25,46 @@
 //  THE SOFTWARE.
 //
 
-#import "QLKBrowser.h"
-#import "QLKClient.h"
-#import "QLKColor.h"
-#import "QLKCue.h"
-#import "QLKDefines.h"
-#import "QLKMessage.h"
-#import "QLKQuaternion.h"
-#import "QLKServer.h"
-#import "QLKVersionNumber.h"
-#import "QLKWorkspace.h"
+#import <Foundation/Foundation.h>
+
+
+#pragma mark - GLKit legacy
+
+union _QLKVector3 {
+    struct
+    {
+        float x, y, z;
+    };
+    struct
+    {
+        float r, g, b;
+    };
+    struct
+    {
+        float s, t, p;
+    };
+    float v[3];
+};
+typedef union _QLKVector3 QLKVector3;
+
+union _QLKQuaternion {
+    struct
+    {
+        QLKVector3 v;
+        float s;
+    };
+    struct
+    {
+        float x, y, z, w;
+    };
+    float q[4];
+} __attribute__((aligned(16)));
+typedef union _QLKQuaternion QLKQuaternion;
+
+extern const QLKQuaternion QLKQuaternionIdentity;
+
+static inline QLKQuaternion QLKQuaternionMake(float x, float y, float z, float w)
+{
+    QLKQuaternion q = {x, y, z, w};
+    return q;
+}

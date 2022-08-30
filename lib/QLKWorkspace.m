@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -27,205 +27,88 @@
 
 #import "QLKWorkspace.h"
 
+#import <F53OSC/F53OSC.h>
 #import <pthread.h>
 
+#import "QLKClient.h"
 #import "QLKCue.h"
 #import "QLKServer.h"
-#import "QLKClient.h"
-#import "F53OSC.h"
 
 
-#define HEARTBEAT_INTERVAL 5          // seconds
-#define HEARTBEAT_FAILURE_INTERVAL 1  // seconds
-#define HEARTBEAT_MAX_ATTEMPTS 5
+#define HEARTBEAT_INTERVAL         5 // seconds
+#define HEARTBEAT_FAILURE_INTERVAL 1 // seconds
+#define HEARTBEAT_MAX_ATTEMPTS     5
 
-NSString * const QLKWorkspaceDidUpdateNotification = @"QLKWorkspaceDidUpdateNotification";
-NSString * const QLKWorkspaceDidUpdateSettingsNotification = @"QLKWorkspaceDidUpdateSettingsNotification";
-NSString * const QLKWorkspaceDidUpdateLightDashboardNotification = @"QLKWorkspaceDidUpdateLightDashboardNotification";
-NSString * const QLKWorkspaceDidConnectNotification = @"QLKWorkspaceDidConnectNotification";
-NSString * const QLKWorkspaceDidDisconnectNotification = @"QLKWorkspaceDidDisconnectNotification";
-NSString * const QLKWorkspaceConnectionErrorNotification = @"QLKWorkspaceConnectionErrorNotification";
-NSString * const QLKQLabDidUpdatePreferencesNotification = @"QLKQLabDidUpdatePreferencesNotification";
+NSNotificationName const QLKWorkspaceDidUpdateNotification = @"QLKWorkspaceDidUpdateNotification";
+NSNotificationName const QLKWorkspaceDidUpdateSettingsNotification = @"QLKWorkspaceDidUpdateSettingsNotification";
+NSNotificationName const QLKWorkspaceDidUpdateAccessPermissionsNotification = @"QLKWorkspaceDidUpdateAccessPermissionsNotification";
+NSNotificationName const QLKWorkspaceDidUpdateLightDashboardNotification = @"QLKWorkspaceDidUpdateLightDashboardNotification";
+NSNotificationName const QLKWorkspaceDidConnectNotification = @"QLKWorkspaceDidConnectNotification";
+NSNotificationName const QLKWorkspaceDidDisconnectNotification = @"QLKWorkspaceDidDisconnectNotification";
+NSNotificationName const QLKWorkspaceConnectionErrorNotification = @"QLKWorkspaceConnectionErrorNotification";
+NSNotificationName const QLKQLabDidUpdatePreferencesNotification = @"QLKQLabDidUpdatePreferencesNotification";
 
 
 NS_ASSUME_NONNULL_BEGIN
 
-@implementation QLKQLabWorkspaceVersion
-
-+ (instancetype) versionWithString:(NSString *)versionString
+@interface QLKWorkspace ()
 {
-    return [[[self class] alloc] initWithString:versionString];
-}
-
-- (instancetype) init
-{
-    return [self initWithString:@""];
-}
-
-- (instancetype) initWithString:(NSString *)versionString
-{
-    self = [super init];
-    if ( self )
-    {
-        _majorVersion = 0;
-        _minorVersion = 0;
-        _patchVersion = 0;
-        
-        // parse the string into components and update the struct
-        NSArray<NSString *> *versionComponents = [versionString componentsSeparatedByString:@"."];
-        for ( NSUInteger i = 0; i < versionComponents.count; i++ )
-        {
-            NSInteger componentValue = versionComponents[i].integerValue;
-            if ( i == 0 )
-                _majorVersion = componentValue;
-            else if ( i == 1 )
-                _minorVersion = componentValue;
-            else if ( i == 2 )
-                _patchVersion = componentValue;
-            else
-                break;
-        }
-    }
-    return self;
-}
-
-- (BOOL) isEqual:(id)object
-{
-    if ( [object isKindOfClass:[QLKQLabWorkspaceVersion class]] == NO )
-        return NO;
-    
-    if ( ((QLKQLabWorkspaceVersion *)object).majorVersion != self.majorVersion )
-        return NO;
-    
-    if ( ((QLKQLabWorkspaceVersion *)object).minorVersion != self.minorVersion )
-        return NO;
-    
-    if ( ((QLKQLabWorkspaceVersion *)object).patchVersion != self.patchVersion )
-        return NO;
-    
-    return YES;
-}
-
-- (NSString *) debugDescription
-{
-    return [NSString stringWithFormat:@"%@ \"%@\"", super.debugDescription, [self stringValue]];
-}
-
-- (NSString *) description
-{
-    return [self stringValue];
-}
-
-- (NSComparisonResult) compare:(QLKQLabWorkspaceVersion *)otherVersion
-{
-    // test major versions
-    if ( self.majorVersion < otherVersion.majorVersion )
-        return NSOrderedAscending;
-    
-    if ( self.majorVersion > otherVersion.majorVersion )
-        return NSOrderedDescending;
-    
-    // major versions are equal
-    
-    // test minor versions
-    if ( self.minorVersion < otherVersion.minorVersion )
-        return NSOrderedAscending;
-    
-    if ( self.minorVersion > otherVersion.minorVersion )
-        return NSOrderedDescending;
-    
-    // minor versions are equal
-    
-    // test patch versions
-    if ( self.patchVersion < otherVersion.patchVersion )
-        return NSOrderedAscending;
-    
-    if ( self.patchVersion > otherVersion.patchVersion )
-        return NSOrderedDescending;
-    
-    // patch versions are equal
-    return NSOrderedSame;
-}
-
-- (BOOL) isOlderThanVersion:(NSString *)version
-{
-    NSComparisonResult result = [self compare:[[self class] versionWithString:version]];
-    return ( result == NSOrderedAscending );
-}
-
-- (BOOL) isEqualToVersion:(NSString *)version
-{
-    NSComparisonResult result = [self compare:[[self class] versionWithString:version]];
-    return ( result == NSOrderedSame );
-}
-
-- (BOOL) isNewerThanVersion:(NSString *)version
-{
-    NSComparisonResult result = [self compare:[[self class] versionWithString:version]];
-    return ( result == NSOrderedDescending );
-}
-
-- (NSString *) stringValue
-{
-    NSString *versionString = [NSString stringWithFormat:@"%ld.%ld.%ld",
-                               (long)self.majorVersion,
-                               (long)self.minorVersion,
-                               (long)self.patchVersion];
-    return versionString;
-}
-
-@end
-
-
-
-@interface QLKWorkspace () {
     pthread_mutex_t _deferredCueUpdatesMutex;
 }
 
-@property (atomic, readwrite)                       BOOL connected;
+// Temporary cache of connection parameters.
+@property (nonatomic, copy, nullable) NSString *connectionPasscode;
+@property (nonatomic, copy, nullable) QLKMessageReplyBlock connectionCompletion;
 
-@property (nonatomic, strong, readonly)             QLKClient *client;
-@property (nonatomic, strong, nullable)             NSTimer *heartbeatTimeout;
-@property (nonatomic)                               NSInteger heartbeatAttempts;
+@property (atomic, readwrite) BOOL connected;
+@property (nonatomic, readwrite) BOOL canView;
+@property (nonatomic, readwrite) BOOL canEdit;
+@property (nonatomic, readwrite) BOOL canControl;
 
-@property (nonatomic, strong, readonly)             dispatch_queue_t replyBlockQueue;
+@property (nonatomic, nullable, readwrite) NSArray<NSDictionary<NSString *, id> *> *videoOutputsList;
 
-@property (nonatomic, strong, readonly)             NSMapTable<QLKCue *, NSMutableSet *> *deferredCueUpdates;
+@property (nonatomic, readonly) QLKClient *client;
+@property (nonatomic, strong, nullable) NSTimer *heartbeatTimeout;
+@property (nonatomic) NSInteger heartbeatAttempts;
+
+@property (nonatomic, readonly) dispatch_queue_t replyBlockQueue;
+
+@property (nonatomic, readonly) NSMapTable<QLKCue *, NSMutableSet *> *deferredCueUpdates;
 
 
-- (void) notifyAboutDisconnection;
-- (void) notifyAboutConnectionError;
+- (void)notifyAboutDisconnection;
+- (void)notifyAboutConnectionError;
 
-- (void) disconnectFromWorkspace;
+- (void)disconnectFromWorkspace;
 
-- (void) clearHeartbeatTimeout;
-- (void) sendHeartbeat;
-- (void) heartbeatTimeout:(NSTimer *)timer;
+- (void)clearHeartbeatTimeout;
+- (void)sendHeartbeat;
+- (void)heartbeatTimeout:(NSTimer *)timer;
 
 @end
 
 
 @implementation QLKWorkspace
 
-- (instancetype) init
+- (instancetype)init
 {
     self = [super init];
-    if ( self )
+    if (self)
     {
         _name = @"";
         _uniqueID = @"";
         _connected = NO;
         _heartbeatAttempts = -1; // not running
-        
+
         _hasPasscode = NO;
         _defaultSendUpdatesOSC = NO;
         _defaultDeferFetchingPropertiesForNewCues = NO;
-        
-        _cuePropertiesQueue = dispatch_queue_create( "com.figure53.QLabKit.cuePropertiesQueue", DISPATCH_QUEUE_SERIAL );
-        _replyBlockQueue = dispatch_queue_create( "com.figure53.QLabKit.replyBlockQueue", DISPATCH_QUEUE_SERIAL );
-        
+
+        _cuePropertiesQueue = dispatch_queue_create("com.figure53.QLabKit.cuePropertiesQueue", DISPATCH_QUEUE_SERIAL);
+        _replyBlockQueue = dispatch_queue_create("com.figure53.QLabKit.replyBlockQueue", DISPATCH_QUEUE_SERIAL);
+
         _deferredCueUpdates = [NSMapTable weakToStrongObjectsMapTable];
-        
+
         // Setup root cue - parent of cue lists
         _root = [[QLKCue alloc] initWithWorkspace:self];
         [self.root setProperty:QLKRootCueIdentifier
@@ -237,343 +120,454 @@ NS_ASSUME_NONNULL_BEGIN
         [self.root setProperty:QLKCueTypeCueList
                         forKey:QLKOSCTypeKey
                       tellQLab:NO];
-        
-        // init at QLab version "3.0.0" until we are told otherwise
-        // NOTE: QLab 4 added the "version" key to the response for `/cueLists`
-        // - prior to that, the value was absent from the response
-        // - so we assume the absense of a version string (nil or empty) to be a connection to QLab 3
-        QLKQLabWorkspaceVersion *defaultVersion = [[QLKQLabWorkspaceVersion alloc] initWithString:@"3.0.0"];
+
+        // init workspace to QLab version "3.0.0" until we are told otherwise
+        // NOTE: QLab 4 added the "version" key/value pair to the `/workspaces` payload
+        // - so we assume the absense of a "version" string (nil or empty) to be a connection to QLab 3
+        QLKVersionNumber *defaultVersion = [[QLKVersionNumber alloc] initWithString:@"3.0.0"];
         _workspaceQLabVersion = defaultVersion;
     }
     return self;
 }
 
-- (instancetype) initWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict server:(QLKServer *)server
+- (instancetype)initWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict server:(QLKServer *)server
 {
     QLKClient *client = [[QLKClient alloc] initWithHost:server.host port:server.port];
     client.useTCP = YES;
     return [self initWithDictionary:dict server:server client:client];
 }
 
-- (instancetype) initWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict server:(QLKServer *)server client:(QLKClient *)client
+- (instancetype)initWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict server:(QLKServer *)server client:(QLKClient *)client
 {
     self = [self init];
-    if ( self )
+    if (self)
     {
-        if ( dict[QLKOSCUIDKey] )
+        if (dict[QLKOSCUIDKey])
             _uniqueID = (NSString *)dict[QLKOSCUIDKey];
-        
-        if ( [dict[@"version"] isKindOfClass:[NSString class]] )
-            _workspaceQLabVersion = [[QLKQLabWorkspaceVersion alloc] initWithString:(NSString *)dict[@"version"]];
-        
+
+        if ([dict[@"version"] isKindOfClass:[NSString class]])
+            _workspaceQLabVersion = [[QLKVersionNumber alloc] initWithString:(NSString *)dict[@"version"]];
+
         [self updateWithDictionary:dict];
-        
+
         _server = server;
         _client = client;
     }
     return self;
 }
 
-- (BOOL) updateWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict
+- (BOOL)updateWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict
 {
     BOOL didUpdate = NO;
-    
-    if ( dict[@"displayName"] && [_name isEqual:dict[@"displayName"]] == NO )
+
+    if (dict[@"displayName"] && [_name isEqual:dict[@"displayName"]] == NO)
     {
         _name = (NSString *)dict[@"displayName"];
         didUpdate = YES;
     }
-    
-    if ( _hasPasscode != [(NSNumber *)dict[@"hasPasscode"] boolValue] )
+
+    // v5 added multiple passcodes per workspace, so these workspaces always have "hasPasscode" as YES.
+    // Only v3 and v4 workspaces include "hasPasscode" in their reply to `/workspaces`.
+    if ([self.workspaceQLabVersion isNewerThanVersion:@"5.0 b0"])
     {
-        _hasPasscode = [(NSNumber *)dict[@"hasPasscode"] boolValue];
-        didUpdate = YES;
+        if (!_hasPasscode)
+        {
+            _hasPasscode = YES;
+            didUpdate = YES;
+        }
     }
-    
+    else // v3 and v4 workspaces
+    {
+        if (_hasPasscode != [(NSNumber *)dict[@"hasPasscode"] boolValue])
+        {
+            _hasPasscode = [(NSNumber *)dict[@"hasPasscode"] boolValue];
+            didUpdate = YES;
+        }
+    }
+
     return didUpdate;
 }
 
-- (void) dealloc
+- (void)dealloc
 {
     self.client.delegate = nil;
 }
 
-- (NSString *) description
+- (NSString *)description
 {
     return [NSString stringWithFormat:@"%@ - %@ : %@", super.description, self.name, self.uniqueID];
 }
 
-- (NSString *) nameWithoutPathExtension
+- (NSString *)nameWithoutPathExtension
 {
-    if ( [self.name.lowercaseString.pathExtension isEqualToString:@"cues"]  ||
-         [self.name.lowercaseString.pathExtension isEqualToString:@"qlab4"])
+    if ([self.name.lowercaseString.pathExtension isEqualToString:@"cues"] ||
+        [self.name.lowercaseString.pathExtension isEqualToString:@"qlab4"] ||
+        [self.name.lowercaseString.pathExtension isEqualToString:@"qlab5"])
         return self.name.stringByDeletingPathExtension;
     else
         return self.name;
 }
 
-- (nullable NSString *) serverName
+- (nullable NSString *)serverName
 {
     return self.server.name;
 }
 
-- (NSString *) fullName
+- (NSString *)fullName
 {
     return [NSString stringWithFormat:@"%@ (%@)", self.name, self.server.name];
 }
 
-- (nullable QLKCue *) firstCue
+- (nullable QLKCue *)firstCue
 {
     return self.firstCueList.firstCue;
 }
 
-- (nullable QLKCue *) firstCueList
+- (nullable QLKCue *)firstCueList
 {
     return self.root.firstCue;
 }
 
-- (NSString *) fullNameWithCueList:(QLKCue *)cueList
+- (NSString *)fullNameWithCueList:(QLKCue *)cueList
 {
     return [NSString stringWithFormat:@"%@ - %@ (%@)", self.name, [cueList propertyForKey:QLKOSCNameKey], self.server.name];
 }
 
-- (BOOL) isQLabWorkspaceVersionAtLeastVersion:(QLKQLabWorkspaceVersion *)version
+- (BOOL)isQLabWorkspaceVersionAtLeastVersion:(QLKVersionNumber *)version
 {
-    NSComparisonResult result = [_workspaceQLabVersion compare:version];
-    return ( result != NSOrderedAscending );
+    NSComparisonResult result = [_workspaceQLabVersion compare:version ignoreBuild:YES];
+    return (result != NSOrderedAscending);
 }
 
-- (BOOL) connectedToQLab3
+- (BOOL)connectedToQLab3
 {
-    return ( _workspaceQLabVersion.majorVersion == 3 );
+    return (_workspaceQLabVersion.majorVersion == 3);
 }
-
 
 
 #pragma mark - Connection/reconnection
 
-- (void) connectWithPasscode:(nullable NSString *)passcode completion:(nullable QLKMessageHandlerBlock)completion
+- (void)connectWithPasscode:(nullable NSString *)passcode completion:(nullable QLKMessageReplyBlock)completion
 {
     self.client.delegate = self;
-    
-    if ( !self.connected && !self.client.isConnected && ![self.client connect] )
+
+    // cache parameters
+    self.connectionPasscode = passcode;
+    self.connectionCompletion = completion;
+
+    if (self.connected && self.client.isConnected)
     {
-        NSLog( @"[workspace] *** Error: couldn't connect to server" );
-        
-        self.client.delegate = nil;
-        
-        // Notify that we are unable to connect to workspace
-        [self notifyAboutConnectionError];
-        
-        if ( completion )
-            completion( @"error" );
-        
+        [self finishConnectWithPasscode];
         return;
     }
-    
-    NSLog( @"[workspace] connecting..." );
-    
+
+    NSLog(@"[workspace] connecting...");
+
+    self.canView = NO;
+    self.canEdit = NO;
+    self.canControl = NO;
+
+    BOOL didInitateConnection = [self.client connect];
+    if (didInitateConnection)
+    {
+        // If the client connects synchronously or is somehow already connected, finish the connection now.
+        if (self.client.isConnected)
+            [self finishConnectWithPasscode];
+
+        // Otherwise for async client connections, the QLKClientDelegate `clientConnected:` implementation below will call `finishConnectWithPasscode`.
+        // If connecting to QLab v5 or later, the callback is called after the client performs a successful encryption handshake with QLab.
+    }
+    else
+    {
+        NSLog(@"[workspace] *** Error: couldn't connect to server");
+
+        self.client.delegate = nil;
+
+        self.connectionPasscode = nil;
+        self.connectionCompletion = nil;
+
+        // Notify that we are unable to connect to workspace
+        [self notifyAboutConnectionError];
+
+        if (completion)
+            completion(@"error", @"error");
+    }
+}
+
+- (void)finishConnectWithPasscode
+{
+    NSString *passcode = self.connectionPasscode;
+    QLKMessageReplyBlock completion = self.connectionCompletion;
+
+    // Unset cached params. We try these once.
+    self.connectionPasscode = nil;
+    self.connectionCompletion = nil;
+
     __weak typeof(self) weakSelf = self;
-    [self.client sendMessageWithArgument:passcode toAddress:@"/connect" block:^(id data) {
-        
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if ( !strongSelf )
-            return;
-        
-        if ( [data isEqualToString:@"ok"] )
-        {
-            // upon success, update cached passcode to use for automatic reconnection
-            if ( strongSelf.hasPasscode )
-                strongSelf.passcode = passcode;
-            else
-                strongSelf.passcode = nil;
-                
-            NSLog( @"[workspace] connected successfully" );
-            
-            [strongSelf finishConnection];
-        }
-        else
-        {
-            strongSelf.client.delegate = nil;
-            [strongSelf.client disconnect];
-            
-            if ( [data isEqualToString:@"badpass"] )
-                NSLog( @"[workspace] invalid passcode" );
-            else
-                NSLog( @"[workspace] connection error: %@", data );
-            
-            [strongSelf notifyAboutConnectionError];
-        }
-        
-        if ( completion )
-            completion( data );
-        
-    }];
+    [self.client sendMessageWithArgument:passcode
+                               toAddress:@"/connect"
+                                   block:^(NSString *status, id _Nullable data) {
+                                       __strong typeof(weakSelf) strongSelf = weakSelf;
+                                       if (!strongSelf)
+                                           return;
+
+                                       if ([data isKindOfClass:[NSString class]] == NO)
+                                           return;
+
+                                       NSString *replyString = (NSString *)data;
+                                       if ([replyString hasPrefix:@"ok"])
+                                       {
+                                           // upon success, update cached passcode to use for automatic reconnection
+                                           if (strongSelf.hasPasscode)
+                                               strongSelf.passcode = passcode;
+                                           else
+                                               strongSelf.passcode = nil;
+
+                                           // Set local hints for access permission granted to this passcode.
+                                           if (self.workspaceQLabVersion.majorVersion >= 5)
+                                           {
+                                               NSArray<NSString *> *components = @[]; // default to "none"
+                                               if ([replyString hasPrefix:@"ok:"])
+                                               {
+                                                   NSString *permissions = [replyString substringFromIndex:3];
+                                                   if (permissions)
+                                                       components = [permissions componentsSeparatedByString:@"|"];
+                                               }
+                                               self.canView = [components containsObject:@"view"];
+                                               self.canEdit = [components containsObject:@"edit"];
+                                               self.canControl = [components containsObject:@"control"];
+                                           }
+                                           else // QLab 3 and 4 grant full access to any client.
+                                           {
+                                               self.canView = YES;
+                                               self.canEdit = YES;
+                                               self.canControl = YES;
+                                           }
+
+                                           NSLog(@"[workspace] connected successfully - view: %@, edit: %@, control: %@", self.canView ? @"Y" : @"N", self.canEdit ? @"Y" : @"N", self.canControl ? @"Y" : @"N");
+
+                                           [strongSelf finishConnection];
+                                       }
+                                       else
+                                       {
+                                           strongSelf.client.delegate = nil;
+                                           [strongSelf.client disconnect];
+
+                                           if ([replyString isEqualToString:@"badpass"])
+                                           {
+                                               NSLog(@"[workspace] invalid passcode");
+                                           }
+                                           else
+                                           {
+                                               NSLog(@"[workspace] connection error: %@", data);
+                                               [strongSelf notifyAboutConnectionError];
+                                           }
+                                       }
+
+                                       if (completion)
+                                           completion(status, data);
+                                   }];
 }
 
 // Called when a connection is successfully made
-- (void) finishConnection
+- (void)finishConnection
 {
-    if ( self.connected )
+    if (self.connected)
         return;
-    
-    pthread_mutex_init( &_deferredCueUpdatesMutex, NULL );
-    
+
+    pthread_mutex_init(&_deferredCueUpdatesMutex, NULL);
+
     self.connected = YES;
     [self startReceivingUpdates];
     [self fetchQLabVersionWithBlock:nil];
     [self fetchCueLists];
-    
+    [self refreshVideoOutputsList];
+
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceDidConnectNotification object:self];
 }
 
-- (void) reconnect
+- (void)reconnect
 {
     // Reconnect using the last-known passcode, e.g. when app wakes from sleep
-    NSLog( @"[workspace] reconnecting..." );
+    NSLog(@"[workspace] reconnecting...");
     [self connectWithPasscode:self.passcode completion:nil];
 }
 
-- (void) disconnect
+- (void)disconnect
 {
-    NSLog( @"[workspace] disconnect: %@", self.name );
-    
+    NSLog(@"[workspace] disconnect: %@", self.name);
+
     self.client.delegate = nil;
     [self stopHeartbeat];
     [self stopReceivingUpdates];
-    
+
     [self disconnectFromWorkspace];
-    
+
     self.connected = NO;
-    
+
+    self.canView = NO;
+    self.canEdit = NO;
+    self.canControl = NO;
+
     [self.client disconnect];
-    
+
     [self.root removeAllChildCues];
-    
-    pthread_mutex_lock( &_deferredCueUpdatesMutex );
+
+    pthread_mutex_lock(&_deferredCueUpdatesMutex);
     [self.deferredCueUpdates removeAllObjects];
-    pthread_mutex_unlock( &_deferredCueUpdatesMutex );
-    
-    pthread_mutex_destroy( &_deferredCueUpdatesMutex );
+    pthread_mutex_unlock(&_deferredCueUpdatesMutex);
+
+    pthread_mutex_destroy(&_deferredCueUpdatesMutex);
 }
 
 // Temporary disconnect when going to sleep
-- (void) temporarilyDisconnect
+- (void)temporarilyDisconnect
 {
-    NSLog( @"[workspace] temp disconnect" );
-    
+    NSLog(@"[workspace] temp disconnect");
+
     [self disconnectFromWorkspace];
     [self stopHeartbeat];
     [self stopReceivingUpdates];
-    
+
     self.connected = NO;
-    
+
     [self.client disconnect];
 }
 
-- (void) notifyAboutDisconnection
+- (void)notifyAboutDisconnection
 {
-    NSLog( @"[workspace] *** notifyAboutDisconnection" );
-    
+    NSLog(@"[workspace] *** notifyAboutDisconnection");
+
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceDidDisconnectNotification object:self];
 }
 
-- (void) notifyAboutConnectionError
+- (void)notifyAboutConnectionError
 {
-    NSLog( @"[workspace] *** notifyAboutConnectionError" );
-    
+    NSLog(@"[workspace] *** notifyAboutConnectionError");
+
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceConnectionErrorNotification object:self];
 }
 
 
-
 #pragma mark - Cues
 
-- (nullable QLKCue *) cueWithID:(NSString *)uid
+- (nullable QLKCue *)cueWithID:(NSString *)uid
 {
     return [self.root cueWithID:uid];
 }
 
-- (nullable QLKCue *) cueWithNumber:(NSString *)number {
+- (nullable QLKCue *)cueWithNumber:(NSString *)number
+{
     return [self.root cueWithNumber:number];
 }
 
 
-
 #pragma mark - Workspace Methods
 
-- (void) disconnectFromWorkspace
+- (void)cueNeedsUpdate:(NSString *)cueID
+{
+    QLKCue *cue = [self cueWithID:cueID];
+
+    if (cue.isGroup)
+    {
+        __weak typeof(self) weakSelf = self;
+        [self cue:cue
+            valueForKey:@"children"
+                  block:^(NSString *status, id _Nullable data) {
+                      __strong typeof(weakSelf) strongSelf = weakSelf;
+                      if (!strongSelf)
+                          return;
+
+                      if ([data isKindOfClass:[NSArray class]] == NO)
+                          return;
+
+                      [cue updateChildCuesWithPropertiesArray:(NSArray *)data removeUnused:YES];
+                  }];
+    }
+
+    if (cue)
+    {
+        NSNotification *notification = [NSNotification notificationWithName:QLKCueNeedsUpdateNotification
+                                                                     object:cue];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:notification
+                                                   postingStyle:NSPostWhenIdle
+                                                   coalesceMask:(NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
+                                                       forModes:@[NSRunLoopCommonModes]];
+    }
+}
+
+- (void)disconnectFromWorkspace
 {
     [self.client sendMessageWithArgument:nil toAddress:@"/disconnect"];
 }
 
-- (void) startReceivingUpdates
+- (void)startReceivingUpdates
 {
     [self.client sendMessageWithArgument:@YES toAddress:@"/updates"];
 }
 
-- (void) stopReceivingUpdates
+- (void)stopReceivingUpdates
 {
     [self.client sendMessageWithArgument:@NO toAddress:@"/updates"];
 }
 
-- (void) enableAlwaysReply
+- (void)enableAlwaysReply
 {
-    [self.client sendMessagesWithArguments:@[ @YES ] toAddress:@"/alwaysReply" workspace:NO block:nil];
+    [self.client sendMessagesWithArguments:@[@YES] toAddress:@"/alwaysReply" workspace:NO block:nil];
 }
 
-- (void) disableAlwaysReply
+- (void)disableAlwaysReply
 {
-    [self.client sendMessagesWithArguments:@[ @NO ] toAddress:@"/alwaysReply" workspace:NO block:nil];
+    [self.client sendMessagesWithArguments:@[@NO] toAddress:@"/alwaysReply" workspace:NO block:nil];
 }
 
-- (void) fetchQLabVersionWithBlock:(nullable QLKMessageHandlerBlock)block
+- (void)fetchQLabVersionWithBlock:(nullable QLKMessageReplyBlock)block
 {
     __weak typeof(self) weakSelf = self;
-    [self.client sendMessagesWithArguments:nil toAddress:@"/version" workspace:NO block:^(id data) {
-        
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if ( !strongSelf )
-            return;
-        
-        if ( [data isKindOfClass:[NSString class]] )
-            strongSelf->_workspaceQLabVersion = [[QLKQLabWorkspaceVersion alloc] initWithString:(NSString *)data];
-        
-        if ( block )
-            block( data );
-        
-    }];
+    [self.client sendMessagesWithArguments:nil
+                                 toAddress:@"/version"
+                                 workspace:NO
+                                     block:^(NSString *status, id _Nullable data) {
+                                         __strong typeof(weakSelf) strongSelf = weakSelf;
+                                         if (!strongSelf)
+                                             return;
+
+                                         if ([data isKindOfClass:[NSString class]])
+                                             strongSelf->_workspaceQLabVersion = [[QLKVersionNumber alloc] initWithString:(NSString *)data];
+
+                                         if (block)
+                                             block(status, data);
+                                     }];
 }
 
-- (void) fetchCueLists
+- (void)fetchCueLists
 {
     __weak typeof(self) weakSelf = self;
-    [self fetchCueListsWithBlock:^(id data) {
-        
+    [self fetchCueListsWithBlock:^(NSString *status, id _Nullable data) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        if ( !strongSelf )
+        if (!strongSelf)
             return;
-        
-        if ( !strongSelf.connected )
+
+        if (!strongSelf.connected)
             return;
-        
-        if ( [data isKindOfClass:[NSArray class]] == NO )
-            return; 
-        
+
+        if ([data isKindOfClass:[NSArray class]] == NO)
+            return;
+
         BOOL rootCueUpdated = NO;
         NSMutableArray<QLKCue *> *currentCueLists = [NSMutableArray arrayWithCapacity:((NSArray *)data).count];
-        
+
         NSUInteger index = 0;
-        for ( NSDictionary<NSString *, NSObject<NSCopying> *> *aCueListDict in (NSArray *)data )
+        for (NSDictionary<NSString *, NSObject<NSCopying> *> *aCueListDict in (NSArray *)data)
         {
             NSString *uid = (NSString *)aCueListDict[QLKOSCUIDKey];
-            if ( !uid )
+            if (!uid)
                 continue;
-            
+
             QLKCue *cueList = [strongSelf.root cueWithID:uid includeChildren:NO];
-            if ( cueList )
+            if (cueList)
             {
-                if ( cueList.sortIndex != index )
+                if (cueList.sortIndex != index)
                 {
                     cueList.sortIndex = index;
                     rootCueUpdated = YES;
@@ -583,30 +577,30 @@ NS_ASSUME_NONNULL_BEGIN
             {
                 cueList = [[QLKCue alloc] initWithDictionary:aCueListDict workspace:strongSelf];
                 cueList.sortIndex = index;
-                
+
                 // manually set cue type to "Cue List" when connected to QLab 3 workspaces (default is "Group")
-                if ( strongSelf.connectedToQLab3 )
+                if (strongSelf.workspaceQLabVersion.majorVersion == 3)
                     [cueList setProperty:QLKCueTypeCueList forKey:QLKOSCTypeKey];
-                
+
                 // allow notification observers to react to this new-found cue list
                 NSNotification *notification = [NSNotification notificationWithName:QLKCueNeedsUpdateNotification
                                                                              object:cueList];
                 [[NSNotificationQueue defaultQueue] enqueueNotification:notification
                                                            postingStyle:NSPostWhenIdle
-                                                           coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
-                                                               forModes:@[ NSRunLoopCommonModes ]];
-                
+                                                           coalesceMask:(NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
+                                                               forModes:@[NSRunLoopCommonModes]];
+
                 rootCueUpdated = YES;
             }
             [currentCueLists addObject:cueList];
-            
+
             index++;
         }
-        
+
         QLKCue *activeCuesList = [strongSelf.root cueWithID:QLKActiveCuesIdentifier includeChildren:NO];
-        if ( activeCuesList )
+        if (activeCuesList)
         {
-            if ( activeCuesList.sortIndex != index )
+            if (activeCuesList.sortIndex != index)
             {
                 activeCuesList.sortIndex = index;
                 rootCueUpdated = YES;
@@ -617,8 +611,8 @@ NS_ASSUME_NONNULL_BEGIN
             // Manually add active cues list to root
             activeCuesList = [[QLKCue alloc] initWithWorkspace:strongSelf];
             activeCuesList.sortIndex = index;
-            
-            
+
+
             [activeCuesList setProperty:QLKActiveCuesIdentifier
                                  forKey:QLKOSCUIDKey
                                tellQLab:NO];
@@ -628,134 +622,139 @@ NS_ASSUME_NONNULL_BEGIN
             [activeCuesList setProperty:QLKCueTypeCueList
                                  forKey:QLKOSCTypeKey
                                tellQLab:NO];
-            
+
             rootCueUpdated = YES;
         }
         [currentCueLists addObject:activeCuesList];
-        
-        
-        if ( strongSelf.root.cues.count != currentCueLists.count )
+
+
+        if (strongSelf.root.cues.count != currentCueLists.count)
             rootCueUpdated = YES;
-        
+
         [strongSelf.root setProperty:currentCueLists forKey:QLKOSCCuesKey tellQLab:NO];
-        
-        
-        if ( rootCueUpdated )
+
+
+        if (rootCueUpdated)
             [strongSelf.root enqueueCueUpdatedNotification];
-        
     }];
 }
 
-- (void) fetchCueListsWithBlock:(nullable QLKMessageHandlerBlock)block
+- (void)fetchCueListsWithBlock:(nullable QLKMessageReplyBlock)block
 {
     [self.client sendMessageWithArgument:nil toAddress:@"/cueLists" block:block];
 }
 
-- (void) fetchPlaybackPositionForCue:(QLKCue *)cue block:(nullable QLKMessageHandlerBlock)block
+- (void)fetchPlaybackPositionForCue:(QLKCue *)cue block:(nullable QLKMessageReplyBlock)block
 {
-    [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:QLKOSCPlaybackPositionIdKey] block:block];
+    NSString *playbackPositionIDKey = (self.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4PlaybackPositionIdKey : QLKOSCPlaybackPositionIDKey);
+    NSString *address = [self addressForCue:cue action:playbackPositionIDKey];
+    [self.client sendMessageWithArgument:nil toAddress:address block:block];
 }
 
-- (void) go
+- (void)go
 {
     [self.client sendMessageWithArgument:nil toAddress:@"/go"];
 }
 
-- (void) save
+- (void)auditionGo
+{
+    [self.client sendMessageWithArgument:nil toAddress:@"/auditionGo"];
+}
+
+- (void)save
 {
     [self.client sendMessageWithArgument:nil toAddress:@"/save"];
 }
 
-- (void) undo
+- (void)undo
 {
     [self.client sendMessageWithArgument:nil toAddress:@"/undo"];
 }
 
-- (void) redo
+- (void)redo
 {
     [self.client sendMessageWithArgument:nil toAddress:@"/redo"];
 }
 
-- (void) resetAll
+- (void)resetAll
 {
     [self.client sendMessageWithArgument:nil toAddress:@"/reset"];
 }
 
-- (void) pauseAll
+- (void)pauseAll
 {
     [self.client sendMessageWithArgument:nil toAddress:@"/pause"];
 }
 
-- (void) resumeAll
+- (void)resumeAll
 {
     [self.client sendMessageWithArgument:nil toAddress:@"/resume"];
 }
 
-- (void) stopAll
+- (void)stopAll
 {
     [self.client sendMessageWithArgument:nil toAddress:@"/stop"];
 }
 
-- (void) panicAll
+- (void)panicAll
 {
     [self.client sendMessageWithArgument:nil toAddress:@"/panic"];
 }
 
 
-
 #pragma mark - Heartbeat
 
-- (void) startHeartbeat
+- (void)startHeartbeat
 {
     [self clearHeartbeatTimeout];
     [self sendHeartbeat];
 }
 
-- (void) stopHeartbeat
+- (void)stopHeartbeat
 {
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(sendHeartbeat) object:nil];
     [self clearHeartbeatTimeout];
-    
+
     self.heartbeatAttempts = -1; // not running
 }
 
-- (void) clearHeartbeatTimeout
+- (void)clearHeartbeatTimeout
 {
     [self.heartbeatTimeout invalidate];
     self.heartbeatTimeout = nil;
-    
+
     self.heartbeatAttempts = 0;
 }
 
-- (void) sendHeartbeat
+- (void)sendHeartbeat
 {
     //NSLog( @"sending heartbeat..." );
-    
+
     __weak typeof(self) weakSelf = self;
-    [self.client sendMessageWithArgument:nil toAddress:@"/thump" block:^(id data) {
-        
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if ( !strongSelf )
-            return;
-        
-        //NSLog( @"heartbeat received" );
-        
-        // exit if not running
-        if ( strongSelf.heartbeatAttempts == -1 )
-            return;
-        
-        [strongSelf clearHeartbeatTimeout];
-        
-        // Don't send if we have become disconnected while waiting for response
-        if ( !strongSelf.connected || !strongSelf.client.isConnected )
-            return;
-        
-        [strongSelf performSelector:@selector(sendHeartbeat)
-                         withObject:nil
-                         afterDelay:HEARTBEAT_INTERVAL];
-        
-    }];
-    
+    [self.client sendMessageWithArgument:nil
+                               toAddress:@"/thump"
+                                   block:^(NSString *status, id _Nullable data) {
+                                       __strong typeof(weakSelf) strongSelf = weakSelf;
+                                       if (!strongSelf)
+                                           return;
+
+                                       //NSLog( @"heartbeat received" );
+
+                                       // exit if not running
+                                       if (strongSelf.heartbeatAttempts == -1)
+                                           return;
+
+                                       [strongSelf clearHeartbeatTimeout];
+
+                                       // Don't send if we have become disconnected while waiting for response
+                                       if (!strongSelf.connected || !strongSelf.client.isConnected)
+                                           return;
+
+                                       [strongSelf performSelector:@selector(sendHeartbeat)
+                                                        withObject:nil
+                                                        afterDelay:HEARTBEAT_INTERVAL];
+                                   }];
+
     // Start timeout for heartbeat response
     self.heartbeatTimeout = [NSTimer scheduledTimerWithTimeInterval:HEARTBEAT_FAILURE_INTERVAL
                                                              target:self
@@ -764,247 +763,268 @@ NS_ASSUME_NONNULL_BEGIN
                                                             repeats:NO];
 }
 
-- (void) heartbeatTimeout:(NSTimer *)timer
+- (void)heartbeatTimeout:(NSTimer *)timer
 {
-    if ( !timer.isValid )
+    if (!timer.isValid)
         return;
-    
-    if ( self.heartbeatAttempts == -1 )
+
+    if (self.heartbeatAttempts == -1)
         return;
-    
+
     // exit if workspace has disconnected while waiting for response
-    if ( !self.connected )
+    if (!self.connected)
         return;
-    
+
     // if timer fires before we receive a response from /thump,
     // - if we have attempts left, try sending again
     // - else post a connection error notification
-    if ( self.heartbeatAttempts < HEARTBEAT_MAX_ATTEMPTS )
+    if (self.heartbeatAttempts < HEARTBEAT_MAX_ATTEMPTS)
     {
         self.heartbeatAttempts++;
         [self sendHeartbeat];
     }
     else
     {
-        NSLog( @"Heartbeat failure: workspace may have died" );
+        NSLog(@"Heartbeat failure: workspace may have died");
         [self notifyAboutConnectionError];
     }
 }
 
 
-
 #pragma mark - Cue Actions
 
-- (void) startCue:(QLKCue *)cue
+- (void)startCue:(QLKCue *)cue
 {
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"start"]];
 
     // immediately update local state for snappier UI response
-    [cue updatePropertiesWithDictionary:@{ QLKOSCIsRunningKey : @YES }];
+    [cue updatePropertiesWithDictionary:@{QLKOSCIsRunningKey: @YES}];
 }
 
-- (void) stopCue:(QLKCue *)cue
+- (void)stopCue:(QLKCue *)cue
 {
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"stop"]];
 }
 
-- (void) pauseCue:(QLKCue *)cue
+- (void)pauseCue:(QLKCue *)cue
 {
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"pause"]];
 
     // immediately update local state for snappier UI response
-    [cue updatePropertiesWithDictionary:@{ QLKOSCIsPausedKey : @YES }];
+    [cue updatePropertiesWithDictionary:@{QLKOSCIsPausedKey: @YES}];
 }
 
-- (void) loadCue:(QLKCue *)cue
+- (void)loadCue:(QLKCue *)cue
 {
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"load"]];
 }
 
-- (void) resetCue:(QLKCue *)cue
+- (void)resetCue:(QLKCue *)cue
 {
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"reset"]];
 }
 
-- (void) deleteCue:(QLKCue *)cue
+- (void)deleteCue:(QLKCue *)cue
 {
-    NSString *address = [NSString stringWithFormat:@"/delete_id/%@", [cue propertyForKey:QLKOSCUIDKey]];
+    NSString *address = [NSString stringWithFormat:@"/delete_id/%@", cue.uid];
     [self.client sendMessageWithArgument:nil toAddress:address];
 }
 
-- (void) resumeCue:(QLKCue *)cue
+- (void)resumeCue:(QLKCue *)cue
 {
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"resume"]];
 }
 
-- (void) hardStopCue:(QLKCue *)cue
+- (void)hardStopCue:(QLKCue *)cue
 {
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"hardStop"]];
 }
 
-- (void) hardPauseCue:(QLKCue *)cue
+- (void)hardPauseCue:(QLKCue *)cue
 {
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"hardPause"]];
 
     // immediately update local state for snappier UI response
-    [cue updatePropertiesWithDictionary:@{ QLKOSCIsPausedKey : @YES }];
+    [cue updatePropertiesWithDictionary:@{QLKOSCIsPausedKey: @YES}];
 }
 
-- (void) togglePauseCue:(QLKCue *)cue
+- (void)togglePauseCue:(QLKCue *)cue
 {
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"togglePause"]];
 }
 
-- (void) previewCue:(QLKCue *)cue
+- (void)previewCue:(QLKCue *)cue
 {
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"preview"]];
 }
 
-- (void) panicCue:(QLKCue *)cue
+- (void)auditionPreviewCue:(QLKCue *)cue
+{
+    [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"auditionPreview"]];
+}
+
+- (void)panicCue:(QLKCue *)cue
 {
     [self.client sendMessageWithArgument:nil toAddress:[self addressForCue:cue action:@"panic"]];
-    
+
     // immediately update local state for snappier UI response
     // NOTE: /isPanicking requires QLab 4.0+
-    if ( !self.connectedToQLab3 )
+    if (!self.connectedToQLab3)
     {
-        [cue updatePropertiesWithDictionary:@{ QLKOSCIsPanickingKey : @YES }];
-        for ( QLKCue *aCue in cue.cues )
+        [cue updatePropertiesWithDictionary:@{QLKOSCIsPanickingKey: @YES}];
+        for (QLKCue *aCue in cue.cues)
         {
-            if ( aCue.isRunning )
-                [aCue updatePropertiesWithDictionary:@{ QLKOSCIsPanickingKey : @YES }];
+            if (aCue.isRunning)
+                [aCue updatePropertiesWithDictionary:@{QLKOSCIsPanickingKey: @YES}];
         }
     }
 }
 
 
-
 #pragma mark - Cue Getters/Setters
 
-- (void) cue:(QLKCue *)cue valueForKey:(NSString *)key block:(nullable QLKMessageHandlerBlock)block
+- (void)cue:(QLKCue *)cue valueForKey:(NSString *)key block:(nullable QLKMessageReplyBlock)block
 {
     [self.client sendMessageWithArgument:nil
                                toAddress:[self addressForCue:cue action:key]
                                    block:block];
 }
 
-- (void) cue:(QLKCue *)cue valuesForKeys:(NSArray<NSString *> *)keys
+- (void)cue:(QLKCue *)cue valuesForKeys:(NSArray<NSString *> *)keys
 {
     [self cue:cue valuesForKeys:keys block:nil];
 }
 
-- (void) cue:(QLKCue *)cue valuesForKeys:(NSArray<NSString *> *)keys block:(nullable QLKMessageHandlerBlock)block
+- (void)cue:(QLKCue *)cue valuesForKeys:(NSArray<NSString *> *)keys block:(nullable QLKMessageReplyBlock)block
 {
     NSString *JSONKeys = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:keys options:0 error:nil] encoding:NSUTF8StringEncoding];
     [self.client sendMessageWithArgument:JSONKeys toAddress:[self addressForCue:cue action:@"valuesForKeys"] block:block];
 }
 
-- (void) cue:(QLKCue *)cue updatePropertySend:(nullable id)value forKey:(NSString *)key
+- (void)cue:(QLKCue *)cue updatePropertySend:(nullable id)value forKey:(NSString *)key
 {
     [self.client sendMessageWithArgument:value toAddress:[self addressForCue:cue action:key]];
 }
 
-- (void) cue:(QLKCue *)cue updatePropertiesSend:(nullable NSArray *)values forKey:(NSString *)key
+- (void)cue:(QLKCue *)cue updatePropertiesSend:(nullable NSArray *)values forKey:(NSString *)key
 {
     [self.client sendMessagesWithArguments:values toAddress:[self addressForCue:cue action:key]];
 }
 
-- (void) updateAllCuePropertiesSendOSC
+- (void)updateAllCuePropertiesSendOSC
 {
     [self.root sendAllPropertiesToQLab];
 }
 
-- (void) runningOrPausedCuesWithBlock:(nullable QLKMessageHandlerBlock)block
+- (void)runningOrPausedCuesWithBlock:(nullable QLKMessageReplyBlock)block
 {
     [self.client sendMessagesWithArguments:nil toAddress:@"/runningOrPausedCues" block:block];
 }
 
 
+#pragma mark - Cue Property Fetching
 
-#pragma mark - Property Fetching
-
-- (void) fetchDefaultCueListPropertiesForCue:(QLKCue *)cue
+- (void)fetchDefaultCueListPropertiesForCue:(QLKCue *)cue
 {
-    NSArray<NSString *> *keys = @[ QLKOSCUIDKey, QLKOSCNumberKey, QLKOSCNameKey, QLKOSCListNameKey, QLKOSCTypeKey, QLKOSCColorNameKey, QLKOSCFlaggedKey, QLKOSCArmedKey, QLKOSCNotesKey ];
+    NSArray<NSString *> *keys;
+    if (self.workspaceQLabVersion.majorVersion < 5)
+        keys = @[QLKOSCUIDKey, QLKOSCNumberKey, QLKOSCNameKey, QLKOSCListNameKey, QLKOSCTypeKey, QLKOSCColorNameKey, QLKOSCFlaggedKey, QLKOSCArmedKey, QLKOSCNotesKey];
+    else
+        keys = @[QLKOSCUIDKey, QLKOSCNumberKey, QLKOSCNameKey, QLKOSCListNameKey, QLKOSCTypeKey, QLKOSCColorNameKey, QLKOSCLiveColorNameKey, QLKOSCFlaggedKey, QLKOSCArmedKey, QLKOSCNotesKey];
     [self fetchPropertiesForCue:cue keys:keys includeChildren:NO];
 }
 
-- (void) fetchBasicPropertiesForCue:(QLKCue *)cue
+- (void)fetchBasicPropertiesForCue:(QLKCue *)cue
 {
-    NSArray<NSString *> *keys = @[ QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCCueTargetNumberKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey ];
+    NSArray<NSString *> *keys;
+    if (self.workspaceQLabVersion.majorVersion < 5)
+        keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCCueTargetNumberKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
+    else
+        keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCCueTargetNumberKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCLiveColorNameKey, QLKOSCColorConditionKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
     [self fetchPropertiesForCue:cue keys:keys includeChildren:NO];
 }
 
-- (void) fetchNotesForCue:(QLKCue *)cue
+- (void)fetchNotesForCue:(QLKCue *)cue
 {
-    NSArray<NSString *> *keys = @[ QLKOSCNotesKey ];
+    NSArray<NSString *> *keys = @[QLKOSCNotesKey];
     [self fetchPropertiesForCue:cue keys:keys includeChildren:NO];
 }
 
-- (void) fetchDisplayAndGeometryForCue:(QLKCue *)cue
+- (void)fetchDisplayAndGeometryForCue:(QLKCue *)cue
 {
-    NSString *fullSurfaceKey = ( self.connectedToQLab3 ? QLKOSCFullScreenKey : QLKOSCFullSurfaceKey );
-    NSArray<NSString *> *keys = @[ fullSurfaceKey, QLKOSCTranslationXKey, QLKOSCTranslationYKey, QLKOSCScaleXKey, QLKOSCScaleYKey, QLKOSCOriginXKey, QLKOSCOriginYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCSurfaceSizeKey, QLKOSCCueSizeKey, QLKOSCSurfaceIDKey, QLKOSCSurfaceListKey ];
+    NSArray<NSString *> *keys;
+    if (self.workspaceQLabVersion.majorVersion == 3)
+    {
+        keys = @[QLKOSCFullScreenKey, QLKOSCV4TranslationXKey, QLKOSCV4TranslationYKey, QLKOSCV4ScaleXKey, QLKOSCV4ScaleYKey, QLKOSCV4OriginXKey, QLKOSCV4OriginYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCSurfaceIDKey, QLKOSCSurfaceSizeKey, QLKOSCSurfaceListKey];
+    }
+    else if (self.workspaceQLabVersion.majorVersion == 4)
+    {
+        keys = @[QLKOSCFullSurfaceKey, QLKOSCV4TranslationXKey, QLKOSCV4TranslationYKey, QLKOSCV4ScaleXKey, QLKOSCV4ScaleYKey, QLKOSCV4OriginXKey, QLKOSCV4OriginYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCSurfaceIDKey];
+    }
+    else // v5.0+
+    {
+        keys = @[QLKOSCFillStageKey, QLKOSCTranslationXKey, QLKOSCTranslationYKey, QLKOSCScaleXKey, QLKOSCScaleYKey, QLKOSCOriginXKey, QLKOSCOriginYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCStageIDKey];
+    }
     [self fetchPropertiesForCue:cue keys:keys includeChildren:NO];
 }
 
-- (void) fetchPropertiesForCue:(QLKCue *)cue keys:(NSArray<NSString *> *)keys includeChildren:(BOOL)includeChildren
+- (void)fetchPropertiesForCue:(QLKCue *)cue keys:(NSArray<NSString *> *)keys includeChildren:(BOOL)includeChildren
 {
-    pthread_mutex_lock( &_deferredCueUpdatesMutex );
+    pthread_mutex_lock(&_deferredCueUpdatesMutex);
     NSMutableSet *currentKeys = [self.deferredCueUpdates objectForKey:cue];
-    pthread_mutex_unlock( &_deferredCueUpdatesMutex );
-    
-    if ( currentKeys )
+    pthread_mutex_unlock(&_deferredCueUpdatesMutex);
+
+    if (currentKeys)
     {
         [currentKeys addObjectsFromArray:keys];
-        if ( includeChildren )
+        if (includeChildren)
             [currentKeys addObject:@"includeChildren"];
     }
     else
     {
         [self cue:cue valuesForKeys:keys block:nil];
     }
-    
-    if ( !includeChildren )
+
+    if (!includeChildren)
         return;
-    
-    for ( QLKCue *aCue in cue.cues )
+
+    for (QLKCue *aCue in cue.cues)
     {
         [self fetchPropertiesForCue:aCue keys:keys includeChildren:includeChildren];
     }
 }
 
-- (void) deferFetchingPropertiesForCue:(QLKCue *)cue
+- (void)deferFetchingPropertiesForCue:(QLKCue *)cue
 {
-    if ( cue.isCueList || cue.isCueCart )
+    if (cue.isCueList || cue.isCueCart)
         return;
-    
+
     // if currentKeys set does not exist, setObject with a new empty set to begin deferring
     // if currentKeys exists, already deferred -- do nothing
-    pthread_mutex_lock( &_deferredCueUpdatesMutex );
-    
+    pthread_mutex_lock(&_deferredCueUpdatesMutex);
+
     NSMutableSet *currentKeys = [self.deferredCueUpdates objectForKey:cue];
-    if ( !currentKeys )
+    if (!currentKeys)
     {
         currentKeys = [NSMutableSet setWithCapacity:0];
         [self.deferredCueUpdates setObject:currentKeys forKey:cue];
     }
-    
-    pthread_mutex_unlock( &_deferredCueUpdatesMutex );
+
+    pthread_mutex_unlock(&_deferredCueUpdatesMutex);
 }
 
-- (void) resumeFetchingPropertiesForCue:(QLKCue *)cue
+- (void)resumeFetchingPropertiesForCue:(QLKCue *)cue
 {
-    pthread_mutex_lock( &_deferredCueUpdatesMutex );
+    pthread_mutex_lock(&_deferredCueUpdatesMutex);
     NSMutableSet *currentKeys = [self.deferredCueUpdates objectForKey:cue];
     [self.deferredCueUpdates removeObjectForKey:cue];
-    pthread_mutex_unlock( &_deferredCueUpdatesMutex );
-    
-    if ( currentKeys.count )
+    pthread_mutex_unlock(&_deferredCueUpdatesMutex);
+
+    if (currentKeys.count)
     {
         BOOL includeChildren = [currentKeys containsObject:@"includeChildren"];
         [currentKeys removeObject:@"includeChildren"];
-        
+
         [self fetchPropertiesForCue:cue
                                keys:currentKeys.allObjects
                     includeChildren:includeChildren];
@@ -1012,202 +1032,336 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 
+#pragma mark - Workspace Settings
+
+- (nullable NSDictionary<NSString *, id> *)surfaceDictForSurfaceID:(NSNumber *)surfaceID
+{
+    // Requires v4.0+ to populate `videoOutputsList` with reply payload from /settings/video/surfaces.
+    if (self.workspaceQLabVersion.majorVersion < 4)
+        return nil;
+
+    for (NSDictionary<NSString *, id> *surfaceDict in self.videoOutputsList)
+    {
+        if ([surfaceDict[@"surfaceID"] isEqual:surfaceID])
+            return surfaceDict;
+    }
+
+    // else
+    return nil;
+}
+
+- (nullable NSDictionary<NSString *, id> *)stageDictForStageID:(NSString *)stageID
+{
+    // Requires v5.0+ to populate `videoOutputsList` with reply payload from /settings/video/stages.
+    if (self.workspaceQLabVersion.majorVersion < 5)
+        return nil;
+
+    for (NSDictionary<NSString *, id> *stageDict in self.videoOutputsList)
+    {
+        if ([stageDict[@"uniqueID"] isEqual:stageID])
+            return stageDict;
+    }
+
+    // else
+    return nil;
+}
+
+- (void)refreshVideoOutputsList
+{
+    // /settings/video/* was added in v4.0
+    if (self.workspaceQLabVersion.majorVersion < 4)
+        return;
+
+    NSString *address;
+    if (self.workspaceQLabVersion.majorVersion == 4)
+        address = @"/settings/video/surfaces";
+    else // v5.0+
+        address = @"/settings/video/stages";
+
+    __weak typeof(self) weakSelf = self;
+    [self.client sendMessageWithArgument:nil
+                               toAddress:address
+                                   block:^(NSString *status, id _Nullable data) {
+                                       if ([data isKindOfClass:[NSArray class]] == NO)
+                                           return;
+
+                                       __strong typeof(weakSelf) strongSelf = weakSelf;
+                                       if (!strongSelf)
+                                           return;
+
+                                       if ([strongSelf.videoOutputsList isEqualToArray:data])
+                                           return;
+
+                                       strongSelf.videoOutputsList = data;
+
+                                       NSNotification *notification = [NSNotification notificationWithName:QLKWorkspaceDidUpdateSettingsNotification
+                                                                                                    object:strongSelf
+                                                                                                  userInfo:@{@"settingsType": @"video"}];
+                                       [[NSNotificationQueue defaultQueue] enqueueNotification:notification
+                                                                                  postingStyle:NSPostASAP
+                                                                                  coalesceMask:(NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
+                                                                                      forModes:@[NSRunLoopCommonModes]];
+                                   }];
+}
+
 
 #pragma mark - OSC address helpers
 
-- (void) sendMessage:(nullable id)object toAddress:(NSString *)address
+- (void)sendMessage:(nullable id)object toAddress:(NSString *)address
 {
     [self sendMessage:object toAddress:address block:nil];
 }
 
-- (void) sendMessage:(nullable id)object toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block
+- (void)sendMessage:(nullable id)object toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block
 {
     [self.client sendMessageWithArgument:object toAddress:address block:block];
 }
 
-- (void) sendApplicationMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block
+- (void)sendApplicationMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block
 {
     [self.client sendMessagesWithArguments:arguments toAddress:address workspace:NO block:block];
 }
 
-- (NSString *) addressForCue:(QLKCue *)cue action:(NSString *)action
+- (NSString *)addressForCue:(QLKCue *)cue action:(NSString *)action
 {
-    return [NSString stringWithFormat:@"/cue_id/%@/%@", [cue propertyForKey:QLKOSCUIDKey], action];
+    return [NSString stringWithFormat:@"/cue_id/%@/%@", cue.uid, action];
 }
 
-- (NSString *) addressForWildcardNumber:(NSString *)number action:(NSString *)action
-{
-    return [NSString stringWithFormat:@"/cue/%@/%@", number, action];
-}
-
-- (NSString *) workspacePrefix
+- (NSString *)workspacePrefix
 {
     return [NSString stringWithFormat:@"/workspace/%@", self.uniqueID];
 }
 
 
-
 #pragma mark - QLKClientDelegate
 
-- (NSString *) workspaceID
+- (NSString *)workspaceIDForClient:(QLKClient *)client
 {
+    if (client != self.client)
+        return @"";
+
     return self.uniqueID;
 }
 
-- (void) workspaceUpdated
+- (void)clientConnected:(QLKClient *)client
 {
+    if (client != self.client)
+        return;
+
+    // NSLog(@"[workspace] *** clientConnected:");
+
+    [self finishConnectWithPasscode];
+}
+
+- (void)clientConnectionErrorOccurred:(QLKClient *)client
+{
+    if (client != self.client)
+        return;
+
+    if (!self.connected)
+        return;
+
+    NSLog(@"[workspace] *** Error: clientConnectionErrorOccurred:");
+
+    [self notifyAboutConnectionError];
+}
+
+- (void)clientWorkspaceUpdated:(QLKClient *)client
+{
+    if (client != self.client)
+        return;
+
     [self fetchCueLists];
-    
+
     NSNotification *notification = [NSNotification notificationWithName:QLKWorkspaceDidUpdateNotification
                                                                  object:self
                                                                userInfo:nil];
     [[NSNotificationQueue defaultQueue] enqueueNotification:notification
                                                postingStyle:NSPostASAP
-                                               coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
-                                                   forModes:@[ NSRunLoopCommonModes ]];
+                                               coalesceMask:(NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
+                                                   forModes:@[NSRunLoopCommonModes]];
 }
 
-- (void) workspaceSettingsUpdated:(NSString *)settingsType
+- (void)client:(QLKClient *)client workspaceSettingsUpdated:(NSString *)settingsType
 {
+    if (client != self.client)
+        return;
+
     NSNotification *notification = [NSNotification notificationWithName:QLKWorkspaceDidUpdateSettingsNotification
                                                                  object:self
-                                                               userInfo:@{ @"settingsType" : settingsType }];
+                                                               userInfo:@{@"settingsType": settingsType}];
     [[NSNotificationQueue defaultQueue] enqueueNotification:notification
                                                postingStyle:NSPostASAP
-                                               coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
-                                                   forModes:@[ NSRunLoopCommonModes ]];
+                                               coalesceMask:(NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
+                                                   forModes:@[NSRunLoopCommonModes]];
+
+    if ([settingsType isEqualToString:@"video"])
+    {
+        [self refreshVideoOutputsList];
+    }
+    else if ([settingsType isEqualToString:@"network.access.osc"]) // v5+
+    {
+        BOOL wasCanView = self.canView;
+        BOOL wasCanEdit = self.canEdit;
+        BOOL wasCanControl = self.canControl;
+
+        // Reconnect using the last-known passcode so that we can update our local access permission hints if needed.
+        __weak typeof(self) weakSelf = self;
+        [self connectWithPasscode:self.passcode
+                       completion:^(NSString *status, id _Nullable data) {
+                           __strong typeof(weakSelf) strongSelf = weakSelf;
+                           if (!strongSelf)
+                               return;
+
+                           // NOTE: `connectWithPasscode:completion:` updates the QLKWorkspace permission properties prior to calling this completion.
+
+                           if (strongSelf.canView == wasCanView &&
+                               strongSelf.canEdit == wasCanEdit &&
+                               strongSelf.canControl == wasCanControl)
+                               return; // no change, nothing more to do
+
+                           // else post notification that permissions have changed
+                           NSNotification *notification = [NSNotification notificationWithName:QLKWorkspaceDidUpdateAccessPermissionsNotification
+                                                                                        object:self
+                                                                                      userInfo:nil];
+                           [[NSNotificationQueue defaultQueue] enqueueNotification:notification
+                                                                      postingStyle:NSPostASAP
+                                                                      coalesceMask:(NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
+                                                                          forModes:@[NSRunLoopCommonModes]];
+                       }];
+    }
 }
 
-- (void) workspaceDisconnected
+- (void)client:(QLKClient *)client cueNeedsUpdate:(NSString *)cueID
 {
-    if ( !self.connected )
+    if (client != self.client)
         return;
-    
-    NSLog( @"[workspace] *** workspaceDisconnected" );
-    
+
+    [self cueNeedsUpdate:cueID];
+}
+
+- (void)client:(QLKClient *)client cueUpdated:(NSString *)cueID withProperties:(NSDictionary<NSString *, NSObject<NSCopying> *> *)properties
+{
+    if (client != self.client)
+        return;
+
+    QLKCue *cue = [self cueWithID:cueID];
+    if (!cue || cue.ignoreUpdates)
+        return;
+
+    dispatch_async(self.replyBlockQueue, ^{
+        [cue updatePropertiesWithDictionary:properties];
+    });
+}
+
+- (void)client:(QLKClient *)client cueListUpdated:(NSString *)cueListID withPlaybackPositionID:(nullable NSString *)cueID
+{
+    if (client != self.client)
+        return;
+
+    QLKCue *cueList = [self cueWithID:cueListID];
+    if (!cueList || cueList.ignoreUpdates)
+        return;
+
+    dispatch_async(self.replyBlockQueue, ^{
+        [cueList setPlaybackPositionID:cueID tellQLab:NO];
+    });
+}
+
+- (void)clientWorkspaceDisconnected:(QLKClient *)client
+{
+    if (client != self.client)
+        return;
+
+    if (!self.connected)
+        return;
+
+    NSLog(@"[workspace] *** clientWorkspaceDisconnected:");
+
     [self disconnect];
     [self notifyAboutDisconnection];
 }
 
-- (void) lightDashboardUpdated
+- (BOOL)shouldEncryptConnectionsForClient:(QLKClient *)client
 {
+    if (client != self.client)
+        return NO;
+
+    return (self.workspaceQLabVersion.majorVersion >= 5);
+}
+
+- (BOOL)clientShouldDisconnectOnError:(QLKClient *)client
+{
+    if (client != self.client)
+        return NO;
+
+    NSLog(@"[workspace] *** clientShouldDisconnectOnError:");
+
+    if (!self.server)
+        return YES;
+
+    if (!self.attemptToReconnect)
+        return YES;
+
+    // else
+    return NO;
+}
+
+- (void)clientLightDashboardUpdated:(QLKClient *)client
+{
+    if (client != self.client)
+        return;
+
     // NOTE: Dashboard updates require a connection to QLab 4.2+
     NSNotification *notification = [NSNotification notificationWithName:QLKWorkspaceDidUpdateLightDashboardNotification
                                                                  object:self
                                                                userInfo:nil];
     [[NSNotificationQueue defaultQueue] enqueueNotification:notification
                                                postingStyle:NSPostASAP
-                                               coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
-                                                   forModes:@[ NSRunLoopCommonModes ]];
+                                               coalesceMask:(NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
+                                                   forModes:@[NSRunLoopCommonModes]];
 }
 
-- (void) preferencesUpdated:(NSString *)key
+- (void)client:(QLKClient *)client preferencesUpdated:(NSString *)key
 {
+    if (client != self.client)
+        return;
+
     // NOTE: Preferences updates require a connection to QLab 4.2+
     NSNotification *notification = [NSNotification notificationWithName:QLKQLabDidUpdatePreferencesNotification
                                                                  object:self
-                                                               userInfo:@{ @"preferencesKey" : key }];
+                                                               userInfo:@{@"preferencesKey": key}];
     [[NSNotificationQueue defaultQueue] enqueueNotification:notification
                                                postingStyle:NSPostASAP
-                                               coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
-                                                   forModes:@[ NSRunLoopCommonModes ]];
+                                               coalesceMask:(NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
+                                                   forModes:@[NSRunLoopCommonModes]];
 }
-
-- (void) cueNeedsUpdate:(NSString *)cueID
-{
-    QLKCue *cue = [self cueWithID:cueID];
-    
-    if ( cue.isGroup )
-    {
-        __weak typeof(self) weakSelf = self;
-        [self cue:cue valueForKey:@"children" block:^(id data) {
-            
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            if ( !strongSelf )
-                return;
-            
-            if ( [data isKindOfClass:[NSArray class]] == NO )
-                return;
-            
-            [cue updateChildCuesWithPropertiesArray:(NSArray *)data removeUnused:YES];
-            
-        }];
-    }
-    
-    if ( cue )
-    {
-        NSNotification *notification = [NSNotification notificationWithName:QLKCueNeedsUpdateNotification
-                                                                     object:cue];
-        [[NSNotificationQueue defaultQueue] enqueueNotification:notification
-                                                   postingStyle:NSPostWhenIdle
-                                                   coalesceMask:( NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender )
-                                                       forModes:@[ NSRunLoopCommonModes ]];
-    }
-}
-
-- (void) cueUpdated:(NSString *)cueID withProperties:(NSDictionary<NSString *, NSObject<NSCopying> *> *)properties
-{
-    QLKCue *cue = [self cueWithID:cueID];
-    if ( !cue || cue.ignoreUpdates )
-        return;
-    
-    dispatch_async( self.replyBlockQueue, ^{
-        [cue updatePropertiesWithDictionary:properties];
-    });
-}
-
-- (void) cueListUpdated:(NSString *)cueListID withPlaybackPositionID:(nullable NSString *)cueID
-{
-    QLKCue *cueList = [self cueWithID:cueListID];
-    if ( !cueList || cueList.ignoreUpdates )
-        return;
-    
-    dispatch_async( self.replyBlockQueue, ^{
-        [cueList setPlaybackPositionID:cueID tellQLab:NO];
-    });
-}
-
-- (BOOL) clientShouldDisconnectOnError
-{
-    NSLog( @"[workspace] *** clientShouldDisconnectOnError" );
-    
-    if ( self.server && self.attemptToReconnect )
-        return NO;
-    
-    // else
-    return YES;
-}
-
-- (void) clientConnectionErrorOccurred
-{
-    if ( !self.connected )
-        return;
-    
-    NSLog( @"[workspace] *** Error: clientConnectionErrorOccurred" );
-    
-    [self notifyAboutConnectionError];
-}
-
-
 
 #pragma mark - deprecated
 
-- (void) fetchChildrenForCue:(QLKCue *)cue block:(nullable QLKMessageHandlerBlock)block
+- (NSString *)addressForWildcardNumber:(NSString *)number action:(NSString *)action
 {
-    [self cue:cue valueForKey:@"children" block:block];
-}
-
-- (void) fetchAudioLevelsForCue:(QLKCue *)cue block:(nullable QLKMessageHandlerBlock)block
-{
-    [self cue:cue valueForKey:@"sliderLevels" block:block];
-}
-
-- (void) connect
-{
-    NSLog( @"[workspace] connect" );
-    [self connectWithPasscode:self.passcode completion:nil];
+    return [NSString stringWithFormat:@"/cue/%@/%@", number, action];
 }
 
 @end
+
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-implementations"
+@implementation QLKQLabWorkspaceVersion
+
+- (instancetype)initWithMajorVersion:(NSUInteger)major minor:(NSUInteger)minor patch:(NSUInteger)patch build:(nullable NSString *)build
+{
+    return [super initWithMajorVersion:major minor:minor patch:patch build:nil];
+}
+
+- (NSComparisonResult)compare:(QLKVersionNumber *)otherVersion
+{
+    return [self compare:otherVersion ignoreBuild:YES];
+}
+
+@end
+#pragma clang diagnostic pop
 
 NS_ASSUME_NONNULL_END

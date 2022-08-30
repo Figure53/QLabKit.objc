@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2017 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2019 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,9 +25,9 @@
 //  THE SOFTWARE.
 //
 
-@import Foundation;
 #import "QLKDefines.h"
 #import "QLKServer.h"
+#import <Foundation/Foundation.h>
 
 @class QLKBrowser;
 @protocol QLKBrowserDelegate;
@@ -37,27 +37,27 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface QLKBrowser : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate, QLKServerDelegate>
 
-@property (nonatomic, weak, nullable)               id<QLKBrowserDelegate> delegate;
+@property (nonatomic, weak, nullable) id<QLKBrowserDelegate> delegate;
 
-@property (assign, readonly)                        BOOL running;
+@property (nonatomic, readonly) BOOL running;
 
 // array of QLKServer objects
-@property (copy, atomic, readonly)                  NSArray<QLKServer *> *servers;
+@property (atomic, readonly) NSArray<QLKServer *> *servers;
 
 // Start server discovery.
-- (void) start;
+- (void)start;
 
 // Stop server discovery.
-- (void) stop;
+- (void)stop;
 
 // Refresh list of workspaces on all servers.
-- (void) refreshAllWorkspaces;
+- (void)refreshAllWorkspaces;
 
 // Continuously poll workspaces of all servers with given interval (in seconds).
-- (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval;
+- (void)enableAutoRefreshWithInterval:(NSTimeInterval)interval;
 
 // Stop auto refresh of workspaces.
-- (void) disableAutoRefresh;
+- (void)disableAutoRefresh;
 
 @end
 
@@ -65,15 +65,15 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol QLKBrowserDelegate <NSObject>
 
 // A server was added or removed.
-- (void) browserDidUpdateServers:(QLKBrowser *)browser;
+- (void)browserDidUpdateServers:(QLKBrowser *)browser;
 
 // A server updated its workspaces.
-- (void) browserServerDidUpdateWorkspaces:(QLKServer *)server;
+- (void)browserServerDidUpdateWorkspaces:(QLKServer *)server;
 
 @optional
 
 // A server updated its host version.
-- (void) browserServerDidUpdateHostVersion:(QLKServer *)server;
+- (void)browserServerDidUpdateHostVersion:(QLKServer *)server;
 
 @end
 

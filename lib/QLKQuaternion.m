@@ -1,10 +1,10 @@
 //
-//  QLabKit.h
+//  QLKQuaternion.m
 //  QLabKit
 //
-//  Created by Zach Waugh on 7/9/13.
+//  Created by Brent Lord on 8/23/20.
 //
-//  Copyright (c) 2013-2019 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2020 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,13 +25,9 @@
 //  THE SOFTWARE.
 //
 
-#import "QLKBrowser.h"
-#import "QLKClient.h"
-#import "QLKColor.h"
-#import "QLKCue.h"
-#import "QLKDefines.h"
-#import "QLKMessage.h"
 #import "QLKQuaternion.h"
-#import "QLKServer.h"
-#import "QLKVersionNumber.h"
-#import "QLKWorkspace.h"
+
+
+#pragma mark - GLKit legacy
+
+const QLKQuaternion QLKQuaternionIdentity = {0, 0, 0, 1};

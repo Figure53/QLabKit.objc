@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,13 +25,14 @@
 //  THE SOFTWARE.
 //
 
-@import Foundation;
+#import <Foundation/Foundation.h>
 
 #import "QLKDefines.h"
-#import "F53OSCClient.h"
+#import <F53OSC/F53OSCClient.h>
 
 
-@class QLKCue, F53OSCMessage;
+@class QLKCue;
+@class F53OSCMessage;
 @protocol QLKClientDelegate;
 
 
@@ -39,56 +40,60 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface QLKClient : NSObject <F53OSCPacketDestination, F53OSCClientDelegate>
 
-- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port;
+- (instancetype)initWithHost:(NSString *)host port:(NSInteger)port;
 
-@property (nonatomic, weak, nullable)               id<QLKClientDelegate> delegate;
-@property (nonatomic, strong, nullable, readonly)   F53OSCClient *OSCClient;
-@property (nonatomic)                               BOOL useTCP;
-@property (nonatomic, readonly)                     BOOL isConnected;
+@property (nonatomic, weak, nullable) id<QLKClientDelegate> delegate;
+@property (nonatomic, nullable, readonly) F53OSCClient *OSCClient;
+@property (nonatomic) BOOL useTCP;
+@property (nonatomic, readonly) BOOL isConnected;
 
-- (BOOL) connect;
-- (void) disconnect;
+- (BOOL)connect;
+- (void)disconnect;
 
-- (void) sendOscMessage:(F53OSCMessage *)message;
-- (void) sendOscMessage:(F53OSCMessage *)message block:(nullable QLKMessageHandlerBlock)block;
+- (void)sendOscMessage:(F53OSCMessage *)message;
+- (void)sendOscMessage:(F53OSCMessage *)message block:(nullable QLKMessageReplyBlock)block;
 
 // NOTE: `arguments` must be a type supported by F53OSCMessage `arguments`: NSString, NSData, or NSNumber
-- (void) sendMessageWithArgument:(nullable NSObject *)argument toAddress:(NSString *)address;
-- (void) sendMessageWithArgument:(nullable NSObject *)argument toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block;
-- (void) sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address;
-- (void) sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageHandlerBlock)block;
-- (void) sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(nullable QLKMessageHandlerBlock)block;
+- (void)sendMessageWithArgument:(nullable NSObject *)argument toAddress:(NSString *)address;
+- (void)sendMessageWithArgument:(nullable NSObject *)argument toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block;
+- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address;
+- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block;
+- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(nullable QLKMessageReplyBlock)block;
 
 @end
 
 
 @protocol QLKClientDelegate <NSObject>
 
-@property (nonatomic, readonly, copy)               NSString *workspaceID;
+- (NSString *)workspaceIDForClient:(QLKClient *)client;
 
-- (void) workspaceUpdated;
-- (void) workspaceSettingsUpdated:(NSString *)settingsType;
-- (void) workspaceDisconnected;
-- (void) cueNeedsUpdate:(NSString *)cueID;
-- (void) cueUpdated:(NSString *)cueID withProperties:(NSDictionary<NSString *, NSObject<NSCopying> *> *)properties;
-- (void) cueListUpdated:(NSString *)cueListID withPlaybackPositionID:(nullable NSString *)cueID;
-- (void) clientConnectionErrorOccurred;
+- (void)clientConnected:(QLKClient *)client;
+- (void)clientConnectionErrorOccurred:(QLKClient *)client;
+
+- (void)clientWorkspaceUpdated:(QLKClient *)client;
+- (void)client:(QLKClient *)client workspaceSettingsUpdated:(NSString *)settingsType;
+- (void)client:(QLKClient *)client cueNeedsUpdate:(NSString *)cueID;
+- (void)client:(QLKClient *)client cueUpdated:(NSString *)cueID withProperties:(NSDictionary<NSString *, NSObject<NSCopying> *> *)properties;
+- (void)client:(QLKClient *)client cueListUpdated:(NSString *)cueListID withPlaybackPositionID:(nullable NSString *)cueID;
+- (void)clientWorkspaceDisconnected:(QLKClient *)client;
 
 @optional
-// upon encountering a connection error, if delegate returns YES (or method is not implemented), client will immediately send `clientConnectionErrorOccurred`
-// if delegate returns NO, delegate is responsible for disconnecting/destroying this client when appropriate
-- (BOOL) clientShouldDisconnectOnError;
+- (BOOL)shouldEncryptConnectionsForClient:(QLKClient *)client; // requires connection to QLab v5+.
+
+// Upon encountering a connection error, if delegate returns YES (or method is not implemented), client will immediately send `clientConnectionErrorOccurred:`.
+// If delegate returns NO, delegate is responsible for disconnecting/destroying this client when appropriate.
+- (BOOL)clientShouldDisconnectOnError:(QLKClient *)client;
 
 // NOTE: these update messages are sent only when connected to QLab 4.2+
-- (void) lightDashboardUpdated;
-- (void) preferencesUpdated:(NSString *)key;
+- (void)clientLightDashboardUpdated:(QLKClient *)client;
+- (void)client:(QLKClient *)client preferencesUpdated:(NSString *)key;
 
 @end
 
 
 @interface QLKClient (DisallowedInits)
 
-- (instancetype) init  __attribute__((unavailable("Use -initWithHost:port:")));
+- (instancetype)init __attribute__((unavailable("Use -initWithHost:port:")));
 
 @end
 

@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2018 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -41,10 +41,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak) IBOutlet NSTableView *cuesTableView;
 @property (weak) IBOutlet NSTextField *connectionLabel;
 
-- (IBAction) go:(id)sender;
-- (IBAction) stop:(id)sender;
-- (IBAction) disconnect:(id)sender;
-- (IBAction) update:(id)sender;
+- (IBAction)go:(id)sender;
+- (IBAction)stop:(id)sender;
+- (IBAction)disconnect:(id)sender;
+- (IBAction)update:(id)sender;
 
 @end
 

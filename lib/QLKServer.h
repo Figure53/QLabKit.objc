@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2018 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,10 +25,10 @@
 //  THE SOFTWARE.
 //
 
-@import Foundation;
+#import <Foundation/Foundation.h>
 
 #import "QLKDefines.h"
-#import "F53OSC.h"
+#import <F53OSC/F53OSC.h>
 
 
 NS_ASSUME_NONNULL_BEGIN
@@ -42,46 +42,47 @@ NS_ASSUME_NONNULL_BEGIN
 // Create a server with the host and port to connect.
 // Host should almost always be either @"localhost" or IP address, e.g. @"10.0.1.1".
 // Pass in port 0 to use default port (53000).
-- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port;
+- (instancetype)initWithHost:(NSString *)host port:(NSInteger)port;
 
 // Create a server with the host, port, and custom QLKClient instance to connect.
-- (instancetype) initWithHost:(NSString *)host port:(NSInteger)port client:(QLKClient *)client;
+- (instancetype)initWithHost:(NSString *)host port:(NSInteger)port client:(QLKClient *)client;
 
-@property (nonatomic, weak, nullable)               id<QLKServerDelegate> delegate;
+@property (nonatomic, weak, nullable) id<QLKServerDelegate> delegate;
 
 // Host address of the server.
-@property (nonatomic, strong, readonly)             NSString *host;
+@property (nonatomic, readonly) NSString *host;
 
 // Port to connect to on the server, 53000 by default.
-@property (nonatomic, readonly)                     NSInteger port;
+@property (nonatomic, readonly) NSInteger port;
 
 // Name of the machine running QLab.
-@property (nonatomic, strong)                       NSString *name;
+@property (nonatomic, strong) NSString *name;
 
 // The netservice used to discover this server (if any). You probably don't need this.
-@property (nonatomic, strong, nullable)             NSNetService *netService;
+@property (nonatomic, strong, nullable) NSNetService *netService;
 
 // The app version of the connected host, i.e. the value returned by OSC command "/version".
-@property (nonatomic, strong, readonly, nullable)   NSString *hostVersion;
+@property (nonatomic, readonly, nullable) NSString *hostVersion;
 
 // Array of QLKWorkspace objects that belong to this server.
-@property (nonatomic, copy, readonly)               NSArray<QLKWorkspace *> *workspaces;
+@property (nonatomic, readonly) NSArray<QLKWorkspace *> *workspaces;
 
-@property (nonatomic, strong, readonly)             QLKClient *client;
+@property (nonatomic, readonly) QLKClient *client;
 
 @property (nonatomic, getter=isConnected, readonly) BOOL connected;
 
-- (nullable QLKWorkspace *) workspaceWithID:(NSString *)uniqueID;
-- (QLKWorkspace *) newWorkspaceWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict; // subclasses can override to customize QLKWorkspace created if desired
+- (nullable QLKWorkspace *)workspaceWithID:(NSString *)uniqueID;
+- (QLKWorkspace *)newWorkspaceWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict; // subclasses can override to customize QLKWorkspace created if desired
 
-- (void) refreshWorkspaces;
-- (void) refreshWorkspacesWithCompletion:(nullable void (^)(NSArray<QLKWorkspace *> *workspaces))completion;
-- (void) enableAutoRefreshWithInterval:(NSTimeInterval)interval;
-- (void) disableAutoRefresh;
-- (void) stop;
+- (void)refreshWorkspaces;
+- (void)refreshWorkspacesWithCompletion:(nullable void (^)(NSArray<QLKWorkspace *> *workspaces))completion;
+- (void)enableAutoRefreshWithInterval:(NSTimeInterval)interval;
+- (void)disableAutoRefresh;
+- (void)removeAllWorkspaces;
+- (void)stop;
 
-- (void) sendOscMessage:(F53OSCMessage *)message;
-- (void) sendOscMessage:(F53OSCMessage *)message block:(nullable QLKMessageHandlerBlock)block;
+- (void)sendOscMessage:(F53OSCMessage *)message;
+- (void)sendOscMessage:(F53OSCMessage *)message block:(nullable QLKMessageReplyBlock)block;
 
 @end
 
@@ -89,17 +90,17 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol QLKServerDelegate <NSObject>
 
 // A server updated its workspaces.
-- (void) serverDidUpdateWorkspaces:(QLKServer *)server;
+- (void)serverDidUpdateWorkspaces:(QLKServer *)server;
 
 @optional
-- (void) serverDidUpdateHostVersion:(QLKServer *)server;
+- (void)serverDidUpdateHostVersion:(QLKServer *)server;
 
 @end
 
 
 @interface QLKServer (DisallowedInits)
 
-- (instancetype) init  __attribute__((unavailable("Use -initWithHost:port:client: or -initWithHost:port:")));
+- (instancetype)init __attribute__((unavailable("Use -initWithHost:port:client: or -initWithHost:port:")));
 
 @end
 

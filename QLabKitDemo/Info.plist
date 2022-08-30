@@ -25,7 +25,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>${MACOSX_DEPLOYMENT_TARGET}</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2013-2018 Figure 53. All rights reserved.</string>
+	<string>Copyright © 2013-2022 Figure 53. All rights reserved.</string>
 	<key>NSMainNibFile</key>
 	<string>QLabKitDemo</string>
 	<key>NSPrincipalClass</key>

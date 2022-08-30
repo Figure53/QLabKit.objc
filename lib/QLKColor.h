@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2020 Figure 53 LLC, http://figure53.com
+//  Copyright (c) 2013-2020 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 //  THE SOFTWARE.
 //
 
-@import Foundation;
+#import <Foundation/Foundation.h>
 
 #import "QLKDefines.h"
 
@@ -34,21 +34,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface QLKColor : NSObject <NSCoding>
 
-@property (strong, nonatomic)                       NSString *name;
-@property (strong, nonatomic, nullable)             QLKColorClass *color;
-@property (strong, nonatomic, nullable)             QLKColorClass *lightColor;
-@property (strong, nonatomic, nullable)             QLKColorClass *darkColor;
+@property (strong, nonatomic) NSString *name;
+@property (strong, nonatomic, nullable) QLKColorClass *color;
+@property (strong, nonatomic, nullable) QLKColorClass *lightColor;
+@property (strong, nonatomic, nullable) QLKColorClass *darkColor;
 
-+ (NSSet<NSString *> *) colors;
-+ (QLKColor *) defaultColor;
-+ (QLKColor *) redColor;
-+ (QLKColor *) orangeColor;
-+ (QLKColor *) yellowColor;
-+ (QLKColor *) greenColor;
-+ (QLKColor *) blueColor;
-+ (QLKColor *) purpleColor;
-+ (QLKColor *) colorWithName:(NSString *)name;
-- (BOOL) isEqualToColor:(QLKColor *)color;
++ (NSSet<NSString *> *)colors;
++ (QLKColor *)defaultColor;
++ (QLKColor *)redColor;
++ (QLKColor *)orangeColor;
++ (QLKColor *)yellowColor;
++ (QLKColor *)greenColor;
++ (QLKColor *)blueColor;
++ (QLKColor *)purpleColor;
++ (QLKColor *)colorWithName:(NSString *)name;
+- (BOOL)isEqualToColor:(QLKColor *)color;
 
 @end
 
