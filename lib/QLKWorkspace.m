@@ -297,6 +297,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)finishConnectWithPasscode
 {
     NSString *passcode = self.connectionPasscode;
+
+    // "No Passcode" in v5+ is empty string. Exit if we are here without a passcode.
+    if (self.workspaceQLabVersion.majorVersion >= 5 && !passcode)
+        return;
+
     QLKMessageReplyBlock completion = self.connectionCompletion;
 
     // Unset cached params. We try these once.
