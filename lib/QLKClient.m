@@ -157,9 +157,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)sendOscMessage:(F53OSCMessage *)message block:(nullable QLKMessageReplyBlock)block
 {
-    if (!self.isConnected)
-        return;
-
     if (block)
         self.callbacks[message.addressPattern] = block;
 
@@ -198,9 +195,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(nullable QLKMessageReplyBlock)block
 {
-    if (!self.isConnected)
-        return;
-    
     if (block)
         self.callbacks[address] = block;
 
