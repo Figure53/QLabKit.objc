@@ -409,6 +409,15 @@ NS_ASSUME_NONNULL_BEGIN
     return [self propertyForKey:QLKOSCParentKey];
 }
 
+- (nullable QLKCue *)parent
+{
+    NSString *parentID = self.parentID;
+    if (!parentID)
+        return nil;
+
+    return [self.workspace cueWithID:parentID];
+}
+
 - (nullable NSString *)playbackPositionID
 {
     return [self propertyForKey:QLK_OSC_KEY_PLAYBACK_POSITION_ID];

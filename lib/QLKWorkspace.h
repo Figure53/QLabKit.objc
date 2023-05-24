@@ -129,6 +129,7 @@ extern NSNotificationName const QLKQLabDidUpdatePreferencesNotification;
 
 - (nullable QLKCue *)cueWithID:(NSString *)uid;
 - (nullable QLKCue *)cueWithNumber:(NSString *)number;
+- (nullable QLKCue *)cueListForCue:(QLKCue *)cue;
 
 - (void)cueNeedsUpdate:(NSString *)cueID;
 

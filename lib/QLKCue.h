@@ -71,6 +71,7 @@ typedef NS_ENUM(NSUInteger, QLKCueFadeMode)
 @property (atomic, strong, readonly, nullable) NSString *iconName;
 @property (nonatomic, readonly) NSArray<QLKCue *> *cues;
 @property (nonatomic, readonly, nullable) NSString *parentID;
+@property (nonatomic, readonly, nullable) QLKCue *parent;
 @property (nonatomic, readonly, nullable) NSString *playbackPositionID; // for cue list cues, the unique ID of the current playback position
 @property (nonatomic, strong, nullable) NSString *name;
 @property (nonatomic, strong, nullable) NSString *number;

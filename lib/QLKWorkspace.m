@@ -466,6 +466,17 @@ NS_ASSUME_NONNULL_BEGIN
     return [self.root cueWithNumber:number];
 }
 
+- (nullable QLKCue *)cueListForCue:(QLKCue *)cue
+{
+    while (cue.parent != nil)
+        cue = cue.parent;
+
+    if ([cue isCueList] || [cue isCueCart])
+        return cue;
+    else
+        return nil;
+}
+
 
 #pragma mark - Workspace Methods
 
