@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2023 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -945,6 +945,19 @@ NS_ASSUME_NONNULL_BEGIN
 {
     [self setProperty:notes
                forKey:QLKOSCNotesKey];
+}
+
+- (nullable QLKCue *)cueTarget
+{
+    NSUInteger targetMode = [[self propertyForKey:@"targetMode"] unsignedIntegerValue]; // property added in 5.2, will be nil when connected to 5.1 and earlier
+    if (targetMode != QLKCueTargetModeCues)
+        return nil;
+
+    NSString *cueTargetID = [self propertyForKey:QLKOSCCurrentCueTargetKey]; // returns cue_id - cueWithID: is faster than searching workspace for a specific cue number
+    if (!cueTargetID.length)
+        return nil;
+
+    return [self.workspace cueWithID:cueTargetID];
 }
 
 - (void)setFlagged:(BOOL)flagged

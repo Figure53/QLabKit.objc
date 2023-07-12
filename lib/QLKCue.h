@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2023 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -42,19 +42,26 @@ NS_ASSUME_NONNULL_BEGIN
 #define QLK_OSC_KEY_TRANSLATION_Y        (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4TranslationYKey : QLKOSCTranslationYKey)
 #define QLK_OSC_KEY_SCALE_X              (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4ScaleXKey : QLKOSCScaleXKey)
 #define QLK_OSC_KEY_SCALE_Y              (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4ScaleYKey : QLKOSCScaleYKey)
-#define QLK_OSC_KEY_ORIGIN_X             (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4OriginXKey : QLKOSCOriginXKey)
-#define QLK_OSC_KEY_ORIGIN_Y             (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4OriginYKey : QLKOSCOriginYKey)
+#define QLK_OSC_KEY_ORIGIN_X             (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4OriginXKey : (self.workspace.workspaceQLabVersion.majorVersion == 5 && self.workspace.workspaceQLabVersion.minorVersion == 0 ? QLKOSCOriginXKey : QLKOSCAnchorXKey))
+#define QLK_OSC_KEY_ORIGIN_Y             (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4OriginYKey : (self.workspace.workspaceQLabVersion.majorVersion == 5 && self.workspace.workspaceQLabVersion.minorVersion == 0 ? QLKOSCOriginYKey : QLKOSCAnchorYKey))
 #define QLK_OSC_KEY_ROTATE_X             (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4RotateXKey : QLKOSCRotateXKey)
 #define QLK_OSC_KEY_ROTATE_Y             (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4RotateYKey : QLKOSCRotateYKey)
 #define QLK_OSC_KEY_ROTATE_Z             (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4RotateZKey : QLKOSCRotateZKey)
 #define QLK_OSC_KEY_FADE_LEVELS_MODE     (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4FadeLevelsModeKey : QLKOSCFadeLevelsModeKey)
 #define QLK_OSC_KEY_VIDEO_OUTPUT_ID      (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCSurfaceIDKey : QLKOSCStageIDKey) // NOTE: `surfaceID` returns NSNumber, `stageID` returns NSString
 
+typedef NS_ENUM(NSUInteger, QLKCueTargetMode)
+{
+    QLKCueTargetModeCues = 0,
+    QLKCueTargetModePatches = 1, // v5.2+
+};
+
 typedef NS_ENUM(NSUInteger, QLKCueFadeMode)
 {
     QLKCueFadeModeAbsolute = 0,
-    QLKCueFadeModeRelative
+    QLKCueFadeModeRelative = 1,
 };
+
 
 @interface QLKCue : NSObject
 
@@ -71,6 +78,7 @@ typedef NS_ENUM(NSUInteger, QLKCueFadeMode)
 @property (nonatomic, strong, nullable) NSString *listName;
 @property (nonatomic, strong, nullable) NSString *type;
 @property (nonatomic, strong, nullable) NSString *notes;
+@property (nonatomic, readonly, nullable) QLKCue *cueTarget;
 @property (nonatomic, getter=isFlagged) BOOL flagged;
 - (BOOL)isPanicking;
 - (BOOL)isCrossfadingOut;   // v5.0+

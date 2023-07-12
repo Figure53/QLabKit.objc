@@ -106,7 +106,9 @@ extern NSString *const QLKOSCCueTargetNumberKey;
 extern NSString *const QLKOSCCurrentCueTargetKey; // returns cue_id
 extern NSString *const QLKOSCColorNameKey;
 extern NSString *const QLKOSCLiveColorNameKey;  // v5.0+
-extern NSString *const QLKOSCColorConditionKey; // v5.0+
+extern NSString *const QLKOSCColorConditionKey; // v5.0-5.1
+extern NSString *const QLKOSCUseSecondColorKey; // v5.2+
+extern NSString *const QLKOSCSecondColorNameKey; // v5.2+
 extern NSString *const QLKOSCFlaggedKey;
 extern NSString *const QLKOSCArmedKey;
 extern NSString *const QLKOSCContinueModeKey;
@@ -143,11 +145,12 @@ extern NSString *const QLKOSCTranslationXKey;   // v5.0+
 extern NSString *const QLKOSCTranslationYKey;   // v5.0+
 extern NSString *const QLKOSCScaleXKey;         // v5.0+
 extern NSString *const QLKOSCScaleYKey;         // v5.0+
-extern NSString *const QLKOSCOriginXKey;        // v5.0+
-extern NSString *const QLKOSCOriginYKey;        // v5.0+
+extern NSString *const QLKOSCAnchorXKey;        // v5.0.2+
+extern NSString *const QLKOSCAnchorYKey;        // v5.0.2+
 extern NSString *const QLKOSCQuaternionKey;
 extern NSString *const QLKOSCCueSizeKey;
 extern NSString *const QLKOSCPreserveAspectRatioKey;
+extern NSString *const QLKOSCFillStyleKey; // v5.2+
 extern NSString *const QLKOSCLayerKey;
 extern NSString *const QLKOSCAudioOutputPatchIDKey;
 extern NSString *const QLKOSCCuesKey;
@@ -155,6 +158,7 @@ extern NSString *const QLKOSCListNameKey;
 extern NSString *const QLKOSCStageIDKey;
 extern NSString *const QLKOSCFillStageKey;
 extern NSString *const QLKOSCOpacityKey;
+extern NSString *const QLKOSCSmoothKey;  // v5.0+
 extern NSString *const QLKOSCRotateXKey; // v5.0+
 extern NSString *const QLKOSCRotateYKey; // v5.0+
 extern NSString *const QLKOSCRotateZKey; // v5.0+
@@ -189,5 +193,8 @@ extern NSString *const QLKOSCV4RotateXKey;
 extern NSString *const QLKOSCV4RotateYKey;
 extern NSString *const QLKOSCV4RotateZKey;
 extern NSString *const QLKOSCV4FadeLevelsModeKey;
+// v5.0.x
+extern NSString *const QLKOSCOriginXKey;
+extern NSString *const QLKOSCOriginYKey;
 
 NS_ASSUME_NONNULL_END

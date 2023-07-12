@@ -944,8 +944,10 @@ NS_ASSUME_NONNULL_BEGIN
     NSArray<NSString *> *keys;
     if (self.workspaceQLabVersion.majorVersion < 5)
         keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCCueTargetNumberKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
-    else
+    else if (self.workspaceQLabVersion.majorVersion == 5 && self.workspaceQLabVersion.minorVersion <= 1)
         keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCCueTargetNumberKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCLiveColorNameKey, QLKOSCColorConditionKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
+    else // v5.2+
+        keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCCueTargetNumberKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCLiveColorNameKey, QLKOSCUseSecondColorKey, QLKOSCSecondColorNameKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
     [self fetchPropertiesForCue:cue keys:keys includeChildren:NO];
 }
 
@@ -960,15 +962,27 @@ NS_ASSUME_NONNULL_BEGIN
     NSArray<NSString *> *keys;
     if (self.workspaceQLabVersion.majorVersion == 3)
     {
+        // v3.x
         keys = @[QLKOSCFullScreenKey, QLKOSCV4TranslationXKey, QLKOSCV4TranslationYKey, QLKOSCV4ScaleXKey, QLKOSCV4ScaleYKey, QLKOSCV4OriginXKey, QLKOSCV4OriginYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCSurfaceIDKey, QLKOSCSurfaceSizeKey, QLKOSCSurfaceListKey];
     }
     else if (self.workspaceQLabVersion.majorVersion == 4)
     {
+        // v4.x
         keys = @[QLKOSCFullSurfaceKey, QLKOSCV4TranslationXKey, QLKOSCV4TranslationYKey, QLKOSCV4ScaleXKey, QLKOSCV4ScaleYKey, QLKOSCV4OriginXKey, QLKOSCV4OriginYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCSurfaceIDKey];
     }
-    else // v5.0+
+    else if (self.workspaceQLabVersion.majorVersion == 5 && self.workspaceQLabVersion.minorVersion == 0)
     {
-        keys = @[QLKOSCFillStageKey, QLKOSCTranslationXKey, QLKOSCTranslationYKey, QLKOSCScaleXKey, QLKOSCScaleYKey, QLKOSCOriginXKey, QLKOSCOriginYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCStageIDKey];
+        // v5.0.x
+        keys = @[QLKOSCFillStageKey, QLKOSCTranslationXKey, QLKOSCTranslationYKey, QLKOSCScaleXKey, QLKOSCScaleYKey, QLKOSCOriginXKey, QLKOSCOriginYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCSmoothKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCStageIDKey];
+    }
+    else if (self.workspaceQLabVersion.majorVersion == 5 && self.workspaceQLabVersion.minorVersion == 1)
+    {
+        // v5.1.x
+        keys = @[QLKOSCFillStageKey, QLKOSCTranslationXKey, QLKOSCTranslationYKey, QLKOSCScaleXKey, QLKOSCScaleYKey, QLKOSCAnchorXKey, QLKOSCAnchorYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCSmoothKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCStageIDKey];
+    }
+    else // v5.2+
+    {
+        keys = @[QLKOSCFillStageKey, QLKOSCTranslationXKey, QLKOSCTranslationYKey, QLKOSCScaleXKey, QLKOSCScaleYKey, QLKOSCAnchorXKey, QLKOSCAnchorYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCSmoothKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCFillStyleKey, QLKOSCCueSizeKey, QLKOSCStageIDKey];
     }
     [self fetchPropertiesForCue:cue keys:keys includeChildren:NO];
 }
