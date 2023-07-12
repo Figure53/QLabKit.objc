@@ -10,6 +10,7 @@
 		3D8B652920656D7E00EB52B9 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3D8B652720656D7E00EB52B9 /* Info.plist */; };
 		3DA977EB1FFE5D9900648971 /* QLKDemoAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3E9FF178B1BC500A4C617 /* QLKDemoAppDelegate.m */; };
 		3DA977F31FFE5F3700648971 /* QLKQLabWorkspaceVersionCompareTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DA977F21FFE5F3700648971 /* QLKQLabWorkspaceVersionCompareTest.m */; };
+		3DE443772A5F326000AAA946 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3DE443722A5F324200AAA946 /* LICENSE.txt */; };
 		3DEAA2CC24F2E50D000E2D3B /* QLKQuaternion.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DEAA2CB24F2E50D000E2D3B /* QLKQuaternion.m */; };
 		3DEB29DB2488139A003D8145 /* F53OSC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DEB29D22488138E003D8145 /* F53OSC.framework */; };
 		3DEB29DC2488139A003D8145 /* F53OSC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3DEB29D22488138E003D8145 /* F53OSC.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -108,6 +109,7 @@
 		3DA977F01FFE5F3600648971 /* QLabKitDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QLabKitDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DA977F21FFE5F3700648971 /* QLKQLabWorkspaceVersionCompareTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QLKQLabWorkspaceVersionCompareTest.m; sourceTree = "<group>"; };
 		3DA977F41FFE5F3700648971 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3DE443722A5F324200AAA946 /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = SOURCE_ROOT; };
 		3DEAA2CA24F2E50D000E2D3B /* QLKQuaternion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKQuaternion.h; sourceTree = "<group>"; };
 		3DEAA2CB24F2E50D000E2D3B /* QLKQuaternion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QLKQuaternion.m; sourceTree = "<group>"; };
 		3DEB29C92488138E003D8145 /* F53OSC.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = F53OSC.xcodeproj; path = F53OSC/F53OSC.xcodeproj; sourceTree = "<group>"; };
@@ -265,6 +267,7 @@
 				92F3EA65178C5D4100A4C617 /* QLKColor.h */,
 				92F3EA66178C5D4100A4C617 /* QLKColor.m */,
 				3D509F931EE9FBB10047BF33 /* README.md */,
+				3DE443722A5F324200AAA946 /* LICENSE.txt */,
 				3DEB29C92488138E003D8145 /* F53OSC.xcodeproj */,
 			);
 			name = QLabKit;
@@ -407,6 +410,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DE443772A5F326000AAA946 /* LICENSE.txt in Resources */,
 				3DF1E9FD2065730900672908 /* QLabKitDemo.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
