@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2023 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Compatibility macros for version-specific OSC method keys
 #define QLK_OSC_KEY_PLAYBACK_POSITION_ID (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4PlaybackPositionIdKey : QLKOSCPlaybackPositionIDKey)
+#define QLK_OSC_KEY_CUE_TARGET_ID        (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4CueTargetIdKey : QLKOSCCueTargetIDKey)
+#define QLK_OSC_KEY_CURRENT_CUE_TARGET_ID ((self.workspace.workspaceQLabVersion.majorVersion < 5 || self.workspace.workspaceQLabVersion.majorVersion == 5 && self.workspace.workspaceQLabVersion.minorVersion < 5) ? QLKOSCCurrentCueTargetKey : QLKOSCCurrentCueTargetIDKey)
 #define QLK_OSC_KEY_FILL_STAGE           (self.workspace.workspaceQLabVersion.majorVersion == 3 ? QLKOSCFullScreenKey : (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCFullSurfaceKey : QLKOSCFillStageKey))
 #define QLK_OSC_KEY_TRANSLATION_X        (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4TranslationXKey : QLKOSCTranslationXKey)
 #define QLK_OSC_KEY_TRANSLATION_Y        (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4TranslationYKey : QLKOSCTranslationYKey)
@@ -50,14 +52,17 @@ NS_ASSUME_NONNULL_BEGIN
 #define QLK_OSC_KEY_FADE_LEVELS_MODE     (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCV4FadeLevelsModeKey : QLKOSCFadeLevelsModeKey)
 #define QLK_OSC_KEY_VIDEO_OUTPUT_ID      (self.workspace.workspaceQLabVersion.majorVersion < 5 ? QLKOSCSurfaceIDKey : QLKOSCStageIDKey) // NOTE: `surfaceID` returns NSNumber, `stageID` returns NSString
 
-typedef NS_ENUM(NSUInteger, QLKCueTargetMode)
-{
-    QLKCueTargetModeCues = 0,
-    QLKCueTargetModePatches = 1, // v5.2+
+typedef NS_ENUM(NSUInteger, QLKCueTargetMode) {
+    QLKCueTargetModeCue = 0,
+    QLKCueTargetModeAudioOutputPatch = 1,   // v5.2+
+    QLKCueTargetModeAudioMap = 2,           // v5.5+
+
+    // legacy
+    QLKCueTargetModeCues    = QLKCueTargetModeCue,
+    QLKCueTargetModePatches = QLKCueTargetModeAudioOutputPatch,
 };
 
-typedef NS_ENUM(NSUInteger, QLKCueFadeMode)
-{
+typedef NS_ENUM(NSUInteger, QLKCueFadeMode) {
     QLKCueFadeModeAbsolute = 0,
     QLKCueFadeModeRelative = 1,
 };
@@ -65,7 +70,7 @@ typedef NS_ENUM(NSUInteger, QLKCueFadeMode)
 
 @interface QLKCue : NSObject
 
-@property (nonatomic, weak, readonly, nullable) QLKWorkspace *workspace;
+@property (nonatomic, weak, readonly) QLKWorkspace *workspace;
 @property (atomic) NSUInteger sortIndex;
 
 @property (atomic, strong, readonly, nullable) NSString *iconName;
@@ -118,8 +123,8 @@ typedef NS_ENUM(NSUInteger, QLKCueFadeMode)
 @property (atomic, getter=isCueList, readonly) BOOL cueList;
 @property (atomic, getter=isCueCart, readonly) BOOL cueCart;
 @property (nonatomic, readonly) BOOL hasChildren;
-@property (nonatomic, readonly, weak, nullable) QLKCue *firstCue;
-@property (nonatomic, readonly, weak, nullable) QLKCue *lastCue;
+@property (nonatomic, readonly, weak) QLKCue *firstCue;
+@property (nonatomic, readonly, weak) QLKCue *lastCue;
 
 @property (nonatomic) BOOL ignoreUpdates;
 
@@ -144,6 +149,9 @@ typedef NS_ENUM(NSUInteger, QLKCueFadeMode)
 - (BOOL)updatePropertiesWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict;                     // if cue was actually updated, posts `QLKCueUpdatedNotification` and returns YES
 - (BOOL)updatePropertiesWithDictionary:(NSDictionary<NSString *, NSObject<NSCopying> *> *)dict notify:(BOOL)notify; // optionally posts `QLKCueUpdatedNotification`
 - (void)updateChildCuesWithPropertiesArray:(NSArray<NSDictionary *> *)data removeUnused:(BOOL)removeUnused;
+
+- (void)deferFetchingProperties;
+- (void)resumeFetchingProperties;
 
 - (NSArray<NSString *> *)allChildCueUids;
 - (nullable QLKCue *)cueAtIndex:(NSInteger)index;

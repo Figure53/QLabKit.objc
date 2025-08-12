@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -42,10 +42,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithHost:(NSString *)host port:(NSInteger)port;
 
-@property (nonatomic, weak, nullable) id<QLKClientDelegate> delegate;
+@property (nonatomic, weak) id<QLKClientDelegate> delegate;
 @property (nonatomic, nullable, readonly) F53OSCClient *OSCClient;
 @property (nonatomic) BOOL useTCP;
 @property (nonatomic, readonly) BOOL isConnected;
+
+- (void)setWorkspaceID:(nullable NSString *)workspaceID; // required to send "long-form" workspace messages
 
 - (BOOL)connect;
 - (void)disconnect;
@@ -53,25 +55,23 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)sendOscMessage:(F53OSCMessage *)message;
 - (void)sendOscMessage:(F53OSCMessage *)message block:(nullable QLKMessageReplyBlock)block;
 
-// NOTE: `arguments` must be a type supported by F53OSCMessage `arguments`: NSString, NSData, or NSNumber
+// NOTE: Each argument must be a type supported by F53OSCMessage `arguments`: NSString, NSData, or NSNumber
 - (void)sendMessageWithArgument:(nullable NSObject *)argument toAddress:(NSString *)address;
 - (void)sendMessageWithArgument:(nullable NSObject *)argument toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block;
-- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address;
-- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block;
-- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(nullable QLKMessageReplyBlock)block;
+- (void)sendMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address;
+- (void)sendMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block;
+- (void)sendMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(nullable QLKMessageReplyBlock)block;
 
 @end
 
 
 @protocol QLKClientDelegate <NSObject>
 
-- (NSString *)workspaceIDForClient:(QLKClient *)client;
-
 - (void)clientConnected:(QLKClient *)client;
 - (void)clientConnectionErrorOccurred:(QLKClient *)client;
 
 - (void)clientWorkspaceUpdated:(QLKClient *)client;
-- (void)client:(QLKClient *)client workspaceSettingsUpdated:(NSString *)settingsType;
+- (void)client:(QLKClient *)client workspaceSettingsUpdated:(NSString *)settingsType key:(nullable NSString *)key arguments:(nullable NSArray<id> *)arguments;
 - (void)client:(QLKClient *)client cueNeedsUpdate:(NSString *)cueID;
 - (void)client:(QLKClient *)client cueUpdated:(NSString *)cueID withProperties:(NSDictionary<NSString *, NSObject<NSCopying> *> *)properties;
 - (void)client:(QLKClient *)client cueListUpdated:(NSString *)cueListID withPlaybackPositionID:(nullable NSString *)cueID;
@@ -88,6 +88,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)clientLightDashboardUpdated:(QLKClient *)client;
 - (void)client:(QLKClient *)client preferencesUpdated:(NSString *)key;
 
+// NOTE: these update messages are sent only when connected to QLab 5.4+
+- (void)clientLiveFadePreviewUpdated:(QLKClient *)client;
+
 @end
 
 
@@ -95,6 +98,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)init __attribute__((unavailable("Use -initWithHost:port:")));
 
+@end
+
+
+@interface QLKClient (Unavailable)
+- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address __attribute__((unavailable("Use -sendMessageWithArguments:toAddress:")));
+- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block __attribute__((unavailable("Use -sendMessageWithArguments:toAddress:block:")));;
+- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(nullable QLKMessageReplyBlock)block __attribute__((unavailable("Use -sendMessageWithArguments:toAddress:workspace:block:")));
 @end
 
 NS_ASSUME_NONNULL_END

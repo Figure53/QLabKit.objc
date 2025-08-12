@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,7 @@ NSNotificationName const QLKWorkspaceDidUpdateNotification = @"QLKWorkspaceDidUp
 NSNotificationName const QLKWorkspaceDidUpdateSettingsNotification = @"QLKWorkspaceDidUpdateSettingsNotification";
 NSNotificationName const QLKWorkspaceDidUpdateAccessPermissionsNotification = @"QLKWorkspaceDidUpdateAccessPermissionsNotification";
 NSNotificationName const QLKWorkspaceDidUpdateLightDashboardNotification = @"QLKWorkspaceDidUpdateLightDashboardNotification";
+NSNotificationName const QLKWorkspaceDidUpdateLiveFadePreviewNotification = @"QLKWorkspaceDidUpdateLiveFadePreviewNotification";
 NSNotificationName const QLKWorkspaceDidConnectNotification = @"QLKWorkspaceDidConnectNotification";
 NSNotificationName const QLKWorkspaceDidDisconnectNotification = @"QLKWorkspaceDidDisconnectNotification";
 NSNotificationName const QLKWorkspaceConnectionErrorNotification = @"QLKWorkspaceConnectionErrorNotification";
@@ -65,6 +66,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) BOOL canEdit;
 @property (nonatomic, readwrite) BOOL canControl;
 
+@property (nonatomic, nullable, readwrite) NSArray<NSDictionary<NSString *, id> *> *audioOutputPatchDicts;
+@property (nonatomic, nullable, readwrite) NSArray<NSDictionary<NSString *, id> *> *audioMapDicts;
 @property (nonatomic, nullable, readwrite) NSArray<NSDictionary<NSString *, id> *> *videoOutputsList;
 
 @property (nonatomic, readonly) QLKClient *client;
@@ -73,7 +76,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly) dispatch_queue_t replyBlockQueue;
 
-@property (nonatomic, readonly) NSMapTable<QLKCue *, NSMutableSet *> *deferredCueUpdates;
+@property (nonatomic, readonly) NSMapTable<QLKCue *, NSMutableSet<NSString *> *> *deferredCueUpdates;
 
 
 - (void)notifyAboutDisconnection;
@@ -104,8 +107,9 @@ NS_ASSUME_NONNULL_BEGIN
         _defaultSendUpdatesOSC = NO;
         _defaultDeferFetchingPropertiesForNewCues = NO;
 
-        _cuePropertiesQueue = dispatch_queue_create("com.figure53.QLabKit.cuePropertiesQueue", DISPATCH_QUEUE_SERIAL);
-        _replyBlockQueue = dispatch_queue_create("com.figure53.QLabKit.replyBlockQueue", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_attr_t attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_UTILITY, 0);
+        _cuePropertiesQueue = dispatch_queue_create("com.figure53.QLabKit.cuePropertiesQueue", attr);
+        _replyBlockQueue = dispatch_queue_create("com.figure53.QLabKit.replyBlockQueue", attr);
 
         _deferredCueUpdates = [NSMapTable weakToStrongObjectsMapTable];
 
@@ -149,6 +153,8 @@ NS_ASSUME_NONNULL_BEGIN
             _workspaceQLabVersion = [[QLKVersionNumber alloc] initWithString:(NSString *)dict[@"version"]];
 
         [self updateWithDictionary:dict];
+
+        [client setWorkspaceID:self.uniqueID];
 
         _server = server;
         _client = client;
@@ -386,6 +392,8 @@ NS_ASSUME_NONNULL_BEGIN
     [self startReceivingUpdates];
     [self fetchQLabVersionWithBlock:nil];
     [self fetchCueLists];
+    [self refreshAudioOutputPatchDicts];
+    [self refreshAudioMapDicts];
     [self refreshVideoOutputsList];
 
     [[NSNotificationCenter defaultCenter] postNotificationName:QLKWorkspaceDidConnectNotification object:self];
@@ -519,41 +527,47 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)startReceivingUpdates
 {
-    [self.client sendMessageWithArgument:@YES toAddress:@"/updates"];
+    if (self.workspaceQLabVersion.majorVersion >= 5) // `/updates {boolean}` is a QLab method in v5+
+        [self.client sendMessageWithArguments:@[@YES] toAddress:@"/updates" workspace:NO block:nil];
+    else
+        [self.client sendMessageWithArgument:@YES toAddress:@"/updates"];
 }
 
 - (void)stopReceivingUpdates
 {
-    [self.client sendMessageWithArgument:@NO toAddress:@"/updates"];
+    if (self.workspaceQLabVersion.majorVersion >= 5) // `/updates {boolean}` is a QLab method in v5+
+        [self.client sendMessageWithArguments:@[@NO] toAddress:@"/updates" workspace:NO block:nil];
+    else
+        [self.client sendMessageWithArgument:@NO toAddress:@"/updates"];
 }
 
 - (void)enableAlwaysReply
 {
-    [self.client sendMessagesWithArguments:@[@YES] toAddress:@"/alwaysReply" workspace:NO block:nil];
+    [self.client sendMessageWithArguments:@[@YES] toAddress:@"/alwaysReply" workspace:NO block:nil];
 }
 
 - (void)disableAlwaysReply
 {
-    [self.client sendMessagesWithArguments:@[@NO] toAddress:@"/alwaysReply" workspace:NO block:nil];
+    [self.client sendMessageWithArguments:@[@NO] toAddress:@"/alwaysReply" workspace:NO block:nil];
 }
 
 - (void)fetchQLabVersionWithBlock:(nullable QLKMessageReplyBlock)block
 {
     __weak typeof(self) weakSelf = self;
-    [self.client sendMessagesWithArguments:nil
-                                 toAddress:@"/version"
-                                 workspace:NO
-                                     block:^(NSString *status, id _Nullable data) {
-                                         __strong typeof(weakSelf) strongSelf = weakSelf;
-                                         if (!strongSelf)
-                                             return;
-
-                                         if ([data isKindOfClass:[NSString class]])
-                                             strongSelf->_workspaceQLabVersion = [[QLKVersionNumber alloc] initWithString:(NSString *)data];
-
-                                         if (block)
-                                             block(status, data);
-                                     }];
+    [self.client sendMessageWithArguments:nil
+                                toAddress:@"/version"
+                                workspace:NO
+                                    block:^(NSString *status, id _Nullable data) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf)
+            return;
+        
+        if ([data isKindOfClass:[NSString class]])
+            strongSelf->_workspaceQLabVersion = [[QLKVersionNumber alloc] initWithString:(NSString *)data];
+        
+        if (block)
+            block(status, data);
+    }];
 }
 
 - (void)fetchCueLists
@@ -924,7 +938,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)cue:(QLKCue *)cue updatePropertiesSend:(nullable NSArray *)values forKey:(NSString *)key
 {
-    [self.client sendMessagesWithArguments:values toAddress:[self addressForCue:cue action:key]];
+    [self.client sendMessageWithArguments:values toAddress:[self addressForCue:cue action:key]];
 }
 
 - (void)updateAllCuePropertiesSendOSC
@@ -934,7 +948,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)runningOrPausedCuesWithBlock:(nullable QLKMessageReplyBlock)block
 {
-    [self.client sendMessagesWithArguments:nil toAddress:@"/runningOrPausedCues" block:block];
+    [self.client sendMessageWithArguments:nil toAddress:@"/runningOrPausedCues" block:block];
 }
 
 
@@ -942,23 +956,58 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)fetchDefaultCueListPropertiesForCue:(QLKCue *)cue
 {
+    QLKVersionNumber *workspaceQLabVersion = self.workspaceQLabVersion;
+
     NSArray<NSString *> *keys;
-    if (self.workspaceQLabVersion.majorVersion < 5)
+    if (workspaceQLabVersion.majorVersion < 5)
+    {
+        // v3.x - v4.x
         keys = @[QLKOSCUIDKey, QLKOSCNumberKey, QLKOSCNameKey, QLKOSCListNameKey, QLKOSCTypeKey, QLKOSCColorNameKey, QLKOSCFlaggedKey, QLKOSCArmedKey, QLKOSCNotesKey];
-    else
+    }
+    else if (workspaceQLabVersion.majorVersion == 5 && workspaceQLabVersion.minorVersion <= 4)
+    {
+        // v5.0 - v5.4.x
         keys = @[QLKOSCUIDKey, QLKOSCNumberKey, QLKOSCNameKey, QLKOSCListNameKey, QLKOSCTypeKey, QLKOSCColorNameKey, QLKOSCLiveColorNameKey, QLKOSCFlaggedKey, QLKOSCArmedKey, QLKOSCNotesKey];
+    }
+    else
+    {
+        // v5.5+
+        keys = @[QLKOSCUIDKey, QLKOSCNumberKey, QLKOSCNameKey, QLKOSCListNameKey, QLKOSCTypeKey, QLKOSCColorNameKey, QLKOSCLiveColorNameKey, QLKOSCFlaggedKey, QLKOSCArmedKey, QLKOSCSkipIfDisarmedKey, QLKOSCNotesKey];
+    }
     [self fetchPropertiesForCue:cue keys:keys includeChildren:NO];
 }
 
 - (void)fetchBasicPropertiesForCue:(QLKCue *)cue
 {
+    QLKVersionNumber *workspaceQLabVersion = self.workspaceQLabVersion;
+
     NSArray<NSString *> *keys;
-    if (self.workspaceQLabVersion.majorVersion < 5)
-        keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCCueTargetNumberKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
-    else if (self.workspaceQLabVersion.majorVersion == 5 && self.workspaceQLabVersion.minorVersion <= 1)
-        keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCCueTargetNumberKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCLiveColorNameKey, QLKOSCColorConditionKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
-    else // v5.2+
-        keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCCueTargetNumberKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCLiveColorNameKey, QLKOSCUseSecondColorKey, QLKOSCSecondColorNameKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
+    if (workspaceQLabVersion.majorVersion < 5)
+    {
+        // v3.x - v4.x
+        keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCCueTargetNumberKey, QLKOSCV4CueTargetIdKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
+    }
+    else if (workspaceQLabVersion.majorVersion == 5 && workspaceQLabVersion.minorVersion <= 1)
+    {
+        // v5.0 - v5.1.x
+        keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCCueTargetNumberKey, QLKOSCCueTargetIDKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCLiveColorNameKey, QLKOSCColorConditionKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
+    }
+    else if (workspaceQLabVersion.majorVersion == 5 && workspaceQLabVersion.minorVersion <= 4)
+    {
+        // v5.2 - v5.4.x
+        keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCTargetModeKey, QLKOSCCueTargetNumberKey, QLKOSCCueTargetIDKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCColorNameKey, QLKOSCLiveColorNameKey, QLKOSCUseSecondColorKey, QLKOSCSecondColorNameKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
+
+        if ([cue.type isEqual:QLKCueTypeFade] || [cue.type isEqual:QLKCueTypeReset])
+            keys = [keys arrayByAddingObjectsFromArray:@[@"canHavePatchTargets", @"patchTargetID"]];
+    }
+    else
+    {
+        // v5.5+
+        keys = @[QLKOSCNameKey, QLKOSCNumberKey, QLKOSCFileTargetKey, QLKOSCTargetModeKey, QLKOSCCueTargetNumberKey, QLKOSCCueTargetIDKey, QLKOSCHasFileTargetsKey, QLKOSCHasCueTargetsKey, QLKOSCArmedKey, QLKOSCSkipIfDisarmedKey, QLKOSCColorNameKey, QLKOSCLiveColorNameKey, QLKOSCUseSecondColorKey, QLKOSCSecondColorNameKey, QLKOSCContinueModeKey, QLKOSCFlaggedKey, QLKOSCPreWaitKey, QLKOSCPostWaitKey, QLKOSCDurationKey, QLKOSCAllowsEditingDurationKey];
+
+        if ([cue.type isEqual:QLKCueTypeFade] || [cue.type isEqual:QLKCueTypeReset])
+            keys = [keys arrayByAddingObjectsFromArray:@[@"canHavePatchTargets", @"patchTargetID", @"canHaveAudioMapTargets", @"audioMapTargetID"]];
+    }
     [self fetchPropertiesForCue:cue keys:keys includeChildren:NO];
 }
 
@@ -970,29 +1019,32 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)fetchDisplayAndGeometryForCue:(QLKCue *)cue
 {
+    QLKVersionNumber *workspaceQLabVersion = self.workspaceQLabVersion;
+
     NSArray<NSString *> *keys;
-    if (self.workspaceQLabVersion.majorVersion == 3)
+    if (workspaceQLabVersion.majorVersion == 3)
     {
         // v3.x
         keys = @[QLKOSCFullScreenKey, QLKOSCV4TranslationXKey, QLKOSCV4TranslationYKey, QLKOSCV4ScaleXKey, QLKOSCV4ScaleYKey, QLKOSCV4OriginXKey, QLKOSCV4OriginYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCSurfaceIDKey, QLKOSCSurfaceSizeKey, QLKOSCSurfaceListKey];
     }
-    else if (self.workspaceQLabVersion.majorVersion == 4)
+    else if (workspaceQLabVersion.majorVersion == 4)
     {
         // v4.x
         keys = @[QLKOSCFullSurfaceKey, QLKOSCV4TranslationXKey, QLKOSCV4TranslationYKey, QLKOSCV4ScaleXKey, QLKOSCV4ScaleYKey, QLKOSCV4OriginXKey, QLKOSCV4OriginYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCSurfaceIDKey];
     }
-    else if (self.workspaceQLabVersion.majorVersion == 5 && self.workspaceQLabVersion.minorVersion == 0)
+    else if (workspaceQLabVersion.majorVersion == 5 && workspaceQLabVersion.minorVersion == 0)
     {
         // v5.0.x
         keys = @[QLKOSCFillStageKey, QLKOSCTranslationXKey, QLKOSCTranslationYKey, QLKOSCScaleXKey, QLKOSCScaleYKey, QLKOSCOriginXKey, QLKOSCOriginYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCSmoothKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCStageIDKey];
     }
-    else if (self.workspaceQLabVersion.majorVersion == 5 && self.workspaceQLabVersion.minorVersion == 1)
+    else if (workspaceQLabVersion.majorVersion == 5 && workspaceQLabVersion.minorVersion == 1)
     {
         // v5.1.x
         keys = @[QLKOSCFillStageKey, QLKOSCTranslationXKey, QLKOSCTranslationYKey, QLKOSCScaleXKey, QLKOSCScaleYKey, QLKOSCAnchorXKey, QLKOSCAnchorYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCSmoothKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCCueSizeKey, QLKOSCStageIDKey];
     }
-    else // v5.2+
+    else
     {
+        // v5.2+
         keys = @[QLKOSCFillStageKey, QLKOSCTranslationXKey, QLKOSCTranslationYKey, QLKOSCScaleXKey, QLKOSCScaleYKey, QLKOSCAnchorXKey, QLKOSCAnchorYKey, QLKOSCLayerKey, QLKOSCOpacityKey, QLKOSCSmoothKey, QLKOSCQuaternionKey, QLKOSCPreserveAspectRatioKey, QLKOSCFillStyleKey, QLKOSCCueSizeKey, QLKOSCStageIDKey];
     }
     [self fetchPropertiesForCue:cue keys:keys includeChildren:NO];
@@ -1001,14 +1053,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)fetchPropertiesForCue:(QLKCue *)cue keys:(NSArray<NSString *> *)keys includeChildren:(BOOL)includeChildren
 {
     pthread_mutex_lock(&_deferredCueUpdatesMutex);
-    NSMutableSet *currentKeys = [self.deferredCueUpdates objectForKey:cue];
+    NSMutableSet<NSString *> *deferredKeys = [self.deferredCueUpdates objectForKey:cue];
     pthread_mutex_unlock(&_deferredCueUpdatesMutex);
 
-    if (currentKeys)
+    if (deferredKeys)
     {
-        [currentKeys addObjectsFromArray:keys];
+        [deferredKeys addObjectsFromArray:keys];
         if (includeChildren)
-            [currentKeys addObject:@"includeChildren"];
+            [deferredKeys addObject:@"includeChildren"];
     }
     else
     {
@@ -1029,15 +1081,15 @@ NS_ASSUME_NONNULL_BEGIN
     if (cue.isCueList || cue.isCueCart)
         return;
 
-    // if currentKeys set does not exist, setObject with a new empty set to begin deferring
-    // if currentKeys exists, already deferred -- do nothing
+    // If `deferredKeys` does not exist, set a new empty set to begin deferring.
+    // If `deferredKeys` exists, we are already deferring. Do nothing.
     pthread_mutex_lock(&_deferredCueUpdatesMutex);
 
-    NSMutableSet *currentKeys = [self.deferredCueUpdates objectForKey:cue];
-    if (!currentKeys)
+    NSMutableSet<NSString *> *deferredKeys = [self.deferredCueUpdates objectForKey:cue];
+    if (!deferredKeys)
     {
-        currentKeys = [NSMutableSet setWithCapacity:0];
-        [self.deferredCueUpdates setObject:currentKeys forKey:cue];
+        deferredKeys = [NSMutableSet setWithCapacity:0];
+        [self.deferredCueUpdates setObject:deferredKeys forKey:cue];
     }
 
     pthread_mutex_unlock(&_deferredCueUpdatesMutex);
@@ -1046,17 +1098,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)resumeFetchingPropertiesForCue:(QLKCue *)cue
 {
     pthread_mutex_lock(&_deferredCueUpdatesMutex);
-    NSMutableSet *currentKeys = [self.deferredCueUpdates objectForKey:cue];
+    NSMutableSet<NSString *> *deferredKeys = [self.deferredCueUpdates objectForKey:cue];
     [self.deferredCueUpdates removeObjectForKey:cue];
     pthread_mutex_unlock(&_deferredCueUpdatesMutex);
 
-    if (currentKeys.count)
+    if (deferredKeys.count)
     {
-        BOOL includeChildren = [currentKeys containsObject:@"includeChildren"];
-        [currentKeys removeObject:@"includeChildren"];
+        BOOL includeChildren = [deferredKeys containsObject:@"includeChildren"];
+        [deferredKeys removeObject:@"includeChildren"];
 
         [self fetchPropertiesForCue:cue
-                               keys:currentKeys.allObjects
+                               keys:deferredKeys.allObjects
                     includeChildren:includeChildren];
     }
 }
@@ -1064,32 +1116,170 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Workspace Settings
 
-- (nullable NSDictionary<NSString *, id> *)surfaceDictForSurfaceID:(NSNumber *)surfaceID
+- (void)refreshAudioOutputPatchDicts
 {
-    // Requires v4.0+ to populate `videoOutputsList` with reply payload from /settings/video/surfaces.
-    if (self.workspaceQLabVersion.majorVersion < 4)
+    // `/settings/audio/*` was added in v5.0
+    if (self.workspaceQLabVersion.majorVersion < 5)
+        return;
+
+    NSString *address = @"/settings/audio/patchList";
+
+    __weak typeof(self) weakSelf = self;
+    [self.client sendMessageWithArgument:nil
+                               toAddress:address
+                                   block:^(NSString *status, id _Nullable data) {
+        if ([data isKindOfClass:[NSDictionary class]])
+            data = @[(NSDictionary *_Nonnull)data];
+        else if ([data isKindOfClass:[NSArray class]] == NO)
+            return;
+
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf)
+            return;
+
+        if ([strongSelf.audioOutputPatchDicts isEqualToArray:data])
+            return;
+
+        strongSelf.audioOutputPatchDicts = data;
+
+        NSNotification *notification = [NSNotification notificationWithName:QLKWorkspaceDidUpdateSettingsNotification
+                                                                     object:strongSelf
+                                                                   userInfo:@{@"settingsType": @"audio"}];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:notification
+                                                   postingStyle:NSPostASAP
+                                                   coalesceMask:NSNotificationNoCoalescing
+                                                       forModes:@[NSRunLoopCommonModes]];
+    }];
+}
+
+- (nullable NSDictionary<NSString *, id> *)audioOutputPatchDictWithUniqueID:(NSString *)uniqueID
+{
+    // Requires v5.0+ to populate `audioOutputPatchDicts` with reply payload from `/settings/audio/patchList`.
+    if (self.workspaceQLabVersion.majorVersion < 5)
         return nil;
 
-    for (NSDictionary<NSString *, id> *surfaceDict in self.videoOutputsList)
+    for (NSDictionary<NSString *, id> *patchDict in self.audioOutputPatchDicts)
     {
-        if ([surfaceDict[@"surfaceID"] isEqual:surfaceID])
-            return surfaceDict;
+        if ([patchDict[@"uniqueID"] isEqual:uniqueID])
+            return patchDict;
     }
 
     // else
     return nil;
 }
 
-- (nullable NSDictionary<NSString *, id> *)stageDictForStageID:(NSString *)stageID
+- (void)refreshAudioMapDicts
 {
-    // Requires v5.0+ to populate `videoOutputsList` with reply payload from /settings/video/stages.
+    // `/settings/audio/maps` was added in v5.5
+    if (self.workspaceQLabVersion.majorVersion < 5)
+        return;
+    if (self.workspaceQLabVersion.majorVersion == 5 && self.workspaceQLabVersion.minorVersion < 5)
+        return;
+
+    NSString *address = @"/settings/audio/maps";
+
+    __weak typeof(self) weakSelf = self;
+    [self.client sendMessageWithArgument:nil
+                               toAddress:address
+                                   block:^(NSString *status, id _Nullable data) {
+        if ([data isKindOfClass:[NSDictionary class]])
+            data = @[(NSDictionary *_Nonnull)data];
+        else if ([data isKindOfClass:[NSArray class]] == NO)
+            return;
+
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf)
+            return;
+
+        if ([strongSelf.audioMapDicts isEqualToArray:data])
+            return;
+
+        strongSelf.audioMapDicts = data;
+
+        NSNotification *notification = [NSNotification notificationWithName:QLKWorkspaceDidUpdateSettingsNotification
+                                                                     object:strongSelf
+                                                                   userInfo:@{@"settingsType": @"audio.maps"}];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:notification
+                                                   postingStyle:NSPostASAP
+                                                   coalesceMask:NSNotificationNoCoalescing
+                                                       forModes:@[NSRunLoopCommonModes]];
+    }];
+}
+
+- (void)refreshDictForAudioMapID:(NSString *)mapID
+{
+    // `/settings/audio/mapID/{id}` was added in v5.5
+    if (self.workspaceQLabVersion.majorVersion < 5)
+        return;
+    if (self.workspaceQLabVersion.majorVersion == 5 && self.workspaceQLabVersion.minorVersion < 5)
+        return;
+
+    if (mapID.length == 0)
+        return;
+
+    NSString *address = [@"/settings/audio/mapID/" stringByAppendingString:mapID];
+
+    __weak typeof(self) weakSelf = self;
+    [self.client sendMessageWithArgument:nil
+                               toAddress:address
+                                   block:^(NSString *status, id _Nullable data) {
+        if ([data isKindOfClass:[NSDictionary class]] == NO)
+            return;
+
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf)
+            return;
+
+        NSUInteger index = NSNotFound;
+
+        NSMutableArray<NSDictionary<NSString *, id> *> *audioMapDicts = strongSelf.audioMapDicts.mutableCopy;
+        if (!audioMapDicts)
+            audioMapDicts = [NSMutableArray array];
+        else
+            index = [audioMapDicts indexOfObjectPassingTest:^BOOL(NSDictionary<NSString *, id> *obj, NSUInteger idx, BOOL *stop) {
+                return [obj[@"uniqueID"] isEqual:mapID];
+            }];
+
+        if (index == NSNotFound)
+            [audioMapDicts addObject:data]; // new map data
+        else
+        {
+            // Exit without notifying if we are already up-to-date.
+            if ([audioMapDicts[index] isEqualToDictionary:data])
+                return;
+
+            audioMapDicts[index] = data;
+        }
+
+        strongSelf.audioMapDicts = audioMapDicts.copy;
+
+        NSDictionary<NSString *, id> *userInfo = @{
+            @"settingsType" : @"audio.maps",
+            @"key"          : @"mapID",
+            @"arguments"    : @[ mapID ],
+        };
+        NSNotification *notification = [NSNotification notificationWithName:QLKWorkspaceDidUpdateSettingsNotification
+                                                                     object:strongSelf
+                                                                   userInfo:userInfo];
+        [[NSNotificationQueue defaultQueue] enqueueNotification:notification
+                                                   postingStyle:NSPostASAP
+                                                   coalesceMask:NSNotificationNoCoalescing
+                                                       forModes:@[NSRunLoopCommonModes]];
+    }];
+}
+
+- (nullable NSDictionary<NSString *, id> *)audioMapDictWithUniqueID:(NSString *)uniqueID
+{
+    // Requires v5.5+ to populate `audioMapDicts` with reply payload from `/settings/audio/maps`.
     if (self.workspaceQLabVersion.majorVersion < 5)
         return nil;
+    if (self.workspaceQLabVersion.majorVersion == 5 && self.workspaceQLabVersion.minorVersion < 5)
+        return nil;
 
-    for (NSDictionary<NSString *, id> *stageDict in self.videoOutputsList)
+    for (NSDictionary<NSString *, id> *mapDict in self.audioMapDicts)
     {
-        if ([stageDict[@"uniqueID"] isEqual:stageID])
-            return stageDict;
+        if ([mapDict[@"uniqueID"] isEqual:uniqueID])
+            return mapDict;
     }
 
     // else
@@ -1098,7 +1288,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)refreshVideoOutputsList
 {
-    // /settings/video/* was added in v4.0
+    // `/settings/video/*` was added in v4.0
     if (self.workspaceQLabVersion.majorVersion < 4)
         return;
 
@@ -1129,9 +1319,41 @@ NS_ASSUME_NONNULL_BEGIN
                                                                                                   userInfo:@{@"settingsType": @"video"}];
                                        [[NSNotificationQueue defaultQueue] enqueueNotification:notification
                                                                                   postingStyle:NSPostASAP
-                                                                                  coalesceMask:(NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
+                                                                                  coalesceMask:NSNotificationNoCoalescing
                                                                                       forModes:@[NSRunLoopCommonModes]];
                                    }];
+}
+
+- (nullable NSDictionary<NSString *, id> *)surfaceDictWithSurfaceID:(NSNumber *)surfaceID
+{
+    // Requires v4.0+ to populate `videoOutputsList` with reply payload from `/settings/video/surfaces`.
+    if (self.workspaceQLabVersion.majorVersion < 4)
+        return nil;
+
+    for (NSDictionary<NSString *, id> *surfaceDict in self.videoOutputsList)
+    {
+        if ([surfaceDict[@"surfaceID"] isEqual:surfaceID])
+            return surfaceDict;
+    }
+
+    // else
+    return nil;
+}
+
+- (nullable NSDictionary<NSString *, id> *)stageDictWithStageID:(NSString *)stageID
+{
+    // Requires v5.0+ to populate `videoOutputsList` with reply payload from `/settings/video/stages`.
+    if (self.workspaceQLabVersion.majorVersion < 5)
+        return nil;
+
+    for (NSDictionary<NSString *, id> *stageDict in self.videoOutputsList)
+    {
+        if ([stageDict[@"uniqueID"] isEqual:stageID])
+            return stageDict;
+    }
+
+    // else
+    return nil;
 }
 
 
@@ -1149,7 +1371,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)sendApplicationMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block
 {
-    [self.client sendMessagesWithArguments:arguments toAddress:address workspace:NO block:block];
+    [self.client sendMessageWithArguments:arguments toAddress:address workspace:NO block:block];
 }
 
 - (NSString *)addressForCue:(QLKCue *)cue action:(NSString *)action
@@ -1157,21 +1379,8 @@ NS_ASSUME_NONNULL_BEGIN
     return [NSString stringWithFormat:@"/cue_id/%@/%@", cue.uid, action];
 }
 
-- (NSString *)workspacePrefix
-{
-    return [NSString stringWithFormat:@"/workspace/%@", self.uniqueID];
-}
-
 
 #pragma mark - QLKClientDelegate
-
-- (NSString *)workspaceIDForClient:(QLKClient *)client
-{
-    if (client != self.client)
-        return @"";
-
-    return self.uniqueID;
-}
 
 - (void)clientConnected:(QLKClient *)client
 {
@@ -1212,20 +1421,36 @@ NS_ASSUME_NONNULL_BEGIN
                                                    forModes:@[NSRunLoopCommonModes]];
 }
 
-- (void)client:(QLKClient *)client workspaceSettingsUpdated:(NSString *)settingsType
+- (void)client:(QLKClient *)client workspaceSettingsUpdated:(NSString *)settingsType key:(nullable NSString *)key arguments:(nullable NSArray<id> *)arguments
 {
     if (client != self.client)
         return;
 
+    NSDictionary<NSString *, id> *userInfo = @{
+        @"settingsType" : settingsType,
+        @"key"          : (key ?: @""),
+        @"arguments"    : (arguments ?: @[]),
+    };
     NSNotification *notification = [NSNotification notificationWithName:QLKWorkspaceDidUpdateSettingsNotification
                                                                  object:self
-                                                               userInfo:@{@"settingsType": settingsType}];
+                                                               userInfo:userInfo];
     [[NSNotificationQueue defaultQueue] enqueueNotification:notification
                                                postingStyle:NSPostASAP
-                                               coalesceMask:(NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
+                                               coalesceMask:NSNotificationNoCoalescing
                                                    forModes:@[NSRunLoopCommonModes]];
 
-    if ([settingsType isEqualToString:@"video"])
+    if ([settingsType isEqualToString:@"audio"])
+    {
+        [self refreshAudioOutputPatchDicts];
+    }
+    else if ([settingsType isEqualToString:@"audio.maps"]) // v5.5+
+    {
+        if ([key isEqual:@"mapID"] && [arguments.firstObject isKindOfClass:[NSString class]])
+            [self refreshDictForAudioMapID:(NSString *)arguments.firstObject];
+        else
+            [self refreshAudioMapDicts];
+    }
+    else if ([settingsType isEqualToString:@"video"])
     {
         [self refreshVideoOutputsList];
     }
@@ -1352,6 +1577,21 @@ NS_ASSUME_NONNULL_BEGIN
                                                    forModes:@[NSRunLoopCommonModes]];
 }
 
+- (void)clientLiveFadePreviewUpdated:(QLKClient *)client
+{
+    if (client != self.client)
+        return;
+
+    // NOTE: Live Fade Preview updates require a connection to QLab 5.4+
+    NSNotification *notification = [NSNotification notificationWithName:QLKWorkspaceDidUpdateLiveFadePreviewNotification
+                                                                 object:self
+                                                               userInfo:nil];
+    [[NSNotificationQueue defaultQueue] enqueueNotification:notification
+                                               postingStyle:NSPostASAP
+                                               coalesceMask:(NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender)
+                                                   forModes:@[NSRunLoopCommonModes]];
+}
+
 - (void)client:(QLKClient *)client preferencesUpdated:(NSString *)key
 {
     if (client != self.client)
@@ -1367,31 +1607,19 @@ NS_ASSUME_NONNULL_BEGIN
                                                    forModes:@[NSRunLoopCommonModes]];
 }
 
+
 #pragma mark - deprecated
 
-- (NSString *)addressForWildcardNumber:(NSString *)number action:(NSString *)action
+- (nullable NSDictionary<NSString *, id> *)surfaceDictForSurfaceID:(NSNumber *)surfaceID
 {
-    return [NSString stringWithFormat:@"/cue/%@/%@", number, action];
+    return [self surfaceDictWithSurfaceID:surfaceID];
+}
+
+- (nullable NSDictionary<NSString *, id> *)stageDictForStageID:(NSString *)stageID
+{
+    return [self stageDictWithStageID:stageID];
 }
 
 @end
-
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-implementations"
-@implementation QLKQLabWorkspaceVersion
-
-- (instancetype)initWithMajorVersion:(NSUInteger)major minor:(NSUInteger)minor patch:(NSUInteger)patch build:(nullable NSString *)build
-{
-    return [super initWithMajorVersion:major minor:minor patch:patch build:nil];
-}
-
-- (NSComparisonResult)compare:(QLKVersionNumber *)otherVersion
-{
-    return [self compare:otherVersion ignoreBuild:YES];
-}
-
-@end
-#pragma clang diagnostic pop
 
 NS_ASSUME_NONNULL_END

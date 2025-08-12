@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -98,22 +98,22 @@ NS_ASSUME_NONNULL_BEGIN
     if (!_hostVersion)
     {
         __weak typeof(self) weakSelf = self;
-        [self.client sendMessagesWithArguments:nil
-                                     toAddress:@"/version"
-                                     workspace:NO
-                                         block:^(NSString *status, id _Nullable data) {
-                                             __strong typeof(weakSelf) strongSelf = weakSelf;
-                                             if (!strongSelf)
-                                                 return;
-
-                                             if ([data isKindOfClass:[NSString class]])
-                                             {
-                                                 strongSelf->_hostVersion = data;
-
-                                                 if ([strongSelf.delegate respondsToSelector:@selector(serverDidUpdateHostVersion:)])
-                                                     [strongSelf.delegate serverDidUpdateHostVersion:strongSelf];
-                                             }
-                                         }];
+        [self.client sendMessageWithArguments:nil
+                                    toAddress:@"/version"
+                                    workspace:NO
+                                        block:^(NSString *status, id _Nullable data) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf)
+                return;
+            
+            if ([data isKindOfClass:[NSString class]])
+            {
+                strongSelf->_hostVersion = data;
+                
+                if ([strongSelf.delegate respondsToSelector:@selector(serverDidUpdateHostVersion:)])
+                    [strongSelf.delegate serverDidUpdateHostVersion:strongSelf];
+            }
+        }];
     }
 
     return _hostVersion;
@@ -168,26 +168,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)refreshWorkspaces
 {
-    if (!self.client.isConnected && ![self.client connect])
-    {
-        NSLog(@"Error: QLKServer unable to connect to QLab server: %@:%ld", self.host, (long)self.port);
-        return;
-    }
-
-    __weak typeof(self) weakSelf = self;
-    [self.client sendMessagesWithArguments:nil
-                                 toAddress:@"/workspaces"
-                                 workspace:NO
-                                     block:^(NSString *status, id _Nullable data) {
-                                         __strong typeof(weakSelf) strongSelf = weakSelf;
-                                         if (!strongSelf)
-                                             return;
-
-                                         if ([data isKindOfClass:[NSArray class]] == NO)
-                                             return;
-
-                                         [strongSelf updateWorkspaces:(NSArray *)data];
-                                     }];
+    [self refreshWorkspacesWithCompletion:nil];
 }
 
 - (void)refreshWorkspacesWithCompletion:(nullable void (^)(NSArray<QLKWorkspace *> *workspaces))completion
@@ -201,26 +182,26 @@ NS_ASSUME_NONNULL_BEGIN
     }
 
     __weak typeof(self) weakSelf = self;
-    [self.client sendMessagesWithArguments:nil
-                                 toAddress:@"/workspaces"
-                                 workspace:NO
-                                     block:^(NSString *status, id _Nullable data) {
-                                         __strong typeof(weakSelf) strongSelf = weakSelf;
-                                         if (!strongSelf)
-                                             return;
-
-                                         if ([data isKindOfClass:[NSArray class]])
-                                         {
-                                             [strongSelf updateWorkspaces:(NSArray *)data];
-                                             if (completion)
-                                                 completion(strongSelf.workspaces);
-                                         }
-                                         else // unexpected reply format
-                                         {
-                                             if (completion)
-                                                 completion(@[]);
-                                         }
-                                     }];
+    [self.client sendMessageWithArguments:nil
+                                toAddress:@"/workspaces"
+                                workspace:NO
+                                    block:^(NSString *status, id _Nullable data) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf)
+            return;
+        
+        if ([data isKindOfClass:[NSArray class]])
+        {
+            [strongSelf updateWorkspaces:(NSArray *)data];
+            if (completion)
+                completion(strongSelf.workspaces);
+        }
+        else // unexpected reply format
+        {
+            if (completion)
+                completion(@[]);
+        }
+    }];
 }
 
 - (void)enableAutoRefreshWithInterval:(NSTimeInterval)interval

@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2018 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -117,11 +117,35 @@ NS_ASSUME_NONNULL_BEGIN
         return;
 
     self.workspace = self.rows[selectedRow];
-    [self.workspace connectWithPasscode:nil
-                             completion:^(NSString *status, id _Nullable data) {
-                                 NSLog(@"[app delegate] workspace did connect");
-                                 self.connectionLabel.stringValue = [NSString stringWithFormat:@"Connected: %@", self.workspace.fullName];
-                             }];
+    QLKMessageReplyBlock completion = ^(NSString *status, id _Nullable data) {
+        NSLog(@"[app delegate] workspace did connect");
+        self.connectionLabel.stringValue = [NSString stringWithFormat:@"Connected: %@", self.workspace.fullName];
+    };
+
+    if (self.workspace.workspaceQLabVersion.majorVersion <= 4)
+        [self.workspace connectWithPasscode:@"" completion:completion];
+    else
+    {
+        NSAlert *alert = [[NSAlert alloc] init];
+        alert.alertStyle = NSAlertStyleWarning;
+        alert.messageText = @"Enter workspace passcode:";
+
+        NSTextField *passcodeField = [[NSSecureTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 24)];
+        passcodeField.placeholderString = @"passcode";
+        alert.accessoryView = passcodeField;
+
+        [alert addButtonWithTitle:@"OK"];
+        NSModalResponse response = [alert runModal];
+
+        if (response == NSAlertFirstButtonReturn)
+        {
+            NSString *passcode = passcodeField.stringValue;
+            if (passcode.length == 0 || passcode.length == 4)
+                [self.workspace connectWithPasscode:passcode completion:completion];
+            else
+                NSLog(@"[app delegate] invalid passcode length");
+        }
+    }
 }
 
 - (void)handleCueUpdated:(NSNotification *)notification

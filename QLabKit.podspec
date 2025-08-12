@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'QLabKit'
-  s.version      = '0.0.5'
+  s.version      = '0.0.6'
   s.summary      = 'An Objective C library for controlling QLab using the OSC API introduced in QLab 3.'
   s.homepage     = 'https://github.com/Figure53/QLabKit.objc'
   s.description  = <<-DESC
@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
     'Zach Waugh' => 'zwaugh@gmail.com',
     'Brent Lord' => 'brent@figure53.com'
   }
-  s.social_media_url = 'https://twitter.com/figure53'
+  s.social_media_url = 'https://instagram.com/figure53'
 
   s.cocoapods_version = '>= 1.3'
   

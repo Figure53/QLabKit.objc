@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -53,7 +53,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 @property (nonatomic, readonly) NSMutableDictionary<NSString *, QLKMessageReplyBlock> *callbacks;
-@property (nonatomic, readonly) NSString *workspacePrefix;
+@property (nonatomic, strong, nullable) NSString *workspacePrefix;
 
 - (void)processMessage:(QLKMessage *)message;
 
@@ -101,7 +101,10 @@ NS_ASSUME_NONNULL_BEGIN
     if (!_OSCClient)
     {
         _OSCClient = [[F53OSCClient alloc] init];
-        _OSCClient.socketDelegateQueue = dispatch_queue_create("com.figure53.QLabKit.F53OSCClient.socket", DISPATCH_QUEUE_SERIAL);
+
+        dispatch_queue_attr_t attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_UTILITY, 0);
+        dispatch_queue_t queue = dispatch_queue_create("com.figure53.QLabKit.F53OSCClient.socket", attr);
+        _OSCClient.socketDelegateQueue = queue;
     }
     return _OSCClient;
 }
@@ -180,25 +183,27 @@ NS_ASSUME_NONNULL_BEGIN
     else if (argument != nil)
         arguments = @[argument];
 
-    [self sendMessagesWithArguments:arguments toAddress:address block:block];
+    [self sendMessageWithArguments:arguments toAddress:address block:block];
 }
 
-- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address
+- (void)sendMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address
 {
-    [self sendMessagesWithArguments:arguments toAddress:address block:nil];
+    [self sendMessageWithArguments:arguments toAddress:address block:nil];
 }
 
-- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block
+- (void)sendMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block
 {
-    [self sendMessagesWithArguments:arguments toAddress:address workspace:YES block:block];
+    [self sendMessageWithArguments:arguments toAddress:address workspace:YES block:block];
 }
 
-- (void)sendMessagesWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(nullable QLKMessageReplyBlock)block
+- (void)sendMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address workspace:(BOOL)toWorkspace block:(nullable QLKMessageReplyBlock)block
 {
+    // NOTE: Callback blocks are stored by relative `address`, not the workspace-prefixed `fullAddress`.
+    // - See QLKClient `-processMessage` for the inverse where callbacks are retrieved for a reply.
     if (block)
         self.callbacks[address] = block;
 
-    NSString *fullAddress = (toWorkspace && self.delegate ? [NSString stringWithFormat:@"%@%@", self.workspacePrefix, address] : address);
+    NSString *fullAddress = (toWorkspace && self.workspacePrefix ? [self.workspacePrefix stringByAppendingString:address] : address);
 
 #if DEBUG_OSC_OUTPUT
     NSLog(@"[OSC:client -> (%@:%d)]\n  address: %@\n     data: {%@}\n ", self.OSCClient.host, self.OSCClient.port, fullAddress, [arguments componentsJoinedByString:@","]);
@@ -208,9 +213,17 @@ NS_ASSUME_NONNULL_BEGIN
     [self.OSCClient sendPacket:message];
 }
 
-- (NSString *)workspacePrefix
+- (void)setWorkspaceID:(nullable NSString *)workspaceID
 {
-    return [NSString stringWithFormat:@"/workspace/%@", [self.delegate workspaceIDForClient:self]];
+    if (workspaceID.length > 0)
+    {
+        workspaceID = [workspaceID stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]];
+        self.workspacePrefix = [@"/workspace/" stringByAppendingString:workspaceID];
+    }
+    else
+    {
+        self.workspacePrefix = nil;
+    }
 }
 
 
@@ -283,8 +296,10 @@ NS_ASSUME_NONNULL_BEGIN
             if (!strongSelf)
                 return;
 
-            NSString *workspaceID = [strongSelf.delegate workspaceIDForClient:strongSelf];
-            NSString *relativeAddress = [message addressWithoutWorkspace:workspaceID];
+            NSString *relativeAddress = message.replyAddress;
+            if (strongSelf.workspacePrefix && [relativeAddress hasPrefix:strongSelf.workspacePrefix])
+                relativeAddress = [relativeAddress substringFromIndex:strongSelf.workspacePrefix.length];
+
             QLKMessageReplyBlock block = strongSelf.callbacks[relativeAddress];
             if (!block)
                 return;
@@ -323,13 +338,20 @@ NS_ASSUME_NONNULL_BEGIN
         }
         else if (message.isWorkspaceSettingsUpdate)
         {
-            NSString *settingsType = message.addressParts.lastObject;
+#if DEBUG
+            NSAssert(message.addressParts.count >= 5, @"");
+#endif
+            NSString *settingsType = message.addressParts[4];
             if (!settingsType)
                 return;
 
+            NSString *key = nil;
+            if (message.addressParts.count >= 6)
+                key = message.addressParts[5];
+
             __weak typeof(self.delegate) delegate = self.delegate;
             dispatch_async(dispatch_get_main_queue(), ^{
-                [delegate client:self workspaceSettingsUpdated:settingsType];
+                [delegate client:self workspaceSettingsUpdated:settingsType key:key arguments:message.arguments];
             });
         }
         else if (message.isLightDashboardUpdate)
@@ -341,6 +363,17 @@ NS_ASSUME_NONNULL_BEGIN
             __weak typeof(self.delegate) delegate = self.delegate;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [delegate clientLightDashboardUpdated:self];
+            });
+        }
+        else if (message.isLiveFadePreviewUpdate)
+        {
+            // NOTE: Live Fade Preview update messages are sent by QLab 5.4 and newer
+            if ([self.delegate respondsToSelector:@selector(clientLiveFadePreviewUpdated:)] == NO)
+                return;
+
+            __weak typeof(self.delegate) delegate = self.delegate;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [delegate clientLiveFadePreviewUpdated:self];
             });
         }
         else if (message.isPreferencesUpdate)

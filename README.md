@@ -1,6 +1,6 @@
 # QLabKit
 
-QLabKit is an Objective-C library for controlling QLab over the OSC API in QLab 3 or later. QLabKit requires macOS 11+ or iOS 14+.
+QLabKit is an Objective-C library for controlling QLab over the OSC API in QLab 3 or later. QLabKit requires macOS 11+ or iOS 15+.
 
 **NOTE:** This library is under active development and the API may change.
 
@@ -117,9 +117,42 @@ NSString *address = [NSString stringWithFormat:@"/workspace/%@/cue_id/%@/name", 
 
 There is also working demo project that shows how you might hook all of this together to find servers on the network, show their workspaces, connect to a workspace, and finally fetch and display all the cues. Open `QLabKit.xcodeproj` and run the `QLabKitDemo` project to learn more.
 
-## Migrating from 0.0.4 to 0.0.5
+## 0.0.6
 
-QLabKit 0.0.5 requires macOS 11+ or iOS 15+.
+Requires macOS 11+ or iOS 15+.
+
+### New
+* Additional support for QLab 5.1 - 5.5.
+* Network socket background queues are now created with a QOS class.
+
+### QLKClient
+* Fixed the names of methods `-sendMessagesWithArguments:toAddress:`, `-sendMessagesWithArguments:toAddress:block:`, and `-sendMessagesWithArguments:toAddress:workspace:block:` to be singular (aka `-sendMessage...`) to match their behavior.
+* Optimized `workspacePrefix`:
+  * QLKClientDelegate method `-workspaceSettingsUpdated:` is replaced with `-workspaceSettingsUpdated:key:arguments:` for more granular handling of certain workspace settings update messages.
+  * Removes QLKClientDelegate method `-workspaceIDForClient:` in favor of QLKWorkspace setting its workspace ID with new method `setWorkspaceID:` and caching the prefix string.
+  * Removes the duplicate QLKWorkspace `workspacePrefix` property.
+  * Removes QLKMessage method `-addressWithoutWorkspace:` in favor of QLKClient trimming the prefix where needed in `-processMessage:`.
+  
+### QLKMesssage
+* `isWorkspaceSettingsUpdate` now matches a message with at least 5 `addressParts` instead of exactly 5.
+
+### QLKWorkspace
+* Fixes handling the "No passcode" passcode (empty-string) when connecting to QLab v5.
+* Adds several convenience methods for getting cue lists and parent cues.
+* Adds the `audioOutputPatchDicts` property which contains the reply payload from `/settings/audio/patchList` when connected to v5+. Use new QLKWorkpace method `audioOutputPatchDictWithUniqueID:` to get a dictionary of values for a given audio output patch ID. This property is kept up-to-date by the workspace in response to Audio settings update notifications.
+* Adds the `audioMapDicts` property which contains the reply payload from `/settings/audio/maps` when connected to v5.5+. Use new QLKWorkpace method `audioMapDictWithUniqueID:` to get a dictionary of values for a given audio map ID. This property is kept up-to-date by the workspace in response to Audio settings update notifications.
+* Renames `surfaceDictForSurfaceID:` to `surfaceDictWithSurfaceID:` and  `stageDictForStageID:` to `stageDictWithStageID:` for consistency. The original method names are deprecated and will be removed in a future update.
+* `QLKWorkspaceDidUpdateSettingsNotification` notifications are now posted without coalescing due to the multiple possible `userInfo` dictionary values that might accompany a given notification.
+
+### QLKCue
+* Adds convenience `deferFetchingProperties` and `resumeFetchingProperties`.
+* Fixes duplicate KVO will/did change notifications for the `ignoreUpdates` and `workspace` keys.
+* Refactors `updateChildCuesWithPropertiesArray:removeUnused:` slightly to remove `atomic` properties previously mutated on multiple threads.
+* NOTE: `enqueueCueUpdatedNotification` is now expected to be called only from the main thread.
+
+## 0.0.5
+
+Requires macOS 11+ or iOS 15+.
 
 ### New
 * Adds support for connecting to QLab v5. See `-[QLKWorkspace connectWithPasscode:completion:]` and the QLab OSC dictionary for more.
@@ -144,19 +177,22 @@ QLabKit 0.0.5 requires macOS 11+ or iOS 15+.
 * The `userInfo` dictionary for the `QLKCueListDidChangePlaybackPositionIDNotification` now includes the unique ID(s) of the old and/or new playback position cues. The `NSKeyValueChangeOldKey` entry, if present, contains the `uniqueID` string of the previous playback position cue. The `NSKeyValueChangeNewKey` entry, if present, contains the `uniqueID` string of the current playback position cue.
 * Patches in QLab 5 are greatly expanded. They have more descriptive patch list OSC getter names (i.e. not just `/patchList`) and are now methods of the respective settings that manage a given patch type. As such, the `patchName` getter and `@"patchDescription"` helper inside `propertyForKey:` no longer cover enough cases to be useful and have been removed. Going forward when connecting to QLab 5, get the patch index or patch unique ID from the cue and cross-reference with the patch list fetched from the appropriate settings. For backward compatibility with QLab 3 and 4, get both the patch index and patch list from the cue and cross-reference with each other.
 
+### QLKQLabWorkspaceVersion
+* This class is deprecated and will be removed in a future release in favor of using `QLKVersionNumber`.
+
 ### QLKVersionNumber
 * Adds a new class and NSString category used to compare version number strings.
 * The `compare:` method of this class compares the "build" number of each version if needed. Use the `QLKVersionNumber` method `compare:ignoreBuild:` to optionally ignore the build number when comparing two versions.
-* The `QLKQLabWorkspaceVersion` class is deprecated and will be removed in a future release in favor of using `QLKVersionNumber`.
 
 ### QLKWorkspace
 * Adds `auditionGo` and `auditionPreviewCue:` convenience methods. Both require QLab v5.0 or later.
+* Adds a `QLKWorkspaceDidUpdateLiveFadePreviewNotification` which is posted by the QLKWorkspace implementation of QLKClientDelegate method `clientLiveFadePreviewUpdated:` when connected to QLab 5.4 or later.
 * When connected to QLab v4 and later, calling `fetchDisplayAndGeometryForCue:` no longer fetches properties related to the list of workspace video outputs or properties of a given output. Instead, the workspace populates its `videoOutputsList` property with the reply payload from `/settings/video/stages` (v5.0+) or `/settings/video/surfaces` (v4.x). This avoids duplicate and/or stale data from being stored in all video cues. Use new QLKWorkpace methods `stageDictForStageID:` (v5.0+) or `surfaceDictForSurfaceID:` (v4.x) to get a dictionary of values for that video output ID. The `videoOutputsList` array is kept up-to-date by the workspace in response to Video settings update notifications.
 * The helper method `addressForWildcardNumber:action:` is deprecated because it is unused in QLabKit and only generates `/cue/*`-prefixed addresses, whereas wildcards can be also be used in addresses with the `/cue_id/*` prefix.
 
-## Migrating from 0.0.3 to 0.0.4
+## 0.0.4
 
-QLabKit 0.0.4 requires macOS 10.9+ or iOS 8.4+.
+Requires macOS 10.9+ or iOS 8.4+.
 
 ### QLKCue
 * Fixes the class method `cueTypeIsAudio:` so that it now correctly returns `NO` for the following cue types: Fade, Camera, Text/Titles.
@@ -194,9 +230,9 @@ QLabKit 0.0.4 requires macOS 10.9+ or iOS 8.4+.
   - `QLKWorkspaceConnectionErrorNotification`
 
 
-## Migrating from 0.0.2 to 0.0.3
+## 0.0.3
 
-QLabKit 0.0.3 requires macOS 10.9+ or iOS 8.4+.
+Requires macOS 10.9+ or iOS 8.4+.
 
 ### QLKBrowser
 * The QLKBrowserDelegate method `serverDidUpdateWorkspaces:` is renamed to `browserServerDidUpdateWorkspaces:` to avoid collision with the QLKServerDelegate method of the same name.
@@ -245,6 +281,6 @@ QLabKit 0.0.3 requires macOS 10.9+ or iOS 8.4+.
 
 ## License
 
-QLabKit © copyright 2014-2022 Figure 53, LLC.
+QLabKit © copyright 2014-2025 Figure 53, LLC.
 
 QLabKit is licensed under the MIT license.

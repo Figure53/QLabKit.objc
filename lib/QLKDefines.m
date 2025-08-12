@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2011-2022 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2011-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -81,9 +81,12 @@ NSString *const QLKOSCParentKey = @"parent";
 NSString *const QLKOSCNameKey = @"name";
 NSString *const QLKOSCNumberKey = @"number";
 NSString *const QLKOSCNotesKey = @"notes";
+NSString *const QLKOSCTargetModeKey = @"targetMode";
 NSString *const QLKOSCFileTargetKey = @"fileTarget";
 NSString *const QLKOSCCueTargetNumberKey = @"cueTargetNumber";
+NSString *const QLKOSCCueTargetIDKey = @"cueTargetID";
 NSString *const QLKOSCCurrentCueTargetKey = @"currentCueTarget";
+NSString *const QLKOSCCurrentCueTargetIDKey = @"currentCueTargetID";
 NSString *const QLKOSCColorNameKey = @"colorName";
 NSString *const QLKOSCLiveColorNameKey = @"colorName/live";
 NSString *const QLKOSCColorConditionKey = @"colorCondition";
@@ -91,6 +94,7 @@ NSString *const QLKOSCUseSecondColorKey = @"useSecondColor";
 NSString *const QLKOSCSecondColorNameKey = @"secondColorName";
 NSString *const QLKOSCFlaggedKey = @"flagged";
 NSString *const QLKOSCArmedKey = @"armed";
+NSString *const QLKOSCSkipIfDisarmedKey = @"skipIfDisarmed";
 NSString *const QLKOSCContinueModeKey = @"continueMode";
 NSString *const QLKOSCPreWaitKey = @"preWait";
 NSString *const QLKOSCPostWaitKey = @"postWait";
@@ -133,6 +137,7 @@ NSString *const QLKOSCPreserveAspectRatioKey = @"preserveAspectRatio";
 NSString *const QLKOSCFillStyleKey = @"fillStyle";
 NSString *const QLKOSCLayerKey = @"layer";
 NSString *const QLKOSCAudioOutputPatchIDKey = @"audioOutputPatchID";
+NSString *const QLKOSCAudioMapIDKey = @"audioMapID";
 NSString *const QLKOSCCuesKey = @"cues";
 NSString *const QLKOSCListNameKey = @"listName";
 NSString *const QLKOSCStageIDKey = @"stageID";
@@ -160,6 +165,7 @@ NSString *const QLKOSCSurfaceListKey = @"surfaceList";
 NSString *const QLKOSCSurfaceIDKey = @"surfaceID";
 NSString *const QLKOSCSurfaceSizeKey = @"surfaceSize";
 NSString *const QLKOSCFullSurfaceKey = @"fullSurface";
+NSString *const QLKOSCV4CueTargetIdKey = @"cueTargetId";
 NSString *const QLKOSCV4PlaybackPositionIdKey = @"playbackPositionId";
 NSString *const QLKOSCV4PatchKey = @"patch";
 NSString *const QLKOSCV4PatchListKey = @"patchList";

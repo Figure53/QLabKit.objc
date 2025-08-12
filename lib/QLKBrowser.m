@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2018 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,7 @@
 
 
 #ifndef RELEASE
+#define RELEASE 0
 #define DEBUG_BROWSER 1
 #endif
 
@@ -47,9 +48,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, nullable) NSTimer *refreshTimer;
 @property (nonatomic, strong) NSMutableArray<QLKServer *> *mutableServers;
 
-@property (nonatomic, strong) NSMutableArray<NSNetService *> *netServices;
+@property (nonatomic, strong) NSMutableArray<NSNetService *> *unresolvedNetServices;
 
-- (void)_refreshAllWorkspaces:(nullable NSTimer *)theTimer;
+- (void)refreshAllWorkspaces:(nullable NSTimer *)theTimer;
 
 - (void)setNeedsNotifyDelegateBrowserDidUpdateServers;
 - (void)notifyDelegateBrowserDidUpdateServers;
@@ -74,8 +75,8 @@ NS_ASSUME_NONNULL_BEGIN
 
         self.refreshTimer = nil;
 
-        self.netServices = [NSMutableArray arrayWithCapacity:0];
-        self.mutableServers = [NSMutableArray arrayWithCapacity:0];
+        self.unresolvedNetServices = [NSMutableArray array];
+        self.mutableServers = [NSMutableArray array];
     }
     return self;
 }
@@ -131,7 +132,7 @@ NS_ASSUME_NONNULL_BEGIN
 
     // Stop all servers to allow dealloc if unused.
     // NOTE: We do not unset the `netService` of a server here, in case a connected workspace using that server wishes to access it.
-    for (QLKServer *aServer in self.servers)
+    for (QLKServer *aServer in self.mutableServers)
     {
         [aServer stop];
         aServer.delegate = nil;
@@ -141,13 +142,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)refreshAllWorkspaces
 {
-    for (QLKServer *server in self.servers)
+    for (QLKServer *server in self.mutableServers)
     {
         [server refreshWorkspaces];
     }
 }
 
-- (void)_refreshAllWorkspaces:(nullable NSTimer *)theTimer
+- (void)refreshAllWorkspaces:(nullable NSTimer *)theTimer
 {
     // Exit if method is being called by a timer and the timer has been cancelled
     if (theTimer && (!self.refreshTimer || !theTimer.isValid))
@@ -162,7 +163,7 @@ NS_ASSUME_NONNULL_BEGIN
     {
         self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:interval
                                                              target:self
-                                                           selector:@selector(_refreshAllWorkspaces:)
+                                                           selector:@selector(refreshAllWorkspaces:)
                                                            userInfo:nil
                                                             repeats:YES];
         self.refreshTimer.tolerance = (interval * 0.1);
@@ -199,7 +200,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     // NOTE: if resolveWithTimeout: resolves immediately, netServiceDidResolveAddress: will mutate the `netServices` array
     // - so here we must enumerate a copy of that collection to avoid a crash
-    NSArray<NSNetService *> *netServices = [self.netServices copy];
+    NSArray<NSNetService *> *netServices = [self.unresolvedNetServices copy];
     for (NSNetService *aService in netServices)
     {
         if (aService.addresses.count)
@@ -214,12 +215,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (nullable QLKServer *)serverForHost:(NSString *)host
 {
-    for (QLKServer *server in self.servers)
+    for (QLKServer *server in self.mutableServers)
     {
         if ([server.host isEqualToString:host])
-        {
             return server;
-        }
     }
 
     return nil;
@@ -227,12 +226,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (nullable QLKServer *)serverForNetService:(NSNetService *)netService
 {
-    for (QLKServer *server in self.servers)
+    for (QLKServer *server in self.mutableServers)
     {
         if ([server.netService isEqual:netService])
-        {
             return server;
-        }
     }
 
     return nil;
@@ -354,7 +351,7 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 
     netService.delegate = self;
-    [self.netServices addObject:netService];
+    [self.unresolvedNetServices addObject:netService];
 
     // multiple calls cancel previous requests to ensure service resolving only begins once (i.e. if moreComing == YES)
     [self setNeedsBeginResolvingNetServices];
@@ -387,6 +384,10 @@ NS_ASSUME_NONNULL_BEGIN
 #if DEBUG_BROWSER
     NSLog(@"[browser] netServiceDidResolveAddress: %@", netService);
 #endif
+#if !RELEASE
+    NSAssert( [NSThread isMainThread], @"[browser] netServiceDidResolveAddress: is not thread-safe and expects to be called on the main thread." );
+#endif
+
     NSInteger port = netService.port;
     if (port < 0) // -1 = not resolved
         return;
@@ -399,7 +400,7 @@ NS_ASSUME_NONNULL_BEGIN
     {
         for (NSData *address in netService.addresses)
         {
-            host = [self IPAddressFromData:address];
+            host = [QLKBrowser IPAddressFromData:address];
             if (host)
                 break;
         }
@@ -420,13 +421,9 @@ NS_ASSUME_NONNULL_BEGIN
     // Once resolved, we can remove the net service from our local records.
     // (The QLKServer will still hold on to it, though.)
     netService.delegate = nil;
-    [self.netServices removeObject:netService];
+    [self.unresolvedNetServices removeObject:netService];
 
-#if DEBUG_BROWSER
-    NSLog(@"[browser] adding server: %@", server);
-#endif
-
-    [self.mutableServers addObject:server];
+    [server refreshWorkspaces];
 
     __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -434,17 +431,25 @@ NS_ASSUME_NONNULL_BEGIN
         if (!strongSelf)
             return;
 
+#if DEBUG_BROWSER
+        NSLog(@"[browser] adding server: %@", server);
+#endif
+
+        [strongSelf.mutableServers addObject:server];
         [strongSelf.delegate browserDidUpdateServers:strongSelf];
     });
-
-    [server refreshWorkspaces];
 }
 
 - (void)netService:(NSNetService *)netService didNotResolve:(NSDictionary<NSString *, NSNumber *> *)error
 {
+#if !RELEASE
+    NSAssert( [NSThread isMainThread], @"[browser] netService:didNotResolve: is not thread-safe and expects to be called on the main thread." );
+#endif
+
     [netService stop];
     netService.delegate = nil;
-    [self.netServices removeObject:netService];
+
+    [self.unresolvedNetServices removeObject:netService];
 
     NSLog(@"[browser] Error: Failed to resolve service: %@ - %@", netService, error);
 }
@@ -452,7 +457,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark -
 
-- (nullable NSString *)IPAddressFromData:(NSData *)data
++ (nullable NSString *)IPAddressFromData:(NSData *)data
 {
     typedef union {
         struct sockaddr sa;

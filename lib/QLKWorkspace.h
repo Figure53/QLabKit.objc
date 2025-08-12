@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -40,11 +40,12 @@ NS_ASSUME_NONNULL_BEGIN
 extern NSNotificationName const QLKWorkspaceDidUpdateNotification;
 extern NSNotificationName const QLKWorkspaceDidUpdateSettingsNotification;
 extern NSNotificationName const QLKWorkspaceDidUpdateAccessPermissionsNotification;
-extern NSNotificationName const QLKWorkspaceDidUpdateLightDashboardNotification;
+extern NSNotificationName const QLKWorkspaceDidUpdateLightDashboardNotification;  // v4.2+
+extern NSNotificationName const QLKWorkspaceDidUpdateLiveFadePreviewNotification; // v5.4+
 extern NSNotificationName const QLKWorkspaceDidConnectNotification;
 extern NSNotificationName const QLKWorkspaceDidDisconnectNotification;
 extern NSNotificationName const QLKWorkspaceConnectionErrorNotification;
-extern NSNotificationName const QLKQLabDidUpdatePreferencesNotification;
+extern NSNotificationName const QLKQLabDidUpdatePreferencesNotification; // v4.2+
 
 @class QLKServer, QLKCue;
 
@@ -75,8 +76,8 @@ extern NSNotificationName const QLKQLabDidUpdatePreferencesNotification;
 // The root cue is the parent of all the cues in this workspace.
 @property (nonatomic, readonly) QLKCue *root;
 
-@property (nonatomic, weak, readonly, nullable) QLKCue *firstCue;
-@property (nonatomic, weak, readonly, nullable) QLKCue *firstCueList;
+@property (nonatomic, weak, readonly) QLKCue *firstCue;
+@property (nonatomic, weak, readonly) QLKCue *firstCueList;
 
 // Whether or not this workspace is protected by a passcode.
 @property (nonatomic, readonly) BOOL hasPasscode;
@@ -193,37 +194,40 @@ extern NSNotificationName const QLKQLabDidUpdatePreferencesNotification;
 
 // Workspace Settings
 
-// Call `refreshVideoOutputsList` to populate.
-// Will contain payload of `/video/settings/surfaces` on v4, payload of `/video/settings/stages` on v5.
-// Workspace-level video output getters were added in v4, so always nil when connected to v3.
+// Returns payload of `/settings/audio/patchList` on v5.
+// Returns nil when connected to v3 or v4. (Workspace-level audio output patch list getters were added in v5.)
+// Updates automatically after receiving an "audio" QLKWorkspaceDidUpdateSettingsNotification.
+@property (nonatomic, nullable, readonly) NSArray<NSDictionary<NSString *, id> *> *audioOutputPatchDicts;
+
+- (nullable NSDictionary<NSString *, id> *)audioOutputPatchDictWithUniqueID:(NSString *)uniqueID;
+
+// Returns payload of `/settings/audio/maps` on v5.
+// Returns nil when connected to v5.4 and earlier. (Workspace-level audio map getters were added in v5.5.)
+// Updates automatically after receiving an "audio" QLKWorkspaceDidUpdateSettingsNotification.
+@property (nonatomic, nullable, readonly) NSArray<NSDictionary<NSString *, id> *> *audioMapDicts;
+
+- (nullable NSDictionary<NSString *, id> *)audioMapDictWithUniqueID:(NSString *)uniqueID;
+
+// Returns payload of `/settings/video/surfaces` on v4, payload of `/settings/video/stages` on v5.
+// Returns nil when connected to v3. (Workspace-level video output getters were added in v4.)
+// Updates automatically after receiving a "video" QLKWorkspaceDidUpdateSettingsNotification.
 @property (nonatomic, nullable, readonly) NSArray<NSDictionary<NSString *, id> *> *videoOutputsList;
 
-- (nullable NSDictionary<NSString *, id> *)surfaceDictForSurfaceID:(NSNumber *)surfaceID; // v4.x
-- (nullable NSDictionary<NSString *, id> *)stageDictForStageID:(NSString *)stageID;       // v5.0+
+- (nullable NSDictionary<NSString *, id> *)surfaceDictWithSurfaceID:(NSNumber *)surfaceID; // v4.x
+- (nullable NSDictionary<NSString *, id> *)stageDictWithStageID:(NSString *)stageID;      // v5.0+
 
 // Lower level API
 - (void)sendMessage:(nullable id)object toAddress:(NSString *)address;
 - (void)sendMessage:(nullable id)object toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block;
 - (void)sendApplicationMessageWithArguments:(nullable NSArray *)arguments toAddress:(NSString *)address block:(nullable QLKMessageReplyBlock)block;
 
-// Helper for sending messages to this workspace: /workspace/{id}
-@property (nonatomic, readonly, copy) NSString *workspacePrefix;
-
 // Helper for sending messages to a specific cue: /cue_id/{cue_id}/action
 - (NSString *)addressForCue:(QLKCue *)cue action:(NSString *)action;
 
 
-// Deprecated in 0.0.5 - leaving for compatibility with QLabKit.objc 0.0.4
-- (NSString *)addressForWildcardNumber:(NSString *)number action:(NSString *)action DEPRECATED_MSG_ATTRIBUTE("Use NSString -stringWithFormat: with the desired prefix 'cue' or 'cue_id' instead");
-
-@end
-
-
-// Deprecated in 0.0.5
-DEPRECATED_MSG_ATTRIBUTE("Use QLKVersionNumber instead")
-@interface QLKQLabWorkspaceVersion : QLKVersionNumber
-
-- (NSComparisonResult)compare:(QLKVersionNumber *)otherVersion DEPRECATED_MSG_ATTRIBUTE("Use QLKVersionNumber -compare:ignoreBuild:YES instead");
+// Deprecated in 0.0.6 - leaving for compatibility with QLabKit.objc 0.0.5
+- (nullable NSDictionary<NSString *, id> *)surfaceDictForSurfaceID:(NSNumber *)surfaceID DEPRECATED_MSG_ATTRIBUTE("Use -surfaceDictWithSurfaceID instead"); // v4.x
+- (nullable NSDictionary<NSString *, id> *)stageDictForStageID:(NSString *)stageID DEPRECATED_MSG_ATTRIBUTE("Use -stageDictWithStageID: instead");       // v5.0+
 
 @end
 

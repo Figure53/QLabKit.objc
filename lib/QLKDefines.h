@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2011-2022 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2011-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -88,8 +88,7 @@ extern NSString *const QLKCueTypeOSC;
 extern NSString *const QLKCueTypeTitles;
 
 // Continue mode type
-typedef NS_ENUM(NSUInteger, QLKCueContinueMode)
-{
+typedef NS_ENUM(NSUInteger, QLKCueContinueMode) {
     QLKCueContinueModeNoContinue = 0,
     QLKCueContinueModeAutoContinue,
     QLKCueContinueModeAutoFollow
@@ -101,16 +100,20 @@ extern NSString *const QLKOSCParentKey;
 extern NSString *const QLKOSCNameKey;
 extern NSString *const QLKOSCNumberKey;
 extern NSString *const QLKOSCNotesKey;
+extern NSString *const QLKOSCTargetModeKey;         // v5.2+
 extern NSString *const QLKOSCFileTargetKey;
 extern NSString *const QLKOSCCueTargetNumberKey;
-extern NSString *const QLKOSCCurrentCueTargetKey; // returns cue_id
+extern NSString *const QLKOSCCueTargetIDKey;        // v5.0+
+extern NSString *const QLKOSCCurrentCueTargetKey;   // returns cue_id
+extern NSString *const QLKOSCCurrentCueTargetIDKey; // v5.5+
 extern NSString *const QLKOSCColorNameKey;
-extern NSString *const QLKOSCLiveColorNameKey;  // v5.0+
-extern NSString *const QLKOSCColorConditionKey; // v5.0-5.1
-extern NSString *const QLKOSCUseSecondColorKey; // v5.2+
-extern NSString *const QLKOSCSecondColorNameKey; // v5.2+
+extern NSString *const QLKOSCLiveColorNameKey;      // v5.0+
+extern NSString *const QLKOSCColorConditionKey;     // v5.0-5.1
+extern NSString *const QLKOSCUseSecondColorKey;     // v5.2+
+extern NSString *const QLKOSCSecondColorNameKey;    // v5.2+
 extern NSString *const QLKOSCFlaggedKey;
 extern NSString *const QLKOSCArmedKey;
+extern NSString *const QLKOSCSkipIfDisarmedKey;     // v5.5+
 extern NSString *const QLKOSCContinueModeKey;
 extern NSString *const QLKOSCPreWaitKey;
 extern NSString *const QLKOSCPostWaitKey;
@@ -138,30 +141,31 @@ extern NSString *const QLKOSCIsTailingOutKey;
 extern NSString *const QLKOSCIsPausedKey;
 extern NSString *const QLKOSCIsBrokenKey;
 extern NSString *const QLKOSCIsOverriddenKey;
-extern NSString *const QLKOSCIsWarningKey; // v5.0+
+extern NSString *const QLKOSCIsWarningKey;          // v5.0+
 extern NSString *const QLKOSCIsLoadedKey;
-extern NSString *const QLKOSCIsChildFlaggedKey; // v5.0+, Group cues only
-extern NSString *const QLKOSCTranslationXKey;   // v5.0+
-extern NSString *const QLKOSCTranslationYKey;   // v5.0+
-extern NSString *const QLKOSCScaleXKey;         // v5.0+
-extern NSString *const QLKOSCScaleYKey;         // v5.0+
-extern NSString *const QLKOSCAnchorXKey;        // v5.0.2+
-extern NSString *const QLKOSCAnchorYKey;        // v5.0.2+
+extern NSString *const QLKOSCIsChildFlaggedKey;     // v5.0+, Group cues only
+extern NSString *const QLKOSCTranslationXKey;       // v5.0+
+extern NSString *const QLKOSCTranslationYKey;       // v5.0+
+extern NSString *const QLKOSCScaleXKey;             // v5.0+
+extern NSString *const QLKOSCScaleYKey;             // v5.0+
+extern NSString *const QLKOSCAnchorXKey;            // v5.0.2+
+extern NSString *const QLKOSCAnchorYKey;            // v5.0.2+
 extern NSString *const QLKOSCQuaternionKey;
 extern NSString *const QLKOSCCueSizeKey;
 extern NSString *const QLKOSCPreserveAspectRatioKey;
-extern NSString *const QLKOSCFillStyleKey; // v5.2+
+extern NSString *const QLKOSCFillStyleKey;          // v5.2+
 extern NSString *const QLKOSCLayerKey;
 extern NSString *const QLKOSCAudioOutputPatchIDKey;
+extern NSString *const QLKOSCAudioMapIDKey;         // v5.5+
 extern NSString *const QLKOSCCuesKey;
 extern NSString *const QLKOSCListNameKey;
 extern NSString *const QLKOSCStageIDKey;
 extern NSString *const QLKOSCFillStageKey;
 extern NSString *const QLKOSCOpacityKey;
-extern NSString *const QLKOSCSmoothKey;  // v5.0+
-extern NSString *const QLKOSCRotateXKey; // v5.0+
-extern NSString *const QLKOSCRotateYKey; // v5.0+
-extern NSString *const QLKOSCRotateZKey; // v5.0+
+extern NSString *const QLKOSCSmoothKey;             // v5.0+
+extern NSString *const QLKOSCRotateXKey;            // v5.0+
+extern NSString *const QLKOSCRotateYKey;            // v5.0+
+extern NSString *const QLKOSCRotateZKey;            // v5.0+
 extern NSString *const QLKOSCPlaybackPositionIDKey;
 extern NSString *const QLKOSCStartNextCueWhenSliceEndsKey;
 extern NSString *const QLKOSCStopTargetWhenSliceEndsKey;
@@ -180,7 +184,8 @@ extern NSString *const QLKOSCSurfaceListKey;
 extern NSString *const QLKOSCSurfaceIDKey;
 extern NSString *const QLKOSCSurfaceSizeKey;
 extern NSString *const QLKOSCFullSurfaceKey;
-extern NSString *const QLKOSCV4PlaybackPositionIdKey; // NOTE: "Id" capitalization prior to v5
+extern NSString *const QLKOSCV4CueTargetIdKey;          // NOTE: "Id" capitalization prior to v5
+extern NSString *const QLKOSCV4PlaybackPositionIdKey;   // NOTE: "Id" capitalization prior to v5
 extern NSString *const QLKOSCV4PatchKey;
 extern NSString *const QLKOSCV4PatchListKey;
 extern NSString *const QLKOSCV4TranslationXKey;

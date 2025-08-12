@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -45,6 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, getter=isWorkspaceUpdate, readonly) BOOL workspaceUpdate;
 @property (nonatomic, getter=isWorkspaceSettingsUpdate, readonly) BOOL workspaceSettingsUpdate;
 @property (nonatomic, getter=isLightDashboardUpdate, readonly) BOOL lightDashboardUpdate;
+@property (nonatomic, getter=isLiveFadePreviewUpdate, readonly) BOOL liveFadePreviewUpdate;
 @property (nonatomic, getter=isCueUpdate, readonly) BOOL cueUpdate;
 @property (nonatomic, getter=isPlaybackPositionUpdate, readonly) BOOL playbackPositionUpdate;
 @property (nonatomic, getter=isPreferencesUpdate, readonly) BOOL preferencesUpdate;
@@ -61,9 +62,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Address without reply, e.g. "/reply/workspace/12345/connect" -> "/workspace/12345/connect"
 @property (nonatomic, readonly, copy) NSString *replyAddress;
-
-// Address with workspace prefix removed, will also remove /reply: "/workspace/12345/connect" -> "/connect"
-- (NSString *)addressWithoutWorkspace:(nullable NSString *)workspaceID;
 
 // Deserialized objects from the "data" key of QLab's reply. Nil if message is not a reply.
 @property (nonatomic, readonly, nullable) id response;

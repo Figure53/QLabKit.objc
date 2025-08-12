@@ -3,7 +3,7 @@
 //  QLabKitDemoTests
 //
 //  Created by Brent Lord on 6/1/14.
-//  Copyright 2014-2019 Figure 53, LLC. All rights reserved.
+//  Copyright 2014-2025 Figure 53, LLC. All rights reserved.
 //
 
 @import XCTest;

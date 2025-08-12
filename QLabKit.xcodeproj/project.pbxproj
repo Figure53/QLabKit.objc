@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		3D8B652920656D7E00EB52B9 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3D8B652720656D7E00EB52B9 /* Info.plist */; };
 		3DA977EB1FFE5D9900648971 /* QLKDemoAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 92F3E9FF178B1BC500A4C617 /* QLKDemoAppDelegate.m */; };
-		3DA977F31FFE5F3700648971 /* QLKQLabWorkspaceVersionCompareTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DA977F21FFE5F3700648971 /* QLKQLabWorkspaceVersionCompareTest.m */; };
 		3DE443772A5F326000AAA946 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3DE443722A5F324200AAA946 /* LICENSE.txt */; };
 		3DEAA2CC24F2E50D000E2D3B /* QLKQuaternion.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DEAA2CB24F2E50D000E2D3B /* QLKQuaternion.m */; };
 		3DEB29DB2488139A003D8145 /* F53OSC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DEB29D22488138E003D8145 /* F53OSC.framework */; };
@@ -107,7 +106,6 @@
 		3D8B652A20656D9700EB52B9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		3DA5A99C242FC0BE0068AF88 /* QLabKit.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; path = QLabKit.podspec; sourceTree = "<group>"; };
 		3DA977F01FFE5F3600648971 /* QLabKitDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QLabKitDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		3DA977F21FFE5F3700648971 /* QLKQLabWorkspaceVersionCompareTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QLKQLabWorkspaceVersionCompareTest.m; sourceTree = "<group>"; };
 		3DA977F41FFE5F3700648971 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3DE443722A5F324200AAA946 /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = SOURCE_ROOT; };
 		3DEAA2CA24F2E50D000E2D3B /* QLKQuaternion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QLKQuaternion.h; sourceTree = "<group>"; };
@@ -168,7 +166,6 @@
 		3DA977F11FFE5F3700648971 /* QLabKitDemoTests */ = {
 			isa = PBXGroup;
 			children = (
-				3DA977F21FFE5F3700648971 /* QLKQLabWorkspaceVersionCompareTest.m */,
 				3DF9D70A2289D8760026CB86 /* QLKVersionNumberCompareTest.m */,
 				3DA977F41FFE5F3700648971 /* Info.plist */,
 			);
@@ -425,7 +422,6 @@
 				3DF1E9E720656F2900672908 /* QLKDemoAppDelegate.m in Sources */,
 				3DF1E9E920656F4300672908 /* main.m in Sources */,
 				3DF9D70B2289D8760026CB86 /* QLKVersionNumberCompareTest.m in Sources */,
-				3DA977F31FFE5F3700648971 /* QLKQLabWorkspaceVersionCompareTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -572,11 +568,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
-				TVOS_DEPLOYMENT_TARGET = 14.0;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
 			};
 			name = Debug;
 		};
@@ -618,10 +614,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				SDKROOT = macosx;
-				TVOS_DEPLOYMENT_TARGET = 14.0;
+				TVOS_DEPLOYMENT_TARGET = 15.0;
 			};
 			name = Release;
 		};

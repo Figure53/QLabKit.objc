@@ -4,7 +4,7 @@
 //
 //  Created by Zach Waugh on 7/9/13.
 //
-//  Copyright (c) 2013-2022 Figure 53 LLC, https://figure53.com
+//  Copyright (c) 2013-2025 Figure 53 LLC, https://figure53.com
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -136,9 +136,10 @@ NS_ASSUME_NONNULL_BEGIN
         return NO;
 
     // /update/workspace/{workspace_id}/settings/{settings_controller}
+    // /update/workspace/{workspace_id}/settings/{settings_controller}/...
     NSArray<NSString *> *parts = self.addressParts;
 
-    return (parts.count == 5 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"settings"]);
+    return (parts.count >= 5 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"settings"]);
 }
 
 - (BOOL)isLightDashboardUpdate
@@ -150,6 +151,17 @@ NS_ASSUME_NONNULL_BEGIN
     NSArray<NSString *> *parts = self.addressParts;
 
     return (parts.count == 4 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"dashboard"]);
+}
+
+- (BOOL)isLiveFadePreviewUpdate
+{
+    if (!self.isUpdate)
+        return NO;
+
+    // /update/workspace/{workspace_id}/liveFadePreview
+    NSArray<NSString *> *parts = self.addressParts;
+
+    return (parts.count == 4 && [parts[1] isEqualToString:@"workspace"] && [parts[3] isEqualToString:@"liveFadePreview"]);
 }
 
 - (BOOL)isCueUpdate
@@ -224,20 +236,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)replyAddress
 {
     return (self.isReply ? [self.address substringFromIndex:[@"/reply" length]] : self.address);
-}
-
-- (NSString *)addressWithoutWorkspace:(nullable NSString *)workspaceID
-{
-    NSString *address = self.replyAddress;
-
-    if (!workspaceID)
-        return address;
-
-    NSString *workspacePrefix = [NSString stringWithFormat:@"/workspace/%@", workspaceID];
-    if (workspaceID && [address hasPrefix:workspacePrefix])
-        return [address substringFromIndex:workspacePrefix.length];
-    else
-        return address;
 }
 
 - (nullable id)response
